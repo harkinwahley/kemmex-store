@@ -1,95 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KEMMEX STORE | Admin Dashboard</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kemmex Admin DEBUG</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
+      authDomain: "kemmex-store-9ffa3.firebaseapp.com",
+      projectId: "kemmex-store-9ffa3",
+      storageBucket: "kemmex-store-9ffa3.firebasestorage.app",
+      messagingSenderId: "500875032118",
+      appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // 🔴 IMPORTANT: YOUR EMAIL MUST BE IN THIS LIST
+    const ADMIN_EMAILS = ["aakinwale16@gmail.com", "admin@kemmex.com"]; 
+  </script>
 </head>
-<body class="bg-gray-100 font-sans">
 
-<header class="bg-white shadow-md p-4 flex justify-between items-center">
-<h1 class="font-bold text-xl text-jumia-orange">KEMMEX Admin Dashboard</h1>
-<button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">Logout</button>
-</header>
+<body class="bg-gray-100 p-10 font-mono">
 
-<main class="p-4">
-<h2 class="font-bold text-lg mb-4">Orders</h2>
-<table class="min-w-full bg-white rounded shadow-md overflow-hidden">
-<thead class="bg-gray-50">
-<tr>
-<th class="px-4 py-2 border-b">#</th>
-<th class="px-4 py-2 border-b">Customer</th>
-<th class="px-4 py-2 border-b">Phone</th>
-<th class="px-4 py-2 border-b">Total (₦)</th>
-<th class="px-4 py-2 border-b">Payment Proof</th>
-<th class="px-4 py-2 border-b">Status</th>
-<th class="px-4 py-2 border-b">Action</th>
-</tr>
-</thead>
-<tbody id="ordersTable">
-<tr><td colspan="7" class="text-center py-4">Loading orders...</td></tr>
-</tbody>
-</table>
-</main>
+  <div class="max-w-3xl mx-auto bg-white p-6 shadow-xl border-t-4 border-blue-500">
+    <h1 class="text-2xl font-bold mb-4">Admin Debugger</h1>
+    
+    <div class="mb-4 p-4 bg-gray-50 rounded">
+      <p class="font-bold">Status:</p>
+      <div id="status" class="text-gray-600">Checking login state...</div>
+    </div>
 
-<script>
-const firebaseConfig = {
-    apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
-    authDomain: "kemmex-store-9ffa3.firebaseapp.com",
-    projectId: "kemmex-store-9ffa3",
-    storageBucket: "kemmex-store-9ffa3.appspot.com",
-    messagingSenderId: "500875032118",
-    appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+    <div class="mb-4 p-4 bg-gray-50 rounded">
+      <p class="font-bold">Current User Email:</p>
+      <div id="userEmail" class="text-blue-600 font-bold text-xl">...</div>
+    </div>
 
-// ===== AUTH CHECK =====
-auth.onAuthStateChanged(user=>{
-    if(!user) window.location.href = "index.html";
-});
+    <div class="mb-4 p-4 bg-gray-50 rounded">
+      <p class="font-bold">Allowed Admin Emails:</p>
+      <div id="adminList" class="text-green-600">...</div>
+    </div>
 
-// ===== LOGOUT =====
-function logout(){ auth.signOut().then(()=>window.location.href="index.html"); }
+    <div id="ordersSection" class="hidden mt-6 border-t pt-4">
+        <h2 class="text-xl font-bold text-green-600 mb-2">✅ ACCESS GRANTED</h2>
+        <p>Loading orders from Firestore...</p>
+        <div id="orderCount" class="text-3xl font-bold mt-2">0 Orders Found</div>
+    </div>
 
-// ===== LOAD ORDERS =====
-function loadOrders(){
-    db.collection("orders").orderBy("createdAt","desc").onSnapshot(snapshot=>{
-        const table = document.getElementById("ordersTable");
-        if(snapshot.empty){
-            table.innerHTML='<tr><td colspan="7" class="text-center py-4">No orders yet.</td></tr>';
-            return;
-        }
-        table.innerHTML = snapshot.docs.map((doc,i)=>{
-            const data = doc.data();
-            return `<tr class="border-b">
-                <td class="px-4 py-2">${i+1}</td>
-                <td class="px-4 py-2">${data.firstName} ${data.lastName}</td>
-                <td class="px-4 py-2">${data.phone}</td>
-                <td class="px-4 py-2">₦${data.total}</td>
-                <td class="px-4 py-2"><a href="${data.paymentProofUrl}" target="_blank" class="text-blue-500 hover:underline">View Proof</a></td>
-                <td class="px-4 py-2">${data.status}</td>
-                <td class="px-4 py-2">${data.status==="pending"?`<button onclick="confirmPayment('${doc.id}')" class="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded">Confirm</button>`:"✅ Confirmed"}</td>
-            </tr>`;
-        }).join("");
+    <div id="errorSection" class="hidden mt-6 border-t pt-4">
+        <h2 class="text-xl font-bold text-red-600 mb-2">❌ ACCESS DENIED</h2>
+        <p>Your current email is not in the Allowed Admin List.</p>
+        <p class="mt-2 text-sm text-gray-500">Go to admin.html code and add your email to the ADMIN_EMAILS list.</p>
+    </div>
+  </div>
+
+  <script>
+    // Show the configured list on screen
+    document.getElementById('adminList').innerText = JSON.stringify(ADMIN_EMAILS);
+
+    auth.onAuthStateChanged(user => {
+      const statusEl = document.getElementById('status');
+      const emailEl = document.getElementById('userEmail');
+
+      if (!user) {
+        statusEl.innerText = "No user logged in.";
+        emailEl.innerText = "Guest (Not Logged In)";
+        document.getElementById('errorSection').classList.remove('hidden');
+        return;
+      }
+
+      statusEl.innerText = "User is logged in.";
+      emailEl.innerText = user.email;
+
+      if (ADMIN_EMAILS.includes(user.email)) {
+        document.getElementById('ordersSection').classList.remove('hidden');
+        loadOrdersCount();
+      } else {
+        document.getElementById('errorSection').classList.remove('hidden');
+      }
     });
-}
-loadOrders();
 
-// ===== CONFIRM PAYMENT =====
-function confirmPayment(orderId){
-    if(!confirm("Mark this payment as confirmed?")) return;
-    db.collection("orders").doc(orderId).update({status:"confirmed"})
-        .then(()=>alert("Payment confirmed."))
-        .catch(err=>alert(err.message));
-}
-</script>
+    function loadOrdersCount() {
+        db.collection("orders").get().then(snap => {
+            document.getElementById('orderCount').innerText = snap.size + " Orders Found in Database";
+        }).catch(err => {
+            document.getElementById('orderCount').innerText = "Error reading DB: " + err.message;
+        });
+    }
+  </script>
 
 </body>
 </html>
