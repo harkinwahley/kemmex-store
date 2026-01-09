@@ -38,7 +38,6 @@
     </style>
 </head>
 
-<!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -62,19 +61,6 @@
 </script>
 <script>
   console.log("Firebase connected:", firebase.apps.length > 0);
-</script>
-<script>
-  db.collection("test")
-    .add({
-      message: "Firebase is connected!",
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    .then(() => {
-      console.log("Firestore write successful");
-    })
-    .catch((error) => {
-      console.error("Error writing document:", error);
-    });
 </script>
 
 <body class="font-sans text-jumia-dark">
@@ -235,22 +221,59 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-gray-600">First Name</label>
-                        <input type="text" required class="w-full border p-2 rounded">
+                        <input type="text" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-600">Last Name</label>
-                        <input type="text" required class="w-full border p-2 rounded">
+                        <input type="text" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600">Delivery Address</label>
-                    <textarea required rows="2" class="w-full border p-2 rounded"></textarea>
+                    <textarea required rows="2" class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></textarea>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-600">Phone Number</label>
-                    <input type="tel" required class="w-full border p-2 rounded">
+                    <input type="tel" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
                 </div>
 
+                <div class="mt-4 mb-2">
+                    <label class="block text-xs font-bold text-gray-600 mb-2 uppercase">Payment Method</label>
+                    
+                    <div class="border-2 border-jumia-orange rounded-md p-3 bg-orange-50 relative">
+                        <div class="flex items-center gap-2 mb-2">
+                            <input type="radio" checked name="payment" class="accent-jumia-orange w-4 h-4">
+                            <span class="font-bold text-sm text-gray-800">Bank Transfer</span>
+                        </div>
+                        
+                        <div class="ml-6 text-sm text-gray-700 space-y-1">
+                            <p class="text-xs text-gray-500 mb-1">Please transfer <strong class="text-black">₦<span id="transfer-amount">0</span></strong> to:</p>
+                            
+                            <div class="font-mono bg-white p-3 rounded border border-orange-200 shadow-sm">
+                                <div class="flex justify-between items-center border-b border-gray-100 pb-1 mb-1">
+                                    <span class="text-gray-500 text-xs">Bank:</span>
+                                    <span class="font-bold text-jumia-dark">Opay</span>
+                                </div>
+                                <div class="flex justify-between items-center border-b border-gray-100 pb-1 mb-1">
+                                    <span class="text-gray-500 text-xs">Account Name:</span>
+                                    <span class="font-bold text-jumia-dark text-right text-xs sm:text-sm">Sokunbi Oluwakemi</span>
+                                </div>
+                                <div class="flex justify-between items-center pt-1">
+                                    <span class="text-gray-500 text-xs">Account No:</span>
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-lg text-jumia-orange tracking-widest">8039468706</span>
+                                        <button type="button" onclick="navigator.clipboard.writeText('8039468706'); alert('Account Number Copied!')" class="text-gray-400 hover:text-black" title="Copy Number">
+                                            <i class="far fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-red-500 mt-2 italic flex items-center gap-1">
+                                <i class="fas fa-info-circle"></i> Use your name as the transfer remark.
+                            </p>
+                        </div>
+                    </div>
+                </div>
                 <div class="bg-blue-50 p-3 rounded border border-blue-100">
                     <p class="font-bold text-sm mb-2">Order Summary</p>
                     <div class="flex justify-between text-sm">
@@ -267,8 +290,8 @@
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded shadow-lg">
-                    Confirm Order & Pay
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded shadow-lg flex justify-center items-center gap-2">
+                   <span>I have made the transfer</span> <i class="fas fa-arrow-right"></i>
                 </button>
             </form>
         </div>
@@ -280,7 +303,7 @@
                 <i class="fas fa-check"></i>
             </div>
             <h2 class="text-2xl font-bold mb-2">Order Placed!</h2>
-            <p class="text-gray-500 mb-6">Thank you for shopping with Kemmex. Your order is being processed.</p>
+            <p class="text-gray-500 mb-6">We will confirm your payment shortly. Thank you for shopping with Kemmex.</p>
             <button onclick="closeModal('successModal'); window.location.reload();" class="bg-jumia-orange text-white px-6 py-2 rounded font-bold">Continue Shopping</button>
         </div>
     </div>
@@ -378,6 +401,7 @@
             const totalEl = document.getElementById('cart-total');
             const checkoutTotal = document.getElementById('checkout-total');
             const checkoutFinal = document.getElementById('checkout-final');
+            const transferAmount = document.getElementById('transfer-amount'); // New ID
 
             // Save to local storage
             localStorage.setItem('kemmex_cart', JSON.stringify(cart));
@@ -393,6 +417,7 @@
             // Update checkout modal as well
             if(checkoutTotal) checkoutTotal.innerText = totalPrice.toLocaleString();
             if(checkoutFinal) checkoutFinal.innerText = totalPrice.toLocaleString();
+            if(transferAmount) transferAmount.innerText = totalPrice.toLocaleString(); // Update transfer instructions
 
             if(cart.length === 0) {
                 container.innerHTML = '<div class="text-center mt-10"><i class="fas fa-shopping-cart text-4xl text-gray-200 mb-2"></i><p class="text-gray-500">Your cart is empty</p></div>';
@@ -552,10 +577,12 @@
         function handlePayment(e) {
             e.preventDefault();
             // Simulate Payment Processing
-            const btn = e.target.querySelector('button');
-            const originalText = btn.innerText;
-            btn.innerText = "Processing...";
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalHTML = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying Transfer...';
             btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
 
             setTimeout(() => {
                 closeModal('checkoutModal');
@@ -564,9 +591,12 @@
                 saveCart();
                 updateCartUI();
                 openModal('successModal');
-                btn.innerText = originalText;
+                
+                // Reset button
+                btn.innerHTML = originalHTML;
                 btn.disabled = false;
-            }, 2000);
+                btn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }, 2500); // Increased delay slightly to simulate "checking" payment
         }
     </script>
 </body>
