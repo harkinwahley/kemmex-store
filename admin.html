@@ -3,8 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kemmex Admin DEBUG</title>
+  <title>Kemmex Admin – Orders</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -23,76 +26,152 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 🔴 IMPORTANT: YOUR EMAIL MUST BE IN THIS LIST
-    const ADMIN_EMAILS = ["aakinwale16@gmail.com", "admin@kemmex.com"]; 
+    // 🔐 ⚠️ REPLACE THIS WITH YOUR ACTUAL LOGIN EMAIL
+    const ADMIN_EMAILS = ["aakinwale16@gmail.com"]; 
   </script>
 </head>
 
-<body class="bg-gray-100 p-10 font-mono">
+<body class="bg-gray-100 p-6 font-sans">
 
-  <div class="max-w-3xl mx-auto bg-white p-6 shadow-xl border-t-4 border-blue-500">
-    <h1 class="text-2xl font-bold mb-4">Admin Debugger</h1>
-    
-    <div class="mb-4 p-4 bg-gray-50 rounded">
-      <p class="font-bold">Status:</p>
-      <div id="status" class="text-gray-600">Checking login state...</div>
+  <div class="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold text-gray-800">Kemmex Orders Dashboard</h1>
+        <button onclick="logout()" class="text-red-500 hover:text-red-700 font-bold text-sm">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
     </div>
 
-    <div class="mb-4 p-4 bg-gray-50 rounded">
-      <p class="font-bold">Current User Email:</p>
-      <div id="userEmail" class="text-blue-600 font-bold text-xl">...</div>
-    </div>
-
-    <div class="mb-4 p-4 bg-gray-50 rounded">
-      <p class="font-bold">Allowed Admin Emails:</p>
-      <div id="adminList" class="text-green-600">...</div>
-    </div>
-
-    <div id="ordersSection" class="hidden mt-6 border-t pt-4">
-        <h2 class="text-xl font-bold text-green-600 mb-2">✅ ACCESS GRANTED</h2>
-        <p>Loading orders from Firestore...</p>
-        <div id="orderCount" class="text-3xl font-bold mt-2">0 Orders Found</div>
-    </div>
-
-    <div id="errorSection" class="hidden mt-6 border-t pt-4">
-        <h2 class="text-xl font-bold text-red-600 mb-2">❌ ACCESS DENIED</h2>
-        <p>Your current email is not in the Allowed Admin List.</p>
-        <p class="mt-2 text-sm text-gray-500">Go to admin.html code and add your email to the ADMIN_EMAILS list.</p>
+    <div class="overflow-x-auto">
+        <table class="w-full text-sm border-collapse">
+        <thead class="bg-gray-50 text-left">
+            <tr>
+            <th class="border p-3 text-gray-600">Date</th>
+            <th class="border p-3 text-gray-600">Customer</th>
+            <th class="border p-3 text-gray-600">Items</th>
+            <th class="border p-3 text-gray-600">Total</th>
+            <th class="border p-3 text-gray-600">Proof</th>
+            <th class="border p-3 text-gray-600">Status</th>
+            <th class="border p-3 text-gray-600">Action</th>
+            </tr>
+        </thead>
+        <tbody id="ordersTable" class="bg-white">
+            <tr>
+                <td colspan="7" class="p-4 text-center text-gray-500">Loading orders...</td>
+            </tr>
+        </tbody>
+        </table>
     </div>
   </div>
 
   <script>
-    // Show the configured list on screen
-    document.getElementById('adminList').innerText = JSON.stringify(ADMIN_EMAILS);
-
+    // 1. Check if user is logged in AND is an admin
     auth.onAuthStateChanged(user => {
-      const statusEl = document.getElementById('status');
-      const emailEl = document.getElementById('userEmail');
-
       if (!user) {
-        statusEl.innerText = "No user logged in.";
-        emailEl.innerText = "Guest (Not Logged In)";
-        document.getElementById('errorSection').classList.remove('hidden');
+        // Not logged in -> Go to home
+        window.location.href = "index.html"; 
+        return;
+      }
+      
+      // Basic security: Check if email is in the allowed list
+      if (!ADMIN_EMAILS.includes(user.email)) {
+        alert("Unauthorized access! You are not an admin.");
+        auth.signOut();
+        window.location.href = "index.html";
         return;
       }
 
-      statusEl.innerText = "User is logged in.";
-      emailEl.innerText = user.email;
-
-      if (ADMIN_EMAILS.includes(user.email)) {
-        document.getElementById('ordersSection').classList.remove('hidden');
-        loadOrdersCount();
-      } else {
-        document.getElementById('errorSection').classList.remove('hidden');
-      }
+      // If allowed, load the orders
+      loadOrders();
     });
 
-    function loadOrdersCount() {
-        db.collection("orders").get().then(snap => {
-            document.getElementById('orderCount').innerText = snap.size + " Orders Found in Database";
-        }).catch(err => {
-            document.getElementById('orderCount').innerText = "Error reading DB: " + err.message;
+    // 2. Load Orders from Firestore (Real-time)
+    function loadOrders() {
+      db.collection("orders")
+        .orderBy("createdAt", "desc")
+        .onSnapshot(snapshot => {
+          const table = document.getElementById("ordersTable");
+          
+          if (snapshot.empty) {
+              table.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-500">No orders found.</td></tr>`;
+              return;
+          }
+
+          table.innerHTML = ""; // Clear table
+
+          snapshot.forEach(doc => {
+            const order = doc.data();
+            const date = order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
+
+            // Determine status color
+            let statusColor = "text-orange-600 bg-orange-100";
+            if (order.status === 'confirmed') statusColor = "text-blue-600 bg-blue-100";
+            if (order.status === 'delivered') statusColor = "text-green-600 bg-green-100";
+
+            // Handle Proof Display
+            let proofHtml = `<span class="text-gray-400 text-xs italic">No Receipt</span>`;
+            if (order.paymentProofUrl) {
+                proofHtml = `
+                    <a href="${order.paymentProofUrl}" target="_blank" class="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 px-2 py-1 rounded">
+                        <i class="fas fa-paperclip"></i> View Receipt
+                    </a>
+                `;
+            }
+
+            table.innerHTML += `
+              <tr class="hover:bg-gray-50 transition">
+                <td class="border p-3 whitespace-nowrap text-gray-500 text-xs">${date}</td>
+                <td class="border p-3">
+                  <div class="font-bold text-gray-800 text-sm">${order.customer.firstName} ${order.customer.lastName}</div>
+                  <div class="text-xs text-gray-500">${order.customer.phone}</div>
+                  <div class="text-xs text-gray-400 italic">${order.customer.address}</div>
+                </td>
+                <td class="border p-3">
+                  <ul class="list-disc list-inside text-gray-700 text-sm">
+                    ${order.items.map(i => `<li>${i.name} <span class="text-gray-400 text-xs">x${i.qty}</span></li>`).join("")}
+                  </ul>
+                </td>
+                <td class="border p-3 font-bold text-gray-800 text-sm">
+                  ₦${order.totalAmount.toLocaleString()}
+                </td>
+                <td class="border p-3">
+                  ${proofHtml}
+                </td>
+                <td class="border p-3">
+                  <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${statusColor}">
+                    ${order.status}
+                  </span>
+                </td>
+                <td class="border p-3">
+                  ${getActionButtons(doc.id, order.status)}
+                </td>
+              </tr>
+            `;
+          });
         });
+    }
+
+    // 3. Generate buttons based on status
+    function getActionButtons(id, status) {
+        if (status === "pending") {
+            return `<button onclick="updateStatus('${id}', 'confirmed')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs shadow transition">Confirm Payment</button>`;
+        } else if (status === "confirmed") {
+            return `<button onclick="updateStatus('${id}', 'delivered')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs shadow transition">Mark Delivered</button>`;
+        } else {
+            return `<span class="text-green-500 font-bold text-xs"><i class="fas fa-check-circle"></i> Complete</span>`;
+        }
+    }
+
+    // 4. Update Status in Firestore
+    function updateStatus(orderId, status) {
+      if(!confirm(`Are you sure you want to mark this order as ${status}?`)) return;
+
+      db.collection("orders").doc(orderId).update({ status: status })
+        .then(() => alert("Order updated!"))
+        .catch(err => alert("Error: " + err.message));
+    }
+
+    function logout() {
+        auth.signOut().then(() => window.location.href = "index.html");
     }
   </script>
 
