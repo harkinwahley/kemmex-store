@@ -5,14 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Kemmex Admin – Orders</title>
 
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
   <script>
+    // 🔥 YOUR FIREBASE CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
       authDomain: "kemmex-store-9ffa3.firebaseapp.com",
@@ -22,39 +24,55 @@
       appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
     };
 
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // 🔐 ⚠️ REPLACE THIS WITH YOUR ACTUAL LOGIN EMAIL
-    const ADMIN_EMAILS = ["aakinwale16@gmail.com"]; 
+    // 🔐 ADMIN EMAIL(S)
+    const ADMIN_EMAILS = [
+      "aakinwale16@gmail.com" // ⛔ CHANGE THIS
+    ];
   </script>
 </head>
 
 <body class="bg-gray-100 p-6">
 
-  <!-- LOGIN SCREEN -->
+  <!-- ================= LOGIN SCREEN ================= -->
   <div id="loginScreen" class="max-w-md mx-auto bg-white shadow rounded-lg p-6 hidden">
     <h2 class="text-xl font-bold mb-4 text-center">Admin Login</h2>
 
-    <input id="email" type="email" placeholder="Admin Email"
-      class="w-full border p-2 mb-3 rounded" />
+    <input
+      id="email"
+      type="email"
+      placeholder="Admin Email"
+      class="w-full border p-2 mb-3 rounded"
+    />
 
-    <input id="password" type="password" placeholder="Password"
-      class="w-full border p-2 mb-4 rounded" />
+    <input
+      id="password"
+      type="password"
+      placeholder="Password"
+      class="w-full border p-2 mb-4 rounded"
+    />
 
-    <button onclick="adminLogin()"
-      class="w-full bg-black text-white py-2 rounded">
+    <button
+      onclick="adminLogin()"
+      class="w-full bg-black text-white py-2 rounded"
+    >
       Login
     </button>
   </div>
 
-  <!-- DASHBOARD -->
+  <!-- ================= DASHBOARD ================= -->
   <div id="dashboard" class="max-w-6xl mx-auto bg-white shadow rounded-lg p-6 hidden">
+
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-2xl font-bold">Kemmex Orders Dashboard</h1>
-      <button onclick="logout()"
-        class="bg-red-600 text-white px-4 py-1 rounded text-sm">
+      <button
+        onclick="logout()"
+        class="bg-red-600 text-white px-4 py-1 rounded text-sm"
+      >
         Logout
       </button>
     </div>
@@ -73,6 +91,7 @@
     </table>
   </div>
 
+  <!-- ================= SCRIPT ================= -->
   <script>
     auth.onAuthStateChanged(user => {
       const loginScreen = document.getElementById("loginScreen");
@@ -85,7 +104,7 @@
       }
 
       if (!ADMIN_EMAILS.includes(user.email)) {
-        alert("Unauthorized admin");
+        alert("Unauthorized admin access");
         auth.signOut();
         return;
       }
@@ -106,10 +125,65 @@
     function logout() {
       auth.signOut();
     }
+
+    function loadOrders() {
+      db.collection("orders")
+        .orderBy("createdAt", "desc")
+        .onSnapshot(snapshot => {
+          const table = document.getElementById("ordersTable");
+          table.innerHTML = "";
+
+          snapshot.forEach(doc => {
+            const order = doc.data();
+
+            table.innerHTML += `
+              <tr>
+                <td class="border p-2">
+                  <strong>${order.customer.firstName} ${order.customer.lastName}</strong><br>
+                  ${order.customer.phone}<br>
+                  <small>${order.customer.address}</small>
+                </td>
+
+                <td class="border p-2">
+                  ${order.items.map(i => `${i.name} × ${i.qty}`).join("<br>")}
+                </td>
+
+                <td class="border p-2 font-bold">
+                  ₦${order.totalAmount.toLocaleString()}
+                </td>
+
+                <td class="border p-2 font-semibold text-orange-600">
+                  ${order.status}
+                </td>
+
+                <td class="border p-2">
+                  ${
+                    order.status === "pending"
+                      ? `<button onclick="updateStatus('${doc.id}','confirmed')"
+                          class="bg-green-600 text-white px-3 py-1 rounded text-xs">
+                          Confirm
+                        </button>`
+                      : order.status === "confirmed"
+                      ? `<button onclick="updateStatus('${doc.id}','delivered')"
+                          class="bg-blue-600 text-white px-3 py-1 rounded text-xs">
+                          Mark Delivered
+                        </button>`
+                      : `<span class="text-green-700 font-bold">Completed</span>`
+                  }
+                </td>
+              </tr>
+            `;
+          });
+        });
+    }
+
+    function updateStatus(orderId, status) {
+      db.collection("orders")
+        .doc(orderId)
+        .update({ status })
+        .catch(err => alert(err.message));
+    }
   </script>
-
-</body>
-
 
 </body>
 </html>
