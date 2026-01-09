@@ -41,7 +41,9 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script> <script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+<script>
   // Your Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
@@ -58,7 +60,7 @@
   // Initialize services
   const auth = firebase.auth();
   const db = firebase.firestore();
-  const storage = firebase.storage(); // ADDED STORAGE INIT
+  const storage = firebase.storage();
 </script>
 <script>
   console.log("Firebase connected:", firebase.apps.length > 0);
@@ -88,13 +90,13 @@
             </div>
 
             <div class="flex items-center gap-6">
-                <div class="relative group cursor-pointer" id="authSection">
+                <div class="relative cursor-pointer" id="authSection" onclick="toggleUserMenu()">
                     <div class="flex items-center gap-2 hover:text-jumia-orange">
                         <i class="far fa-user text-xl"></i>
                         <span class="font-medium hidden sm:block" id="userDisplayName">Account</span>
                         <i class="fas fa-chevron-down text-xs hidden sm:block"></i>
                     </div>
-                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl py-2 hidden group-hover:block border border-gray-100">
+                    <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl py-2 hidden border border-gray-100 z-50">
                         <button onclick="openModal('loginModal')" id="loginBtn" class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-jumia-orange font-bold uppercase text-sm">Sign In</button>
                         <button onclick="logout()" id="logoutBtn" class="hidden block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 text-sm">Logout</button>
                         <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-sm">My Orders</a>
@@ -384,6 +386,24 @@
                 document.getElementById('loginBtn').classList.remove('hidden');
                 document.getElementById('logoutBtn').classList.add('hidden');
                 localStorage.removeItem('kemmex_user');
+            }
+        });
+
+        // --- AUTH MENU TOGGLE ---
+        function toggleUserMenu() {
+            const menu = document.getElementById('userMenu');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+            } else {
+                menu.classList.add('hidden');
+            }
+        }
+
+        window.addEventListener('click', function(e) {
+            const section = document.getElementById('authSection');
+            const menu = document.getElementById('userMenu');
+            if (!section.contains(e.target)) {
+                menu.classList.add('hidden');
             }
         });
 
