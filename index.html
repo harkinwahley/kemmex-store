@@ -41,7 +41,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script> <script>
   // Your Firebase configuration
   const firebaseConfig = {
     apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
@@ -58,6 +58,7 @@
   // Initialize services
   const auth = firebase.auth();
   const db = firebase.firestore();
+  const storage = firebase.storage(); // ADDED STORAGE INIT
 </script>
 <script>
   console.log("Firebase connected:", firebase.apps.length > 0);
@@ -292,6 +293,22 @@
                             <p class="text-xs text-red-500 mt-2 italic flex items-center gap-1">
                                 <i class="fas fa-info-circle"></i> Use your name as the transfer remark.
                             </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 mb-4">
+                    <label class="block text-xs font-bold text-gray-600 mb-2 uppercase">Upload Payment Proof</label>
+                    <div class="border border-dashed border-gray-400 rounded-md p-4 bg-gray-50 text-center relative hover:bg-white transition">
+                        <input type="file" id="paymentProof" accept="image/*,application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="previewFile()">
+                        <div id="upload-placeholder">
+                            <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-1"></i>
+                            <p class="text-xs text-gray-500 font-medium">Click to upload Receipt / Screenshot</p>
+                            <p class="text-[10px] text-gray-400">(Images or PDF)</p>
+                        </div>
+                        <div id="file-selected" class="hidden flex items-center justify-center gap-2 text-green-600">
+                            <i class="fas fa-check-circle"></i>
+                            <span class="text-xs font-bold truncate max-w-[150px]" id="filename-display">filename.jpg</span>
                         </div>
                     </div>
                 </div>
@@ -628,7 +645,23 @@
             }
         }
 
-        // UPDATE: REAL FIRESTORE ORDER SAVING
+        // --- NEW FILE UPLOAD LOGIC ---
+        function previewFile() {
+            const fileInput = document.getElementById('paymentProof');
+            const placeholder = document.getElementById('upload-placeholder');
+            const fileSelected = document.getElementById('file-selected');
+            const filenameDisplay = document.getElementById('filename-display');
+
+            if (fileInput.files.length > 0) {
+                placeholder.classList.add('hidden');
+                fileSelected.classList.remove('hidden');
+                filenameDisplay.innerText = fileInput.files[0].name;
+            } else {
+                placeholder.classList.remove('hidden');
+                fileSelected.classList.add('hidden');
+            }
+        }
+
         function handlePayment(e) {
             e.preventDefault();
 
@@ -642,50 +675,82 @@
                 return;
             }
 
+            const fileInput = document.getElementById('paymentProof');
             const btn = e.target.querySelector('button[type="submit"]');
             const originalHTML = btn.innerHTML;
-
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving order...';
             btn.disabled = true;
 
-            const orderData = {
-                userId: auth.currentUser.uid,
-                email: auth.currentUser.email,
-                items: cart.map(item => ({
-                    id: item.id,
-                    name: item.name,
-                    price: item.price,
-                    qty: item.qty
-                })),
-                totalAmount: cart.reduce((sum, i) => sum + i.price * i.qty, 0),
-                customer: {
-                    firstName: document.getElementById('firstName').value,
-                    lastName: document.getElementById('lastName').value,
-                    phone: document.getElementById('phone').value,
-                    address: document.getElementById('address').value
-                },
-                paymentMethod: "bank_transfer",
-                status: "pending",
-                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            // Helper to finish order creation
+            const createOrder = (proofUrl) => {
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving Order...';
+                
+                const orderData = {
+                    userId: auth.currentUser.uid,
+                    email: auth.currentUser.email,
+                    items: cart.map(item => ({
+                        id: item.id,
+                        name: item.name,
+                        price: item.price,
+                        qty: item.qty
+                    })),
+                    totalAmount: cart.reduce((sum, i) => sum + i.price * i.qty, 0),
+                    customer: {
+                        firstName: document.getElementById('firstName').value,
+                        lastName: document.getElementById('lastName').value,
+                        phone: document.getElementById('phone').value,
+                        address: document.getElementById('address').value
+                    },
+                    paymentMethod: "bank_transfer",
+                    paymentProofUrl: proofUrl || null, // Save the URL here
+                    status: "pending",
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
+
+                db.collection("orders").add(orderData)
+                    .then(() => {
+                        closeModal('checkoutModal');
+                        cart = [];
+                        saveCart();
+                        updateCartUI();
+                        openModal('successModal');
+                    })
+                    .catch(error => {
+                        alert("Failed to save order: " + error.message);
+                    })
+                    .finally(() => {
+                        btn.innerHTML = originalHTML;
+                        btn.disabled = false;
+                    });
             };
 
-            db.collection("orders").add(orderData)
-                .then(() => {
-                    closeModal('checkoutModal');
-
-                    cart = [];
-                    saveCart();
-                    updateCartUI();
-
-                    openModal('successModal');
-                })
-                .catch(error => {
-                    alert("Failed to save order: " + error.message);
-                })
-                .finally(() => {
-                    btn.innerHTML = originalHTML;
+            // 1. Check if file exists to upload
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Uploading Receipt...';
+                
+                // Create a unique path: receipts/USER_ID/TIMESTAMP_FILENAME
+                const storageRef = storage.ref(`receipts/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
+                
+                storageRef.put(file)
+                    .then(snapshot => snapshot.ref.getDownloadURL())
+                    .then(url => {
+                        console.log("File uploaded:", url);
+                        createOrder(url); // Pass URL to createOrder
+                    })
+                    .catch(error => {
+                        console.error("Upload failed:", error);
+                        alert("Failed to upload receipt. Please try again.");
+                        btn.innerHTML = originalHTML;
+                        btn.disabled = false;
+                    });
+            } else {
+                // 2. No file, check confirmation or proceed
+                if(!confirm("You haven't uploaded a payment receipt. Proceed anyway?")) {
                     btn.disabled = false;
-                });
+                    return;
+                }
+                createOrder(null);
+            }
         }
     </script>
 </body>
