@@ -6,58 +6,135 @@
 <title>My Orders | Kemmex Store</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: { jumia: { orange: '#f68b1e', hover: '#e07e1b', dark: '#282828', gray: '#f1f1f2' } },
+                fontFamily: { sans: ['Roboto', 'sans-serif'] }
+            }
+        }
+    }
+</script>
+
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 </head>
 
-<body class="bg-gray-100 p-4">
+<body class="bg-jumia-gray font-sans min-h-screen">
 
-<h1 class="text-2xl font-bold mb-4">My Orders</h1>
+<header class="bg-white shadow-md sticky top-0 z-50">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+        <a href="index.html" class="text-2xl font-bold text-black tracking-tighter">
+            KEMMEX<span class="text-jumia-orange">★</span>
+        </a>
+        <a href="index.html" class="text-sm font-bold text-jumia-orange hover:underline flex items-center gap-2">
+            <i class="fas fa-arrow-left"></i> Back to Store
+        </a>
+    </div>
+</header>
 
-<div id="ordersList" class="space-y-4"></div>
+<main class="container mx-auto px-4 py-6 max-w-3xl">
+    <h1 class="text-2xl font-bold mb-6 text-gray-800 border-b pb-2">My Order History</h1>
+
+    <div id="loading" class="text-center py-10">
+        <i class="fas fa-spinner fa-spin text-4xl text-jumia-orange"></i>
+        <p class="mt-2 text-gray-500">Loading your orders...</p>
+    </div>
+
+    <div id="ordersList" class="space-y-4 hidden"></div>
+</main>
 
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
-  authDomain: "kemmex-store-9ffa3.firebaseapp.com",
-  projectId: "kemmex-store-9ffa3",
-};
-firebase.initializeApp(firebaseConfig);
+  // Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
+    authDomain: "kemmex-store-9ffa3.firebaseapp.com",
+    projectId: "kemmex-store-9ffa3",
+    storageBucket: "kemmex-store-9ffa3.firebasestorage.app",
+    messagingSenderId: "500875032118",
+    appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
+  };
 
-const auth = firebase.auth();
-const db = firebase.firestore();
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-auth.onAuthStateChanged(user => {
-  if (!user) {
-    alert("Please login to view your orders");
-    window.location.href = "index.html";
-    return;
-  }
+  // Check Login State
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      alert("Please login to view your orders");
+      window.location.href = "index.html";
+      return;
+    }
 
-  db.collection("orders")
-    .where("userId", "==", user.uid)
-    .orderBy("createdAt", "desc")
-    .onSnapshot(snapshot => {
-      const container = document.getElementById("ordersList");
+    // Load Orders
+    db.collection("orders")
+      .where("userId", "==", user.uid)
+      .orderBy("createdAt", "desc")
+      .onSnapshot(snapshot => {
+        const container = document.getElementById("ordersList");
+        const loading = document.getElementById("loading");
+        
+        loading.classList.add("hidden");
+        container.classList.remove("hidden");
 
-      if (snapshot.empty) {
-        container.innerHTML = "<p>No orders yet.</p>";
-        return;
-      }
+        if (snapshot.empty) {
+          container.innerHTML = `
+              <div class="bg-white p-8 rounded shadow text-center">
+                  <i class="fas fa-shopping-bag text-4xl text-gray-300 mb-3"></i>
+                  <p class="text-gray-500">You haven't placed any orders yet.</p>
+                  <a href="index.html" class="inline-block mt-4 bg-jumia-orange text-white px-6 py-2 rounded font-bold hover:bg-jumia-hover">Start Shopping</a>
+              </div>
+          `;
+          return;
+        }
 
-      container.innerHTML = snapshot.docs.map(doc => {
-        const o = doc.data();
-        return `
-          <div class="bg-white p-4 rounded shadow">
-            <p class="font-bold">Order Total: ₦${o.total}</p>
-            <p>Status: <span class="font-bold text-jumia-orange">${o.status}</span></p>
-            <p class="text-xs text-gray-500">${o.createdAt?.toDate()}</p>
-          </div>
-        `;
-      }).join("");
-    });
-});
+        container.innerHTML = snapshot.docs.map(doc => {
+          const o = doc.data();
+          const date = o.createdAt ? new Date(o.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
+          
+          // Dynamic Status Color
+          let statusColor = "bg-gray-100 text-gray-600";
+          if(o.status === 'confirmed') statusColor = "bg-blue-100 text-blue-600";
+          if(o.status === 'processing') statusColor = "bg-yellow-100 text-yellow-700";
+          if(o.status === 'shipped') statusColor = "bg-purple-100 text-purple-600";
+          if(o.status === 'delivered') statusColor = "bg-green-100 text-green-600";
+
+          return `
+            <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
+              <div class="flex justify-between items-start border-b border-dashed pb-3 mb-3">
+                  <div>
+                      <p class="text-xs text-gray-500 uppercase font-bold">Order Date</p>
+                      <p class="text-sm font-medium text-gray-800">${date}</p>
+                  </div>
+                  <span class="px-3 py-1 rounded-full text-xs font-bold uppercase ${statusColor}">
+                      ${o.status}
+                  </span>
+              </div>
+              
+              <div class="space-y-2 mb-4">
+                  ${o.items.map(item => `
+                      <div class="flex justify-between text-sm text-gray-600">
+                          <span><span class="font-bold text-gray-400">x${item.qty}</span> ${item.name}</span>
+                          <span class="font-medium">₦${item.price.toLocaleString()}</span>
+                      </div>
+                  `).join('')}
+              </div>
+
+              <div class="flex justify-between items-center pt-2 border-t">
+                  <span class="font-bold text-gray-700 text-sm">Total Paid</span>
+                  <span class="font-bold text-lg text-jumia-orange">₦${o.totalAmount.toLocaleString()}</span>
+              </div>
+            </div>
+          `;
+        }).join("");
+      });
+  });
 </script>
 
 </body>
