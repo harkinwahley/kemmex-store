@@ -3,200 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add New Product | Kemmex Admin</title>
-    <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/shop-local.png">
+    <title>Add Product | Kemmex Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 </head>
+<body class="bg-gray-100 min-h-screen">
 
-<body class="bg-gray-100 min-h-screen font-sans">
-
-    <div id="loginOverlay" class="fixed inset-0 bg-gray-900 z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm p-8 text-center">
-            <div class="mb-4 text-orange-500 text-4xl"><i class="fas fa-lock"></i></div>
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">Admin Access Required</h2>
-            <p class="text-gray-500 text-sm mb-6">Please sign in to manage products.</p>
+    <div class="container mx-auto px-4 py-8 max-w-2xl">
+        <div class="bg-white p-8 rounded-lg shadow-lg">
             
-            <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-left">
-                <div>
-                    <label class="text-xs font-bold text-gray-600 uppercase">Email</label>
-                    <input id="adminEmail" type="email" value="aakinwale16@gmail.com" required 
-                        class="w-full border p-2 rounded focus:border-orange-500 outline-none">
-                </div>
-                <div>
-                    <label class="text-xs font-bold text-gray-600 uppercase">Password</label>
-                    <input id="adminPassword" type="password" required 
-                        class="w-full border p-2 rounded focus:border-orange-500 outline-none">
-                </div>
-                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded shadow-lg transition">
-                    Unlock Dashboard
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <div id="mainContent" class="hidden max-w-2xl mx-auto py-10 px-4">
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-gray-800">Add New Product</h1>
-            <div class="flex gap-4 text-sm">
-                <a href="admin.html" class="text-blue-600 hover:underline">View Orders</a>
-                <button onclick="auth.signOut()" class="text-red-500 hover:underline">Logout</button>
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="text-2xl font-bold">Add New Product</h1>
+                <a href="admin.html" class="text-blue-600 hover:underline">Back to Dashboard</a>
             </div>
-        </div>
 
-        <div class="bg-white rounded-lg shadow-lg p-8">
-            <form onsubmit="handleAddProduct(event)" class="space-y-6">
+            <form id="addProductForm" onsubmit="saveProduct(event)" class="space-y-4">
                 
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Product Image Link</label>
-                    <input id="pImg" type="url" required placeholder="https://..." 
-                        class="w-full border p-3 rounded focus:ring-2 focus:ring-orange-500 outline-none"
-                        onchange="previewImage(this.value)">
-                    
-                    <p class="text-xs text-gray-500 mt-2">
-                        <i class="fas fa-info-circle"></i> 
-                        Tip: Upload image to <a href="https://imgbb.com/" target="_blank" class="text-blue-500 underline">ImgBB</a>, copy the 'Direct Link', and paste it here.
-                    </p>
-
-                    <img id="imgPreview" class="hidden mt-4 h-48 w-full object-contain border rounded bg-gray-50">
+                    <label class="block text-sm font-bold mb-1">Product Name</label>
+                    <input type="text" id="pName" required class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Product Name</label>
-                        <input id="pName" type="text" required class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+                        <label class="block text-sm font-bold mb-1">Price (₦)</label>
+                        <input type="number" id="pPrice" required class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Price (₦)</label>
-                        <input id="pPrice" type="number" required class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+                        <label class="block text-sm font-bold mb-1">Stock Quantity</label>
+                        <input type="number" id="pStock" required class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
                     </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-1">Category</label>
+                    <select id="pCategory" class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+                        <option value="Baby & Kids">Baby & Kids</option>
+                        <option value="Maternity">Maternity</option>
+                        <option value="Adult Wears">Adult Wears</option>
+                        <option value="Thrift Wears">Thrift Wears</option>
+                        <option value="Toys">Toys</option>
+                        <option value="Accessories">Accessories</option>
+                    </select>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Category</label>
-                        <select id="pCategory" class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none bg-white">
-                            <option>Baby & Kids</option>
-                            <option>Maternity</option>
-                            <option>Adult Wears</option>
-                            <option>Thrift Wears</option>
-                            <option>Toys</option>
-                            <option>Accessories</option>
-                        </select>
+                        <label class="block text-sm font-bold mb-1">Sizes (Optional)</label>
+                        <input type="text" id="pSize" placeholder="e.g. S, M, L, XL" class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Stock Qty</label>
-                        <input id="pStock" type="number" value="10" required class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+                        <label class="block text-sm font-bold mb-1">Colors (Optional)</label>
+                        <input type="text" id="pColor" placeholder="e.g. Red, Blue, Black" class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
                     </div>
                 </div>
 
-                <button type="submit" id="submitBtn" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded shadow-lg transition">
-                    Save Product
+                <div>
+                    <label class="block text-sm font-bold mb-1">Description</label>
+                    <textarea id="pDesc" rows="3" placeholder="Describe the material, fit, or condition..." class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold mb-1">Image URL</label>
+                    <input type="url" id="pImg" required placeholder="https://..." class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+                    <p class="text-xs text-gray-500 mt-1">Tip: Use images from Unsplash or host your own.</p>
+                </div>
+
+                <button type="submit" id="saveBtn" class="w-full bg-green-600 text-white font-bold py-3 rounded hover:bg-green-700 transition mt-4">
+                    Upload Product
                 </button>
-
             </form>
         </div>
     </div>
 
     <script>
-      const ADMIN_EMAILS = ["aakinwale16@gmail.com", "kemzolin99@gmail.com"];
+        // 🚨 CONFIG
+        const ADMIN_EMAILS = ["aakinwale16@gmail.com", "kemzolin99@gmail.com"];
 
         const firebaseConfig = {
             apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
             authDomain: "kemmex-store-9ffa3.firebaseapp.com",
             projectId: "kemmex-store-9ffa3",
-            storageBucket: "kemmex-store-9ffa3.firebasestorage.app",
+            storageBucket: "kemmex-store-9ffa3.appspot.com",
             messagingSenderId: "500875032118",
             appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
         };
-
         firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
         const db = firebase.firestore();
+        const auth = firebase.auth();
 
-        // --- AUTH LOGIC ---
+        // Check Auth
         auth.onAuthStateChanged(user => {
-            const loginOverlay = document.getElementById('loginOverlay');
-            const mainContent = document.getElementById('mainContent');
-
-            if (user && ADMIN_EMAILS.includes(user.email)) {
-                loginOverlay.classList.add('hidden');
-                mainContent.classList.remove('hidden');
-            } else {
-                loginOverlay.classList.remove('hidden');
-                mainContent.classList.add('hidden');
-                if (user && !ADMIN_EMAILS.includes(user.email)) {
-                    alert("Unauthorized access. Please login with an admin account.");
-                    auth.signOut();
-                }
+            if (!user || !ADMIN_EMAILS.includes(user.email)) {
+                alert("Unauthorized Access");
+                window.location.href = "index.html";
             }
         });
 
-        function handleAdminLogin(e) {
+        function saveProduct(e) {
             e.preventDefault();
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassword').value;
-            const btn = e.target.querySelector('button');
-            const originalText = btn.innerText;
-
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+            const btn = document.getElementById('saveBtn');
+            btn.innerText = "Saving...";
             btn.disabled = true;
 
-            auth.signInWithEmailAndPassword(email, password)
-                .catch(error => {
-                    alert("Login Failed: " + error.message);
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                });
-        }
+            const product = {
+                name: document.getElementById('pName').value,
+                price: Number(document.getElementById('pPrice').value),
+                stock: Number(document.getElementById('pStock').value),
+                category: document.getElementById('pCategory').value,
+                img: document.getElementById('pImg').value,
+                // NEW FIELDS
+                size: document.getElementById('pSize').value || "Free Size",
+                color: document.getElementById('pColor').value || "As seen",
+                description: document.getElementById('pDesc').value || "No description provided.",
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
 
-        function previewImage(url) {
-            const img = document.getElementById('imgPreview');
-            if(url) {
-                img.src = url;
-                img.classList.remove('hidden');
-            } else {
-                img.classList.add('hidden');
-            }
-        }
-
-        async function handleAddProduct(e) {
-            e.preventDefault();
-
-            const btn = document.getElementById('submitBtn');
-            const originalText = btn.innerText;
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-
-            try {
-                await db.collection("products").add({
-                    name: document.getElementById('pName').value,
-                    price: Number(document.getElementById('pPrice').value),
-                    category: document.getElementById('pCategory').value,
-                    stock: Number(document.getElementById('pStock').value),
-                    img: document.getElementById('pImg').value,
-                    active: true,
-                    rating: 5,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                alert("Product Added Successfully!");
-                document.getElementById('pName').value = "";
-                document.getElementById('pPrice').value = "";
-                document.getElementById('pImg').value = "";
-                document.getElementById('imgPreview').classList.add('hidden');
-                
-            } catch (error) {
-                console.error(error);
-                alert("Error: " + error.message);
-            } finally {
-                btn.innerText = originalText;
+            db.collection("products").add(product)
+            .then(() => {
+                alert("Product Added Successfully! ✅");
+                document.getElementById('addProductForm').reset();
+            })
+            .catch(error => alert("Error: " + error.message))
+            .finally(() => {
+                btn.innerText = "Upload Product";
                 btn.disabled = false;
-            }
+            });
         }
     </script>
 </body>
