@@ -41,7 +41,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 
 <script>
   // Your Firebase configuration
@@ -56,14 +55,8 @@
 
   // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
-
-  // Initialize services
   const auth = firebase.auth();
   const db = firebase.firestore();
-  const storage = firebase.storage();
-</script>
-<script>
-  console.log("Firebase connected:", firebase.apps.length > 0);
 </script>
 
 <body class="font-sans text-jumia-dark">
@@ -264,75 +257,54 @@
                 <div class="mt-4 mb-2">
                     <label class="block text-xs font-bold text-gray-600 mb-2 uppercase">Payment Method</label>
                     
-                    <div class="border-2 border-jumia-orange rounded-md p-3 bg-orange-50 relative">
-                        <div class="flex items-center gap-2 mb-2">
+                    <div class="border-2 border-jumia-orange rounded-md p-4 bg-orange-50 relative">
+                        <div class="flex items-center gap-2 mb-3">
                             <input type="radio" checked name="payment" class="accent-jumia-orange w-4 h-4">
                             <span class="font-bold text-sm text-gray-800">Bank Transfer</span>
                         </div>
                         
-                        <div class="ml-6 text-sm text-gray-700 space-y-1">
-                            <p class="text-xs text-gray-500 mb-1">Please transfer <strong class="text-black">₦<span id="transfer-amount">0</span></strong> to:</p>
+                        <div class="ml-6 space-y-2">
+                            <p class="text-sm text-gray-700">Transfer <strong class="text-black text-lg">₦<span id="transfer-amount">0</span></strong> to:</p>
                             
-                            <div class="font-mono bg-white p-3 rounded border border-orange-200 shadow-sm">
-                                <div class="flex justify-between items-center border-b border-gray-100 pb-1 mb-1">
+                            <div class="bg-white p-3 rounded border border-orange-200 shadow-sm">
+                                <div class="flex justify-between items-center mb-1">
                                     <span class="text-gray-500 text-xs">Bank:</span>
                                     <span class="font-bold text-jumia-dark">Opay</span>
                                 </div>
-                                <div class="flex justify-between items-center border-b border-gray-100 pb-1 mb-1">
-                                    <span class="text-gray-500 text-xs">Account Name:</span>
-                                    <span class="font-bold text-jumia-dark text-right text-xs sm:text-sm">Sokunbi Oluwakemi</span>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-gray-500 text-xs">Name:</span>
+                                    <span class="font-bold text-jumia-dark">Sokunbi Oluwakemi</span>
                                 </div>
-                                <div class="flex justify-between items-center pt-1">
-                                    <span class="text-gray-500 text-xs">Account No:</span>
+                                <div class="flex justify-between items-center pt-2 border-t border-dashed">
+                                    <span class="text-gray-500 text-xs">Acct No:</span>
                                     <div class="flex items-center gap-2">
-                                        <span class="font-bold text-lg text-jumia-orange tracking-widest">8039468706</span>
-                                        <button type="button" onclick="navigator.clipboard.writeText('8039468706'); alert('Account Number Copied!')" class="text-gray-400 hover:text-black" title="Copy Number">
+                                        <span class="font-bold text-xl text-jumia-orange tracking-widest">8039468706</span>
+                                        <button type="button" onclick="navigator.clipboard.writeText('8039468706'); alert('Copied!')" class="text-gray-400 hover:text-black">
                                             <i class="far fa-copy"></i>
                                         </button>
                                     </div>
                                 </div>
                             </div>
-                            <p class="text-xs text-red-500 mt-2 italic flex items-center gap-1">
-                                <i class="fas fa-info-circle"></i> Use your name as the transfer remark.
-                            </p>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-4 mb-4">
-                    <label class="block text-xs font-bold text-gray-600 mb-2 uppercase">Upload Payment Proof</label>
-                    <div class="border border-dashed border-gray-400 rounded-md p-4 bg-gray-50 text-center relative hover:bg-white transition">
-                        <input type="file" id="paymentProof" accept="image/*,application/pdf" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="previewFile()">
-                        <div id="upload-placeholder">
-                            <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 mb-1"></i>
-                            <p class="text-xs text-gray-500 font-medium">Click to upload Receipt / Screenshot</p>
-                            <p class="text-[10px] text-gray-400">(Images or PDF)</p>
-                        </div>
-                        <div id="file-selected" class="hidden flex items-center justify-center gap-2 text-green-600">
-                            <i class="fas fa-check-circle"></i>
-                            <span class="text-xs font-bold truncate max-w-[150px]" id="filename-display">filename.jpg</span>
-                        </div>
-                    </div>
+                <div class="mb-6 flex items-start gap-3 p-3 bg-gray-50 rounded border">
+                    <input type="checkbox" id="confirmPaid" required class="mt-1 w-5 h-5 accent-green-600 cursor-pointer">
+                    <label for="confirmPaid" class="text-sm text-gray-700 cursor-pointer">
+                        I have sent the money to the account above.
+                    </label>
                 </div>
 
-                <div class="bg-blue-50 p-3 rounded border border-blue-100">
-                    <p class="font-bold text-sm mb-2">Order Summary</p>
-                    <div class="flex justify-between text-sm">
-                        <span>Items Total</span>
-                        <span>₦<span id="checkout-total">0</span></span>
-                    </div>
-                    <div class="flex justify-between text-sm mt-1">
-                        <span>Delivery Fee</span>
-                        <span class="text-green-600 font-bold">FREE</span>
-                    </div>
-                    <div class="flex justify-between font-bold text-lg mt-2 border-t pt-2">
-                        <span>To Pay</span>
+                <div class="bg-blue-50 p-3 rounded border border-blue-100 mb-4">
+                    <div class="flex justify-between font-bold text-lg">
+                        <span>Total to Pay</span>
                         <span class="text-jumia-orange">₦<span id="checkout-final">0</span></span>
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded shadow-lg flex justify-center items-center gap-2">
-                   <span>I have made the transfer</span> <i class="fas fa-arrow-right"></i>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded shadow-lg text-lg uppercase tracking-wide">
+                    Complete Order
                 </button>
             </form>
         </div>
@@ -389,7 +361,7 @@
             }
         });
 
-        // --- AUTH MENU TOGGLE ---
+        // --- MENU TOGGLE (FIXED CLICK) ---
         function toggleUserMenu() {
             const menu = document.getElementById('userMenu');
             if (menu.classList.contains('hidden')) {
@@ -402,6 +374,7 @@
         window.addEventListener('click', function(e) {
             const section = document.getElementById('authSection');
             const menu = document.getElementById('userMenu');
+            // If click is outside the authSection, close the menu
             if (!section.contains(e.target)) {
                 menu.classList.add('hidden');
             }
@@ -665,23 +638,7 @@
             }
         }
 
-        // --- NEW FILE UPLOAD LOGIC ---
-        function previewFile() {
-            const fileInput = document.getElementById('paymentProof');
-            const placeholder = document.getElementById('upload-placeholder');
-            const fileSelected = document.getElementById('file-selected');
-            const filenameDisplay = document.getElementById('filename-display');
-
-            if (fileInput.files.length > 0) {
-                placeholder.classList.add('hidden');
-                fileSelected.classList.remove('hidden');
-                filenameDisplay.innerText = fileInput.files[0].name;
-            } else {
-                placeholder.classList.remove('hidden');
-                fileSelected.classList.add('hidden');
-            }
-        }
-
+        // --- ONE CLICK PAYMENT LOGIC ---
         function handlePayment(e) {
             e.preventDefault();
 
@@ -695,82 +652,57 @@
                 return;
             }
 
-            const fileInput = document.getElementById('paymentProof');
+            // Verify checkbox
+            const isConfirmed = document.getElementById('confirmPaid').checked;
+            if (!isConfirmed) {
+                alert("Please tick the box to confirm you have sent the money.");
+                return;
+            }
+
             const btn = e.target.querySelector('button[type="submit"]');
             const originalHTML = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             btn.disabled = true;
 
-            // Helper to finish order creation
-            const createOrder = (proofUrl) => {
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving Order...';
-                
-                const orderData = {
-                    userId: auth.currentUser.uid,
-                    email: auth.currentUser.email,
-                    items: cart.map(item => ({
-                        id: item.id,
-                        name: item.name,
-                        price: item.price,
-                        qty: item.qty
-                    })),
-                    totalAmount: cart.reduce((sum, i) => sum + i.price * i.qty, 0),
-                    customer: {
-                        firstName: document.getElementById('firstName').value,
-                        lastName: document.getElementById('lastName').value,
-                        phone: document.getElementById('phone').value,
-                        address: document.getElementById('address').value
-                    },
-                    paymentMethod: "bank_transfer",
-                    paymentProofUrl: proofUrl || null, // Save the URL here
-                    status: "pending",
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                };
-
-                db.collection("orders").add(orderData)
-                    .then(() => {
-                        closeModal('checkoutModal');
-                        cart = [];
-                        saveCart();
-                        updateCartUI();
-                        openModal('successModal');
-                    })
-                    .catch(error => {
-                        alert("Failed to save order: " + error.message);
-                    })
-                    .finally(() => {
-                        btn.innerHTML = originalHTML;
-                        btn.disabled = false;
-                    });
+            // Create Order Data
+            const orderData = {
+                userId: auth.currentUser.uid,
+                email: auth.currentUser.email,
+                items: cart.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    price: item.price,
+                    qty: item.qty
+                })),
+                totalAmount: cart.reduce((sum, i) => sum + i.price * i.qty, 0),
+                customer: {
+                    firstName: document.getElementById('firstName').value,
+                    lastName: document.getElementById('lastName').value,
+                    phone: document.getElementById('phone').value,
+                    address: document.getElementById('address').value
+                },
+                paymentMethod: "bank_transfer",
+                status: "pending", 
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            // 1. Check if file exists to upload
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                btn.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Uploading Receipt...';
-                
-                // Create a unique path: receipts/USER_ID/TIMESTAMP_FILENAME
-                const storageRef = storage.ref(`receipts/${auth.currentUser.uid}/${Date.now()}_${file.name}`);
-                
-                storageRef.put(file)
-                    .then(snapshot => snapshot.ref.getDownloadURL())
-                    .then(url => {
-                        console.log("File uploaded:", url);
-                        createOrder(url); // Pass URL to createOrder
-                    })
-                    .catch(error => {
-                        console.error("Upload failed:", error);
-                        alert("Failed to upload receipt. Please try again.");
-                        btn.innerHTML = originalHTML;
-                        btn.disabled = false;
-                    });
-            } else {
-                // 2. No file, check confirmation or proceed
-                if(!confirm("You haven't uploaded a payment receipt. Proceed anyway?")) {
+            // Save to Firestore
+            db.collection("orders").add(orderData)
+                .then(() => {
+                    closeModal('checkoutModal');
+                    cart = [];
+                    saveCart();
+                    updateCartUI();
+                    openModal('successModal');
+                })
+                .catch(error => {
+                    alert("Failed to save order: " + error.message);
+                })
+                .finally(() => {
+                    btn.innerHTML = originalHTML;
                     btn.disabled = false;
-                    return;
-                }
-                createOrder(null);
-            }
+                });
         }
     </script>
 </body>
