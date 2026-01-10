@@ -32,9 +32,12 @@
         body { background-color: #f1f1f2; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Modal Transitions */
         .modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
         .modal.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .modal.flex { opacity: 1; visibility: visible; pointer-events: auto; }
+        /* Note: We removed 'flex' from here to fix the mobile scroll issue */
+        .modal.active { opacity: 1; visibility: visible; pointer-events: auto; }
         
         /* WhatsApp Button Animation */
         .whatsapp-float {
@@ -48,7 +51,7 @@
         }
         .whatsapp-float:hover { transform: scale(1.1); background-color: #20ba5a; }
 
-        /* 🟢 NEW: Shimmer Animation for Skeleton Loading */
+        /* Shimmer Animation for Skeleton Loading */
         @keyframes shimmer {
             0% { background-position: -1000px 0; }
             100% { background-position: 1000px 0; }
@@ -263,6 +266,7 @@
                     <img src="https://cdn-icons-png.flaticon.com/512/2331/2331716.png" class="w-24 h-24 object-contain group-hover:scale-110 transition duration-300">
                 </div>
             </div>
+
             <div class="bg-white p-3 rounded-t-md border-b flex justify-between items-center">
                 <h2 class="font-bold text-lg" id="section-title">Top Picks for You</h2>
                 <select id="sort" onchange="sortProducts()" class="text-sm border rounded px-2 py-1 outline-none">
@@ -414,8 +418,8 @@
       </div>
     </div>
 
-    <div id="checkoutModal" class="modal fixed inset-0 bg-black/60 z-[60] hidden justify-center items-center overflow-y-auto py-10">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg p-6 relative m-4">
+    <div id="checkoutModal" class="modal fixed inset-0 bg-black/60 z-[60] hidden overflow-y-auto">
+        <div class="relative bg-white rounded-lg shadow-2xl w-full max-w-lg p-6 mx-auto my-10">
             <button onclick="closeModal('checkoutModal')" class="absolute top-3 right-3 text-gray-400 hover:text-black text-xl">&times;</button>
             <h2 class="text-xl font-bold border-b pb-3 mb-4">Finalize Order</h2>
             
@@ -436,6 +440,14 @@
                         <option value="3000">Outside Ogun State - ₦3,000</option>
                         <option value="0">Store Pickup (Abeokuta) - Free</option>
                     </select>
+
+                    <div id="pickup-details" class="hidden bg-orange-50 p-3 rounded border border-orange-200 mt-2 text-sm text-gray-700">
+                        <p class="font-bold mb-1">Pickup Locations:</p>
+                        <ul class="list-disc ml-4 space-y-1 text-xs">
+                            <li>No 6, Opelifa Street, Iyana Adigbe, Obada, Abeokuta.</li>
+                            <li>No 33, Sholoade Street, Near Bale's House, Ijeun Titun, Abeokuta.</li>
+                        </ul>
+                    </div>
                 </div>
 
                 <div class="mt-4 mb-2">
@@ -488,10 +500,8 @@
         let isLoggedIn = false;
         let currentFilter = 'all';
 
-        // 🟢 UPDATED: Load Products with Skeleton Screen
         function loadProducts() {
              const grid = document.getElementById('products-grid');
-             // Show Skeleton first
              grid.innerHTML = Array(8).fill(0).map(() => `
                 <div class="bg-white p-2 rounded-md shadow-sm h-64 flex flex-col gap-2">
                     <div class="skeleton h-40 w-full rounded-md"></div>
@@ -555,17 +565,14 @@
             }
             grid.innerHTML = items.map(p => `
                 <div class="group bg-white border border-transparent hover:border-gray-200 hover:shadow-lg rounded-md transition duration-200 relative p-2 flex flex-col">
-                    
                     <a href="product.html?id=${p.id}" class="block relative overflow-hidden mb-2 cursor-pointer">
                         <img src="${p.img}" alt="${p.name}" class="w-full h-40 object-cover rounded-md group-hover:scale-105 transition duration-300">
                         ${p.oldPrice ? `<span class="absolute top-0 right-0 bg-orange-100 text-jumia-orange text-xs font-bold px-2 py-1 rounded-bl-md">-${Math.round(((p.oldPrice - p.price)/p.oldPrice)*100)}%</span>` : ''}
                     </a>
-                    
                     <div class="flex-grow">
                         <a href="product.html?id=${p.id}" class="block">
                             <h3 class="text-sm text-gray-700 line-clamp-2 mb-1 group-hover:text-jumia-orange transition">${p.name}</h3>
                         </a>
-                        
                         <div class="mb-1">
                             <span class="text-lg font-bold text-gray-900">₦ ${p.price.toLocaleString()}</span>
                             ${p.oldPrice ? `<span class="text-xs text-gray-400 line-through ml-2">₦ ${p.oldPrice.toLocaleString()}</span>` : ''}
@@ -595,27 +602,13 @@
         function addToCart(id) {
             const product = products.find(p => p.id === id);
             if (!product) return;
-
-            if (product.stock <= 0) {
-                alert("Out of stock");
-                return;
-            }
-
+            if (product.stock <= 0) return alert("Out of stock");
             const existing = cart.find(item => item.id === id);
-            if (existing && existing.qty >= product.stock) {
-                alert("You have reached the maximum stock available for this item.");
-                return;
-            }
-
-            if(existing) {
-                existing.qty++;
-            } else {
-                cart.push({ ...product, qty: 1 });
-            }
-            
+            if (existing && existing.qty >= product.stock) return alert("Max stock reached");
+            if(existing) existing.qty++;
+            else cart.push({ ...product, qty: 1 });
             saveCart();
             updateCartUI();
-            
             const btn = event.target;
             const originalText = btn.innerText;
             btn.innerText = "Added!";
@@ -670,19 +663,11 @@
         function changeQty(id, change) {
             const item = cart.find(i => i.id === id);
             const product = products.find(p => p.id === id);
-            
             if(item) {
-                if (change > 0 && product && item.qty >= product.stock) {
-                    alert("Max stock reached");
-                    return;
-                }
-                
+                if (change > 0 && product && item.qty >= product.stock) return alert("Max stock reached");
                 item.qty += change;
                 if(item.qty <= 0) removeFromCart(id);
-                else {
-                    saveCart();
-                    updateCartUI();
-                }
+                else { saveCart(); updateCartUI(); }
             }
         }
 
@@ -720,8 +705,26 @@
             renderProducts(sortedProducts);
         }
 
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+        // Updated Modal Handling for Mobile Scroll Fix
+        function openModal(id) { 
+            const el = document.getElementById(id);
+            el.classList.remove('hidden'); 
+            // Only add 'active' which sets opacity. Layout is handled by CSS now.
+            el.classList.add('active'); 
+            if(id === 'checkoutModal' || id === 'loginModal') {
+                el.classList.add('block'); // Ensure it displays
+            } else {
+                el.classList.add('flex'); // Center others
+            }
+        }
+        
+        function closeModal(id) { 
+            const el = document.getElementById(id);
+            el.classList.add('hidden'); 
+            el.classList.remove('active'); 
+            el.classList.remove('flex');
+            el.classList.remove('block');
+        }
 
         function handleLogin(e) {
             e.preventDefault();
@@ -750,14 +753,14 @@
             if(!isLoggedIn) openModal('loginModal'); 
             else { 
                 if(cart.length === 0) return alert("Cart is empty"); 
-                
                 const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 document.getElementById('delivery-location').value = "0"; 
                 document.getElementById('checkout-total').innerText = subtotal.toLocaleString();
                 document.getElementById('checkout-total').dataset.subtotal = subtotal; 
                 document.getElementById('transfer-amount').innerText = subtotal.toLocaleString();
                 document.getElementById('shipping-display').innerText = "Select delivery location to see final total.";
-                
+                // Hide pickup details initially
+                document.getElementById('pickup-details').classList.add('hidden');
                 openModal('checkoutModal'); 
             } 
         }
@@ -770,13 +773,20 @@
             document.getElementById('checkout-total').innerText = finalTotal.toLocaleString();
             document.getElementById('transfer-amount').innerText = finalTotal.toLocaleString();
             
-            if(shippingFee > 0) {
-                document.getElementById('shipping-display').innerText = `(Includes ₦${shippingFee.toLocaleString()} Delivery Fee)`;
+            // 🟢 Handle Pickup Display Logic
+            const sel = document.getElementById('delivery-location');
+            const text = sel.options[sel.selectedIndex].text;
+            
+            if(text.includes("Pickup")) {
+                document.getElementById('shipping-display').innerText = "Store Pickup (Free)";
+                document.getElementById('pickup-details').classList.remove('hidden');
             } else {
-                const sel = document.getElementById('delivery-location');
-                const text = sel.options[sel.selectedIndex].text;
-                if(text.includes("Pickup")) document.getElementById('shipping-display').innerText = "Store Pickup (Free)";
-                else document.getElementById('shipping-display').innerText = "Shipping fee pending...";
+                document.getElementById('pickup-details').classList.add('hidden');
+                if(shippingFee > 0) {
+                    document.getElementById('shipping-display').innerText = `(Includes ₦${shippingFee.toLocaleString()} Delivery Fee)`;
+                } else {
+                    document.getElementById('shipping-display').innerText = "Shipping fee pending...";
+                }
             }
         }
 
