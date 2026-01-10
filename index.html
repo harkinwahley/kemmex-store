@@ -140,16 +140,84 @@
             </nav>
         </aside>
 
-        <section class="w-full md:w-4/5">
-            <div class="bg-cover bg-center h-48 md:h-64 rounded-md mb-6 relative overflow-hidden" style="background-image: url('https://images.unsplash.com/photo-1472851294608-4155f2118c15?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');">
-                <div class="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent flex items-center px-8">
-                    <div class="text-white max-w-lg">
-                        <h2 class="text-3xl md:text-4xl font-bold mb-2">Kemmex Store</h2>
-                        <p class="mb-4 text-gray-200">Your journey, our fashion. Premium maternity and baby wear.</p>
+        <section class="w-full md:w-4/5 relative group">
+            
+            <div id="hero-slider" class="h-48 md:h-72 rounded-md mb-6 relative overflow-hidden bg-gray-200">
+                
+                <div class="absolute inset-0 transition-opacity duration-1000 opacity-100 slide-item">
+                    <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
+                        <div class="text-white max-w-lg animate-slideInRight">
+                            <span class="bg-orange-500 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">BABY & KIDS</span>
+                            <h2 class="text-3xl md:text-5xl font-bold mb-2">Cute & Comfortable</h2>
+                            <p class="mb-4 text-gray-200 text-sm md:text-base">Premium Looks, Pocket-Friendly Prices.</p>
+                            <button onclick="filterCategory('Baby & Kids')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-orange-500 hover:text-white transition">Shop Baby</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
+                    <img src="https://images.unsplash.com/photo-1563229875-13ae6d24a956?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
+                        <div class="text-white max-w-lg">
+                            <span class="bg-pink-500 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">MATERNITY</span>
+                            <h2 class="text-3xl md:text-5xl font-bold mb-2">Glowing & Stylish</h2>
+                            <p class="mb-4 text-gray-200 text-sm md:text-base">Comfort for every step of your journey.</p>
+                            <button onclick="filterCategory('Maternity')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-pink-500 hover:text-white transition">Shop Maternity</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
+                    <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
+                        <div class="text-white max-w-lg">
+                            <span class="bg-blue-600 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">ADULT WEARS</span>
+                            <h2 class="text-3xl md:text-5xl font-bold mb-2">Classy & Bold</h2>
+                            <p class="mb-4 text-gray-200 text-sm md:text-base">Upgrade your wardrobe today.</p>
+                            <button onclick="filterCategory('Adult Wears')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-blue-600 hover:text-white transition">Shop Adult</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
+                    <img src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
+                        <div class="text-white max-w-lg">
+                            <span class="bg-green-600 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">THRIFT WEARS</span>
+                            <h2 class="text-3xl md:text-5xl font-bold mb-2">Unbeatable Value</h2>
+                            <p class="mb-4 text-gray-200 text-sm md:text-base">High quality fashion for less.</p>
+                            <button onclick="filterCategory('Thrift Wears')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-green-600 hover:text-white transition">Shop Thrift</button>
+                        </div>
+                    </div>
+                </div>
+                
+                 <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
+                    <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
+                        <div class="text-white max-w-lg">
+                            <span class="bg-yellow-500 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">TOYS & FUN</span>
+                            <h2 class="text-3xl md:text-5xl font-bold mb-2">Playtime Joy</h2>
+                            <p class="mb-4 text-gray-200 text-sm md:text-base">Spark their imagination.</p>
+                            <button onclick="filterCategory('Toys')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-yellow-500 hover:text-white transition">Shop Toys</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
+                    <img src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
+                        <div class="text-white max-w-lg">
+                            <span class="bg-purple-500 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">ACCESSORIES</span>
+                            <h2 class="text-3xl md:text-5xl font-bold mb-2">The Perfect Finish</h2>
+                            <p class="mb-4 text-gray-200 text-sm md:text-base">Shoes, bags, and more.</p>
+                            <button onclick="filterCategory('Accessories')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-purple-500 hover:text-white transition">Shop Accessories</button>
+                        </div>
                     </div>
                 </div>
             </div>
 
+            ```
             <div class="md:hidden flex gap-3 overflow-x-auto pb-4 hide-scrollbar mb-4">
                 <button onclick="filterCategory('all')" class="whitespace-nowrap bg-white px-4 py-2 rounded-full shadow-sm text-sm font-medium border border-gray-200">All</button>
                 <button onclick="filterCategory('Baby & Kids')" class="whitespace-nowrap bg-white px-4 py-2 rounded-full shadow-sm text-sm font-medium border border-gray-200">Baby & Kids</button>
@@ -623,6 +691,27 @@
                 .catch(error => alert("Error: " + error.message))
                 .finally(() => { btn.innerHTML = originalHTML; btn.disabled = false; });
         }
+
+// 🟢 AUTOMATIC SLIDER SCRIPT
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide-item');
+        
+        function nextSlide() {
+            // Hide current
+            slides[currentSlide].classList.remove('opacity-100');
+            slides[currentSlide].classList.add('opacity-0');
+            
+            // Calculate next
+            currentSlide = (currentSlide + 1) % slides.length;
+            
+            // Show next
+            slides[currentSlide].classList.remove('opacity-0');
+            slides[currentSlide].classList.add('opacity-100');
+        }
+
+        // Change slide every 5 seconds
+        setInterval(nextSlide, 5000);
+        
     </script>
 </body>
 </html>
