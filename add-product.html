@@ -58,7 +58,7 @@
                     
                     <p class="text-xs text-gray-500 mt-2">
                         <i class="fas fa-info-circle"></i> 
-                        Tip: Upload image to <a href="https://postimages.org/" target="_blank" class="text-blue-500 underline">PostImages.org</a> or <a href="https://imgbb.com/" target="_blank" class="text-blue-500 underline">ImgBB</a> and paste the 'Direct Link' here.
+                        Tip: Upload image to <a href="https://imgbb.com/" target="_blank" class="text-blue-500 underline">ImgBB</a>, copy the 'Direct Link', and paste it here.
                     </p>
 
                     <img id="imgPreview" class="hidden mt-4 h-48 w-full object-contain border rounded bg-gray-50">
@@ -79,9 +79,11 @@
                     <div>
                         <label class="block text-xs font-bold text-gray-600 uppercase mb-1">Category</label>
                         <select id="pCategory" class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none bg-white">
-                            <option>Baby Wear</option>
+                            <option>Baby & Kids</option>
                             <option>Maternity</option>
-                            <option>Adult Fashion</option>
+                            <option>Adult Wears</option>
+                            <option>Thrift Wears</option>
+                            <option>Toys</option>
                             <option>Accessories</option>
                         </select>
                     </div>
@@ -100,7 +102,6 @@
     </div>
 
     <script>
-        // --- CONFIGURATION ---
         const ADMIN_EMAILS = ["aakinwale16@gmail.com"]; 
 
         const firebaseConfig = {
@@ -116,17 +117,15 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- AUTH LOGIC (Updated) ---
+        // --- AUTH LOGIC ---
         auth.onAuthStateChanged(user => {
             const loginOverlay = document.getElementById('loginOverlay');
             const mainContent = document.getElementById('mainContent');
 
             if (user && ADMIN_EMAILS.includes(user.email)) {
-                // User is Admin -> Show Content
                 loginOverlay.classList.add('hidden');
                 mainContent.classList.remove('hidden');
             } else {
-                // Not logged in OR Not Admin -> Show Login
                 loginOverlay.classList.remove('hidden');
                 mainContent.classList.add('hidden');
                 if (user && !ADMIN_EMAILS.includes(user.email)) {
@@ -154,7 +153,6 @@
                 });
         }
 
-        // --- PREVIEW LOGIC ---
         function previewImage(url) {
             const img = document.getElementById('imgPreview');
             if(url) {
@@ -165,7 +163,6 @@
             }
         }
 
-        // --- SAVE LOGIC ---
         async function handleAddProduct(e) {
             e.preventDefault();
 
@@ -187,7 +184,6 @@
                 });
 
                 alert("Product Added Successfully!");
-                // Clear form but keep login
                 document.getElementById('pName').value = "";
                 document.getElementById('pPrice').value = "";
                 document.getElementById('pImg').value = "";
