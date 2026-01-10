@@ -332,7 +332,7 @@
             if (!section.contains(e.target)) menu.classList.add('hidden');
         });
 
-        function renderProducts(items) {
+     function renderProducts(items) {
             const grid = document.getElementById('products-grid');
             if(items.length === 0) {
                 grid.innerHTML = '<p class="col-span-full text-center text-gray-500">No products found.</p>';
@@ -340,12 +340,17 @@
             }
             grid.innerHTML = items.map(p => `
                 <div class="group bg-white border border-transparent hover:border-gray-200 hover:shadow-lg rounded-md transition duration-200 relative p-2 flex flex-col">
-                    <div class="relative overflow-hidden mb-2">
+                    
+                    <a href="product.html?id=${p.id}" class="block relative overflow-hidden mb-2 cursor-pointer">
                         <img src="${p.img}" alt="${p.name}" class="w-full h-40 object-cover rounded-md group-hover:scale-105 transition duration-300">
                         ${p.oldPrice ? `<span class="absolute top-0 right-0 bg-orange-100 text-jumia-orange text-xs font-bold px-2 py-1 rounded-bl-md">-${Math.round(((p.oldPrice - p.price)/p.oldPrice)*100)}%</span>` : ''}
-                    </div>
+                    </a>
+                    
                     <div class="flex-grow">
-                        <h3 class="text-sm text-gray-700 line-clamp-2 mb-1 group-hover:text-jumia-orange transition">${p.name}</h3>
+                        <a href="product.html?id=${p.id}" class="block">
+                            <h3 class="text-sm text-gray-700 line-clamp-2 mb-1 group-hover:text-jumia-orange transition">${p.name}</h3>
+                        </a>
+                        
                         <div class="mb-1">
                             <span class="text-lg font-bold text-gray-900">₦ ${p.price.toLocaleString()}</span>
                             ${p.oldPrice ? `<span class="text-xs text-gray-400 line-through ml-2">₦ ${p.oldPrice.toLocaleString()}</span>` : ''}
