@@ -13,16 +13,9 @@
             theme: {
                 extend: {
                     colors: {
-                        jumia: {
-                            orange: '#f68b1e',
-                            hover: '#e07e1b',
-                            dark: '#282828',
-                            gray: '#f1f1f2'
-                        }
+                        jumia: { orange: '#f68b1e', hover: '#e07e1b', dark: '#282828', gray: '#f1f1f2' }
                     },
-                    fontFamily: {
-                        sans: ['Roboto', 'sans-serif'],
-                    }
+                    fontFamily: { sans: ['Roboto', 'sans-serif'] }
                 }
             }
         }
@@ -31,19 +24,18 @@
         body { background-color: #f1f1f2; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        /* Modal Transitions */
         .modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
         .modal.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         .modal.flex { opacity: 1; visibility: visible; pointer-events: auto; }
     </style>
 </head>
 
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // Your Firebase configuration
+  // ✅ USE YOUR REAL CONFIG HERE
   const firebaseConfig = {
     apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
     authDomain: "kemmex-store-9ffa3.firebaseapp.com",
@@ -53,7 +45,6 @@
     appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
   };
 
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
@@ -67,7 +58,7 @@
         </div>
 
         <div class="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
-            <a href="#" onclick="renderHome()" class="text-2xl font-bold text-black tracking-tighter">
+            <a href="#" onclick="window.location.reload()" class="text-2xl font-bold text-black tracking-tighter">
                 KEMMEX<span class="text-jumia-orange">★</span>
             </a>
 
@@ -75,7 +66,7 @@
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <i class="fas fa-search text-gray-400"></i>
                 </div>
-                <input type="text" id="searchInput" placeholder="Search products, brands and categories" 
+                <input type="text" id="searchInput" placeholder="Search products..." 
                     class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-jumia-orange">
                 <button onclick="filterProducts()" class="bg-jumia-orange text-white px-6 font-semibold rounded-r-md hover:bg-jumia-hover shadow-sm uppercase text-sm tracking-wide">
                     Search
@@ -92,9 +83,7 @@
                     <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl py-2 hidden border border-gray-100 z-50">
                         <button onclick="openModal('loginModal')" id="loginBtn" class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-jumia-orange font-bold uppercase text-sm">Sign In</button>
                         <button onclick="logout()" id="logoutBtn" class="hidden block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 text-sm">Logout</button>
-                        
                         <a href="orders.html" class="block px-4 py-2 hover:bg-gray-100 text-sm">My Orders</a>
-                        
                         <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-sm">Saved Items</a>
                     </div>
                 </div>
@@ -111,7 +100,7 @@
                 </div>
             </div>
         </div>
-
+        
         <div class="md:hidden px-4 pb-3">
             <div class="relative">
                 <input type="text" id="mobileSearchInput" placeholder="Search products..." class="w-full pl-3 pr-10 py-2 border rounded-md focus:outline-none focus:border-jumia-orange">
@@ -139,7 +128,6 @@
                     <div class="text-white max-w-lg">
                         <h2 class="text-3xl md:text-4xl font-bold mb-2">Kemmex Store</h2>
                         <p class="mb-4 text-gray-200">Your journey, our fashion. Premium maternity and baby wear.</p>
-                        <button onclick="document.getElementById('products-grid').scrollIntoView({behavior: 'smooth'})" class="bg-jumia-orange hover:bg-jumia-hover text-white px-6 py-2 rounded font-bold text-sm uppercase shadow-lg">Shop Now</button>
                     </div>
                 </div>
             </div>
@@ -161,7 +149,11 @@
             </div>
 
             <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 bg-white p-2 rounded-b-md shadow-sm">
+                <div class="col-span-full text-center py-10">
+                    <i class="fas fa-spinner fa-spin text-3xl text-jumia-orange"></i>
+                    <p class="text-gray-500 mt-2">Loading products from Firestore...</p>
                 </div>
+            </div>
         </section>
     </main>
 
@@ -171,19 +163,15 @@
                 <h3 class="font-bold text-lg">Shopping Cart (<span id="cart-qty-header">0</span>)</h3>
                 <button onclick="toggleCart()" class="text-gray-500 hover:text-red-500 text-xl">&times;</button>
             </div>
-            
             <div id="cart-items" class="flex-grow overflow-y-auto p-4 space-y-4">
                 <div class="text-center text-gray-500 mt-10">Your cart is empty</div>
             </div>
-
             <div class="p-4 border-t bg-gray-50">
                 <div class="flex justify-between mb-4 text-lg font-bold">
                     <span>Subtotal</span>
                     <span class="text-jumia-orange">₦<span id="cart-total">0</span></span>
                 </div>
-                <button onclick="checkout()" class="w-full bg-jumia-orange hover:bg-jumia-hover text-white font-bold py-3 rounded shadow-md uppercase">
-                    Checkout Now
-                </button>
+                <button onclick="checkout()" class="w-full bg-jumia-orange hover:bg-jumia-hover text-white font-bold py-3 rounded shadow-md uppercase">Checkout Now</button>
             </div>
         </div>
     </div>
@@ -193,25 +181,14 @@
             <button onclick="closeModal('loginModal')" class="absolute top-3 right-3 text-gray-400 hover:text-black">&times;</button>
             <div class="text-center mb-6">
                 <h2 class="text-2xl font-bold text-jumia-orange">Welcome Back!</h2>
-                <p class="text-gray-500 text-sm">Login to continue to checkout</p>
+                <p class="text-gray-500 text-sm">Login to continue</p>
             </div>
             <form onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Email Address</label>
-                    <input id="loginEmail" type="email" required placeholder="demo@kemmex.com" class="w-full border border-gray-300 p-2 rounded focus:border-jumia-orange focus:ring-1 focus:ring-jumia-orange outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold uppercase text-gray-600 mb-1">Password</label>
-                    <input id="loginPassword" type="password" required placeholder="******" class="w-full border border-gray-300 p-2 rounded focus:border-jumia-orange focus:ring-1 focus:ring-jumia-orange outline-none">
-                </div>
-                <button type="submit" class="w-full bg-jumia-orange hover:bg-jumia-hover text-white font-bold py-2.5 rounded shadow-lg transition transform active:scale-95">Login</button>
+                <input id="loginEmail" type="email" required placeholder="Email Address" class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
+                <input id="loginPassword" type="password" required placeholder="Password" class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
+                <button type="submit" class="w-full bg-jumia-orange hover:bg-jumia-hover text-white font-bold py-2.5 rounded shadow-lg">Login</button>
             </form>
-            <p class="text-center text-sm mt-4">
-                New here?
-                <button type="button" onclick="openModal('signupModal')" class="text-jumia-orange font-bold">
-                    Create Account
-                </button>
-            </p>
+            <p class="text-center text-sm mt-4">New here? <button onclick="openModal('signupModal')" class="text-jumia-orange font-bold">Create Account</button></p>
         </div>
     </div>
 
@@ -220,13 +197,9 @@
         <button onclick="closeModal('signupModal')" class="absolute top-3 right-3 text-gray-400">&times;</button>
         <h2 class="text-xl font-bold mb-4 text-center text-jumia-orange">Create Account</h2>
         <form onsubmit="handleSignup(event)" class="space-y-3">
-          <input id="signupEmail" type="email" required placeholder="Email"
-            class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
-          <input id="signupPassword" type="password" required placeholder="Password"
-            class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
-          <button class="w-full bg-jumia-orange hover:bg-jumia-hover text-white py-2 font-bold rounded">
-            Sign Up
-          </button>
+          <input id="signupEmail" type="email" required placeholder="Email" class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
+          <input id="signupPassword" type="password" required placeholder="Password" class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
+          <button class="w-full bg-jumia-orange hover:bg-jumia-hover text-white py-2 font-bold rounded">Sign Up</button>
         </form>
       </div>
     </div>
@@ -238,54 +211,25 @@
             
             <form onsubmit="handlePayment(event)" class="space-y-4">
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600">First Name</label>
-                        <input id="firstName" type="text" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-gray-600">Last Name</label>
-                        <input id="lastName" type="text" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
-                    </div>
+                    <div><label class="block text-xs font-bold text-gray-600">First Name</label><input id="firstName" type="text" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
+                    <div><label class="block text-xs font-bold text-gray-600">Last Name</label><input id="lastName" type="text" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600">Delivery Address</label>
-                    <textarea id="address" required rows="2" class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></textarea>
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-600">Phone Number</label>
-                    <input id="phone" type="tel" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
-                </div>
+                <div><label class="block text-xs font-bold text-gray-600">Delivery Address</label><textarea id="address" required rows="2" class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></textarea></div>
+                <div><label class="block text-xs font-bold text-gray-600">Phone Number</label><input id="phone" type="tel" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
 
                 <div class="mt-4 mb-2">
                     <label class="block text-xs font-bold text-gray-600 mb-2 uppercase">Payment Method</label>
-                    
                     <div class="border-2 border-jumia-orange rounded-md p-4 bg-orange-50 relative">
                         <div class="flex items-center gap-2 mb-3">
                             <input type="radio" checked name="payment" class="accent-jumia-orange w-4 h-4">
                             <span class="font-bold text-sm text-gray-800">Bank Transfer</span>
                         </div>
-                        
                         <div class="ml-6 space-y-2">
                             <p class="text-sm text-gray-700">Transfer <strong class="text-black text-lg">₦<span id="transfer-amount">0</span></strong> to:</p>
-                            
                             <div class="bg-white p-3 rounded border border-orange-200 shadow-sm">
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="text-gray-500 text-xs">Bank:</span>
-                                    <span class="font-bold text-jumia-dark">Opay</span>
-                                </div>
-                                <div class="flex justify-between items-center mb-1">
-                                    <span class="text-gray-500 text-xs">Name:</span>
-                                    <span class="font-bold text-jumia-dark">Sokunbi Oluwakemi</span>
-                                </div>
-                                <div class="flex justify-between items-center pt-2 border-t border-dashed">
-                                    <span class="text-gray-500 text-xs">Acct No:</span>
-                                    <div class="flex items-center gap-2">
-                                        <span class="font-bold text-xl text-jumia-orange tracking-widest">8039468706</span>
-                                        <button type="button" onclick="navigator.clipboard.writeText('8039468706'); alert('Copied!')" class="text-gray-400 hover:text-black">
-                                            <i class="far fa-copy"></i>
-                                        </button>
-                                    </div>
-                                </div>
+                                <div class="flex justify-between mb-1"><span class="text-gray-500 text-xs">Bank:</span><span class="font-bold text-jumia-dark">Opay</span></div>
+                                <div class="flex justify-between mb-1"><span class="text-gray-500 text-xs">Name:</span><span class="font-bold text-jumia-dark">Sokunbi Oluwakemi</span></div>
+                                <div class="flex justify-between pt-2 border-t border-dashed"><span class="text-gray-500 text-xs">Acct No:</span><span class="font-bold text-xl text-jumia-orange tracking-widest">8039468706</span></div>
                             </div>
                         </div>
                     </div>
@@ -293,60 +237,59 @@
 
                 <div class="mb-6 flex items-start gap-3 p-3 bg-gray-50 rounded border">
                     <input type="checkbox" id="confirmPaid" required class="mt-1 w-5 h-5 accent-green-600 cursor-pointer">
-                    <label for="confirmPaid" class="text-sm text-gray-700 cursor-pointer">
-                        I have sent the money to the account above.
-                    </label>
+                    <label for="confirmPaid" class="text-sm text-gray-700 cursor-pointer">I have sent the money to the account above.</label>
                 </div>
 
                 <div class="bg-blue-50 p-3 rounded border border-blue-100 mb-4">
-                    <div class="flex justify-between font-bold text-lg">
-                        <span>Total to Pay</span>
-                        <span class="text-jumia-orange">₦<span id="checkout-final">0</span></span>
-                    </div>
+                    <div class="flex justify-between font-bold text-lg"><span>Total to Pay</span><span class="text-jumia-orange">₦<span id="checkout-final">0</span></span></div>
                 </div>
 
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded shadow-lg text-lg uppercase tracking-wide">
-                    Complete Order
-                </button>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded shadow-lg text-lg uppercase tracking-wide">Complete Order</button>
             </form>
         </div>
     </div>
 
     <div id="successModal" class="modal fixed inset-0 bg-black/60 z-[70] hidden justify-center items-center">
         <div class="bg-white rounded-lg p-8 text-center max-w-sm m-4">
-            <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
-                <i class="fas fa-check"></i>
-            </div>
+            <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"><i class="fas fa-check"></i></div>
             <h2 class="text-2xl font-bold mb-2">Order Placed!</h2>
-            <p class="text-gray-500 mb-6">We will confirm your payment shortly. Thank you for shopping with Kemmex.</p>
+            <p class="text-gray-500 mb-6">We will confirm your payment shortly.</p>
             <button onclick="closeModal('successModal'); window.location.reload();" class="bg-jumia-orange text-white px-6 py-2 rounded font-bold">Continue Shopping</button>
         </div>
     </div>
 
     <script>
-        // --- DATA ---
-        const products = [
-            { id: 1, name: "Newborn Cotton Bodysuit Set", category: "Baby Wear", price: 8500, oldPrice: 10000, img: "https://images.unsplash.com/photo-1522771753035-4848230d3fad?auto=format&fit=crop&w=300&q=80", rating: 4.5 },
-            { id: 2, name: "Maternity Floral Maxi Dress", category: "Maternity", price: 15000, oldPrice: 18500, img: "https://images.unsplash.com/photo-1565538420876-02e637715f33?auto=format&fit=crop&w=300&q=80", rating: 4.8 },
-            { id: 3, name: "Unisex Baby Sneakers", category: "Baby Wear", price: 6000, oldPrice: 7500, img: "https://images.unsplash.com/photo-1515488042361-25f4682ae2ed?auto=format&fit=crop&w=300&q=80", rating: 4.2 },
-            { id: 4, name: "Ladies Corporate Gown", category: "Adult Fashion", price: 12000, oldPrice: 15000, img: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?auto=format&fit=crop&w=300&q=80", rating: 4.0 },
-            { id: 5, name: "Nursing Pillow & Cover", category: "Accessories", price: 9500, oldPrice: 11000, img: "https://images.unsplash.com/photo-1557827983-012eb6ea8dc1?auto=format&fit=crop&w=300&q=80", rating: 4.7 },
-            { id: 6, name: "Men's Casual Polo Shirt", category: "Adult Fashion", price: 7000, oldPrice: 8500, img: "https://images.unsplash.com/photo-1586363104862-3a5e2ab60d99?auto=format&fit=crop&w=300&q=80", rating: 4.3 },
-            { id: 7, name: "Baby Diaper Bag (Large)", category: "Accessories", price: 18000, oldPrice: 22000, img: "https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=300&q=80", rating: 4.9 },
-            { id: 8, name: "Postpartum Belly Wrap", category: "Maternity", price: 5500, oldPrice: 7000, img: "https://images.unsplash.com/photo-1605218427360-363972288331?auto=format&fit=crop&w=300&q=80", rating: 4.1 },
-        ];
-
-        // --- STATE ---
+        // ✅ INSTRUCTION 9: REPLACED HARDCODED PRODUCTS WITH EMPTY ARRAY
+        let products = [];
         let cart = JSON.parse(localStorage.getItem('kemmex_cart')) || [];
         let isLoggedIn = false;
         let currentFilter = 'all';
 
-        // --- INIT ---
-        document.addEventListener('DOMContentLoaded', () => {
-            renderProducts(products);
+        // ✅ INSTRUCTION 9: LOAD PRODUCTS FROM FIRESTORE
+        function loadProducts() {
+          db.collection("products")
+            .where("active", "==", true)
+            .get()
+            .then(snapshot => {
+              products = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+              }));
+              renderProducts(products);
+            })
+            .catch(err => {
+              console.error("Error loading products", err);
+              document.getElementById('products-grid').innerHTML = `<p class="col-span-full text-center text-red-500">Failed to load products. Check console.</p>`;
+            });
+        }
+
+        // Run loadProducts on page load
+        document.addEventListener("DOMContentLoaded", () => {
+            loadProducts();
             updateCartUI();
         });
-        
+
+        // --- AUTH ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 isLoggedIn = true;
@@ -363,28 +306,23 @@
             }
         });
 
-        // --- MENU TOGGLE (FIXED CLICK) ---
+        // --- UI FUNCTIONS ---
         function toggleUserMenu() {
             const menu = document.getElementById('userMenu');
-            if (menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-            } else {
-                menu.classList.add('hidden');
-            }
+            menu.classList.toggle('hidden');
         }
-
         window.addEventListener('click', function(e) {
             const section = document.getElementById('authSection');
             const menu = document.getElementById('userMenu');
-            // If click is outside the authSection, close the menu
-            if (!section.contains(e.target)) {
-                menu.classList.add('hidden');
-            }
+            if (!section.contains(e.target)) menu.classList.add('hidden');
         });
 
-        // --- RENDER FUNCTIONS ---
         function renderProducts(items) {
             const grid = document.getElementById('products-grid');
+            if(items.length === 0) {
+                grid.innerHTML = '<p class="col-span-full text-center text-gray-500">No products found.</p>';
+                return;
+            }
             grid.innerHTML = items.map(p => `
                 <div class="group bg-white border border-transparent hover:border-gray-200 hover:shadow-lg rounded-md transition duration-200 relative p-2 flex flex-col">
                     <div class="relative overflow-hidden mb-2">
@@ -398,10 +336,11 @@
                             ${p.oldPrice ? `<span class="text-xs text-gray-400 line-through ml-2">₦ ${p.oldPrice.toLocaleString()}</span>` : ''}
                         </div>
                         <div class="text-xs text-yellow-400 mb-3">
-                            ${getStars(p.rating)} <span class="text-gray-300">(${Math.floor(Math.random()*50 + 10)})</span>
+                            ${getStars(p.rating || 5)} <span class="text-gray-300">(${Math.floor(Math.random()*50 + 10)})</span>
                         </div>
+                        <div class="text-xs text-gray-500 mb-2">Stock: ${p.stock}</div>
                     </div>
-                    <button onclick="addToCart(${p.id})" class="w-full bg-jumia-orange text-white py-2 rounded text-sm font-bold uppercase hover:bg-jumia-hover transition shadow-sm opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300 md:opacity-100 md:translate-y-0">
+                    <button onclick="addToCart('${p.id}')" class="w-full bg-jumia-orange text-white py-2 rounded text-sm font-bold uppercase hover:bg-jumia-hover transition shadow-sm opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300 md:opacity-100 md:translate-y-0">
                         Add To Cart
                     </button>
                 </div>
@@ -418,11 +357,24 @@
             return stars;
         }
 
-        // --- CART LOGIC ---
+        // ✅ INSTRUCTION 11: UPDATE ADD TO CART (CHECK STOCK)
         function addToCart(id) {
             const product = products.find(p => p.id === id);
+            if (!product) return;
+
+            // Check global stock
+            if (product.stock <= 0) {
+                alert("Out of stock");
+                return;
+            }
+
             const existing = cart.find(item => item.id === id);
-            
+            // Check local cart quantity against stock
+            if (existing && existing.qty >= product.stock) {
+                alert("You have reached the maximum stock available for this item.");
+                return;
+            }
+
             if(existing) {
                 existing.qty++;
             } else {
@@ -432,15 +384,11 @@
             saveCart();
             updateCartUI();
             
-            // Animation feedback
             const btn = event.target;
             const originalText = btn.innerText;
             btn.innerText = "Added!";
             btn.classList.add('bg-green-600');
-            setTimeout(() => {
-                btn.innerText = originalText;
-                btn.classList.remove('bg-green-600');
-            }, 1000);
+            setTimeout(() => { btn.innerText = originalText; btn.classList.remove('bg-green-600'); }, 1000);
         }
 
         function updateCartUI() {
@@ -452,10 +400,8 @@
             const checkoutFinal = document.getElementById('checkout-final');
             const transferAmount = document.getElementById('transfer-amount');
 
-            // Save to local storage
             localStorage.setItem('kemmex_cart', JSON.stringify(cart));
 
-            // Stats
             const totalQty = cart.reduce((acc, item) => acc + item.qty, 0);
             const totalPrice = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
 
@@ -463,7 +409,6 @@
             headerQty.innerText = totalQty;
             totalEl.innerText = totalPrice.toLocaleString();
             
-            // Update checkout modal as well
             if(checkoutTotal) checkoutTotal.innerText = totalPrice.toLocaleString();
             if(checkoutFinal) checkoutFinal.innerText = totalPrice.toLocaleString();
             if(transferAmount) transferAmount.innerText = totalPrice.toLocaleString();
@@ -481,11 +426,11 @@
                         <div class="text-jumia-orange font-bold text-sm">₦ ${item.price.toLocaleString()}</div>
                         <div class="flex items-center justify-between mt-2">
                             <div class="flex items-center border rounded">
-                                <button onclick="changeQty(${item.id}, -1)" class="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold">-</button>
+                                <button onclick="changeQty('${item.id}', -1)" class="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold">-</button>
                                 <span class="px-2 text-sm">${item.qty}</span>
-                                <button onclick="changeQty(${item.id}, 1)" class="px-2 py-0.5 bg-jumia-orange text-white hover:bg-jumia-hover font-bold">+</button>
+                                <button onclick="changeQty('${item.id}', 1)" class="px-2 py-0.5 bg-jumia-orange text-white hover:bg-jumia-hover font-bold">+</button>
                             </div>
-                            <button onclick="removeFromCart(${item.id})" class="text-xs text-gray-400 hover:text-red-500 underline"><i class="fas fa-trash"></i> Remove</button>
+                            <button onclick="removeFromCart('${item.id}')" class="text-xs text-gray-400 hover:text-red-500 underline"><i class="fas fa-trash"></i> Remove</button>
                         </div>
                     </div>
                 </div>
@@ -494,7 +439,15 @@
 
         function changeQty(id, change) {
             const item = cart.find(i => i.id === id);
+            const product = products.find(p => p.id === id);
+            
             if(item) {
+                // Stock check on increment
+                if (change > 0 && product && item.qty >= product.stock) {
+                    alert("Max stock reached");
+                    return;
+                }
+                
                 item.qty += change;
                 if(item.qty <= 0) removeFromCart(id);
                 else {
@@ -510,30 +463,13 @@
             updateCartUI();
         }
 
-        function saveCart() {
-            localStorage.setItem('kemmex_cart', JSON.stringify(cart));
-        }
+        function saveCart() { localStorage.setItem('kemmex_cart', JSON.stringify(cart)); }
+        function toggleCart() { const s = document.getElementById('cartSidebar'); s.classList.toggle('hidden'); s.classList.toggle('flex'); }
 
-        function toggleCart() {
-            const sidebar = document.getElementById('cartSidebar');
-            if(sidebar.classList.contains('hidden')) {
-                sidebar.classList.remove('hidden');
-                sidebar.classList.add('flex');
-            } else {
-                sidebar.classList.add('hidden');
-                sidebar.classList.remove('flex');
-            }
-        }
-
-        // --- FILTERING ---
         function filterCategory(cat) {
             currentFilter = cat;
             document.getElementById('section-title').innerText = cat === 'all' ? "All Products" : cat;
-            
-            const filtered = cat === 'all' 
-                ? products 
-                : products.filter(p => p.category === cat);
-            
+            const filtered = cat === 'all' ? products : products.filter(p => p.category === cat);
             renderProducts(filtered);
             window.scrollTo({top: document.getElementById('products-grid').offsetTop - 100, behavior: 'smooth'});
         }
@@ -541,12 +477,7 @@
         function filterProducts(source) {
             const inputId = source === 'mobile' ? 'mobileSearchInput' : 'searchInput';
             const query = document.getElementById(inputId).value.toLowerCase();
-            
-            const filtered = products.filter(p => 
-                p.name.toLowerCase().includes(query) || 
-                p.category.toLowerCase().includes(query)
-            );
-            
+            const filtered = products.filter(p => p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
             document.getElementById('section-title').innerText = `Search results for "${query}"`;
             renderProducts(filtered);
         }
@@ -554,129 +485,62 @@
         function sortProducts() {
             const sortVal = document.getElementById('sort').value;
             let sortedProducts = [...products];
-            
-            if(currentFilter !== 'all') {
-                sortedProducts = sortedProducts.filter(p => p.category === currentFilter);
-            }
-
+            if(currentFilter !== 'all') sortedProducts = sortedProducts.filter(p => p.category === currentFilter);
             if(sortVal === 'price-low') sortedProducts.sort((a,b) => a.price - b.price);
             if(sortVal === 'price-high') sortedProducts.sort((a,b) => b.price - a.price);
-            
             renderProducts(sortedProducts);
         }
 
-        // --- AUTH & CHECKOUT ---
-
-        function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-            document.getElementById(id).classList.add('flex');
-        }
-
-        function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-            document.getElementById(id).classList.remove('flex');
-        }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
 
         function handleLogin(e) {
             e.preventDefault();
-
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            const btn = e.target.querySelector('button');
-            const originalText = btn.innerText;
-
-            btn.innerText = "Signing in...";
-            btn.disabled = true;
-
+            const email = document.getElementById('loginEmail').value, password = document.getElementById('loginPassword').value, btn = e.target.querySelector('button'), txt = btn.innerText;
+            btn.innerText = "Signing in..."; btn.disabled = true;
             auth.signInWithEmailAndPassword(email, password)
-                .then(() => {
-                    closeModal('loginModal');
-                    if (cart.length > 0) checkout();
-                })
-                .catch(error => {
-                    alert(error.message);
-                })
-                .finally(() => {
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                });
+                .then(() => { closeModal('loginModal'); if (cart.length > 0) checkout(); })
+                .catch(err => alert(err.message))
+                .finally(() => { btn.innerText = txt; btn.disabled = false; });
         }
 
         function handleSignup(e) {
             e.preventDefault();
-
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-            const btn = e.target.querySelector('button');
-            const originalText = btn.innerText;
-
-            btn.innerText = "Creating Account...";
-            btn.disabled = true;
-
+            const email = document.getElementById('signupEmail').value, password = document.getElementById('signupPassword').value, btn = e.target.querySelector('button'), txt = btn.innerText;
+            btn.innerText = "Creating Account..."; btn.disabled = true;
             auth.createUserWithEmailAndPassword(email, password)
-                .then(() => {
-                    alert("Account created successfully. Please log in.");
-                    closeModal('signupModal');
-                    openModal('loginModal');
-                })
-                .catch(error => alert(error.message))
-                .finally(() => {
-                    btn.innerText = originalText;
-                    btn.disabled = false;
-                });
+                .then(() => { alert("Success! Please log in."); closeModal('signupModal'); openModal('loginModal'); })
+                .catch(err => alert(err.message))
+                .finally(() => { btn.innerText = txt; btn.disabled = false; });
         }
 
-        function logout() {
-            auth.signOut();
+        function logout() { auth.signOut(); }
+        
+        function checkout() { 
+            toggleCart(); 
+            if(!isLoggedIn) openModal('loginModal'); 
+            else { 
+                if(cart.length === 0) return alert("Cart is empty"); 
+                openModal('checkoutModal'); 
+            } 
         }
 
-        function checkout() {
-            toggleCart(); // Close cart drawer
-            if(!isLoggedIn) {
-                openModal('loginModal');
-            } else {
-                if(cart.length === 0) return alert("Cart is empty");
-                openModal('checkoutModal');
-            }
-        }
-
-        // --- ONE CLICK PAYMENT LOGIC ---
+        // ✅ INSTRUCTION 11: HANDLE PAYMENT & REDUCE STOCK
         function handlePayment(e) {
             e.preventDefault();
-
-            if (!auth.currentUser) {
-                alert("You must be logged in");
-                return;
-            }
-
-            if (cart.length === 0) {
-                alert("Cart is empty");
-                return;
-            }
-
-            // Verify checkbox
-            const isConfirmed = document.getElementById('confirmPaid').checked;
-            if (!isConfirmed) {
-                alert("Please tick the box to confirm you have sent the money.");
-                return;
-            }
+            if (!auth.currentUser) return alert("Please log in");
+            if (cart.length === 0) return alert("Cart is empty");
+            if (!document.getElementById('confirmPaid').checked) return alert("Please confirm payment");
 
             const btn = e.target.querySelector('button[type="submit"]');
             const originalHTML = btn.innerHTML;
-            
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             btn.disabled = true;
 
-            // Create Order Data
             const orderData = {
                 userId: auth.currentUser.uid,
                 email: auth.currentUser.email,
-                items: cart.map(item => ({
-                    id: item.id,
-                    name: item.name,
-                    price: item.price,
-                    qty: item.qty
-                })),
+                items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
                 totalAmount: cart.reduce((sum, i) => sum + i.price * i.qty, 0),
                 customer: {
                     firstName: document.getElementById('firstName').value,
@@ -689,22 +553,23 @@
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            // Save to Firestore
             db.collection("orders").add(orderData)
                 .then(() => {
+                    // ✅ PART F: REDUCE STOCK AFTER PAYMENT
+                    cart.forEach(item => {
+                        db.collection("products").doc(item.id).update({
+                            stock: firebase.firestore.FieldValue.increment(-item.qty)
+                        });
+                    });
+
                     closeModal('checkoutModal');
                     cart = [];
                     saveCart();
                     updateCartUI();
                     openModal('successModal');
                 })
-                .catch(error => {
-                    alert("Failed to save order: " + error.message);
-                })
-                .finally(() => {
-                    btn.innerHTML = originalHTML;
-                    btn.disabled = false;
-                });
+                .catch(error => alert("Error: " + error.message))
+                .finally(() => { btn.innerHTML = originalHTML; btn.disabled = false; });
         }
     </script>
 </body>
