@@ -41,11 +41,23 @@
                 <span id="pCategory" class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Category</span>
                 <h1 id="pName" class="text-3xl font-bold text-gray-800 mb-4 leading-tight">Product Name</h1>
                 
-                <div class="flex items-center mb-6">
+                <div class="flex items-center mb-4">
                     <span class="text-[#f68b1e] text-2xl font-bold">₦ <span id="pPrice">0</span></span>
                     <span id="pStock" class="ml-auto text-xs bg-green-100 text-green-800 px-3 py-1 rounded-full font-bold">In Stock</span>
                 </div>
 
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <p id="pDesc" class="text-sm text-gray-600 mb-3 leading-relaxed">No description available.</p>
+                    
+                    <div class="flex gap-3 border-t border-gray-200 pt-3">
+                        <div class="text-xs uppercase font-bold text-gray-500">
+                            Size: <span id="pSize" class="text-black ml-1">Free</span>
+                        </div>
+                        <div class="text-xs uppercase font-bold text-gray-500 border-l border-gray-300 pl-3">
+                            Color: <span id="pColor" class="text-black ml-1">As seen</span>
+                        </div>
+                    </div>
+                </div>
                 <hr class="border-gray-100 mb-6">
 
                 <button onclick="addToCartCurrent()" class="w-full bg-[#f68b1e] hover:bg-[#e07e1b] text-white font-bold py-4 rounded-lg shadow-md uppercase tracking-wide transition transform active:scale-95 flex items-center justify-center gap-2">
@@ -75,7 +87,6 @@
         // LOGIC
         let currentProduct = null;
 
-        // 1. Get ID from URL (e.g. ?id=xyz)
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('id');
 
@@ -105,6 +116,11 @@
             document.getElementById('pName').innerText = p.name;
             document.getElementById('pPrice').innerText = p.price.toLocaleString();
             
+            // 🟢 Update New Fields
+            document.getElementById('pDesc').innerText = p.description || "Premium quality item from Kemmex Store.";
+            document.getElementById('pSize').innerText = p.size || "Free Size";
+            document.getElementById('pColor').innerText = p.color || "As seen";
+            
             if(p.stock <= 0) {
                 const stockEl = document.getElementById('pStock');
                 stockEl.innerText = "Out of Stock";
@@ -115,7 +131,6 @@
         function addToCartCurrent() {
             if(!currentProduct) return;
             
-            // Re-use logic from index (simplified)
             let cart = JSON.parse(localStorage.getItem('kemmex_cart')) || [];
             
             if (currentProduct.stock <= 0) return alert("Out of stock");
@@ -128,13 +143,12 @@
             
             localStorage.setItem('kemmex_cart', JSON.stringify(cart));
             
-            // Feedback & Redirect
-            const btn = event.currentTarget; // Select button
+            const btn = event.currentTarget;
             btn.innerText = "Added to Cart!";
             btn.classList.add("bg-green-600");
             
             setTimeout(() => {
-                window.location.href = "index.html"; // Go back to shop to see cart
+                window.location.href = "index.html";
             }, 500);
         }
     </script>
