@@ -14,10 +14,37 @@
 
 <body class="bg-gray-100 min-h-screen font-sans">
 
-    <div class="max-w-2xl mx-auto py-10 px-4">
+    <div id="loginOverlay" class="fixed inset-0 bg-gray-900 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm p-8 text-center">
+            <div class="mb-4 text-orange-500 text-4xl"><i class="fas fa-lock"></i></div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Admin Access Required</h2>
+            <p class="text-gray-500 text-sm mb-6">Please sign in to manage products.</p>
+            
+            <form onsubmit="handleAdminLogin(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="text-xs font-bold text-gray-600 uppercase">Email</label>
+                    <input id="adminEmail" type="email" value="aakinwale16@gmail.com" required 
+                        class="w-full border p-2 rounded focus:border-orange-500 outline-none">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-gray-600 uppercase">Password</label>
+                    <input id="adminPassword" type="password" required 
+                        class="w-full border p-2 rounded focus:border-orange-500 outline-none">
+                </div>
+                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded shadow-lg transition">
+                    Unlock Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="mainContent" class="hidden max-w-2xl mx-auto py-10 px-4">
         <div class="flex justify-between items-center mb-8">
             <h1 class="text-3xl font-bold text-gray-800">Add New Product</h1>
-            <a href="admin.html" class="text-blue-600 hover:underline">Back to Dashboard</a>
+            <div class="flex gap-4 text-sm">
+                <a href="admin.html" class="text-blue-600 hover:underline">View Orders</a>
+                <button onclick="auth.signOut()" class="text-red-500 hover:underline">Logout</button>
+            </div>
         </div>
 
         <div class="bg-white rounded-lg shadow-lg p-8">
@@ -31,7 +58,7 @@
                     
                     <p class="text-xs text-gray-500 mt-2">
                         <i class="fas fa-info-circle"></i> 
-                        Tip: Upload image to <a href="https://postimages.org/" target="_blank" class="text-blue-500 underline">PostImages.org</a> and paste the 'Direct Link' here.
+                        Tip: Upload image to <a href="https://postimages.org/" target="_blank" class="text-blue-500 underline">PostImages.org</a> or <a href="https://imgbb.com/" target="_blank" class="text-blue-500 underline">ImgBB</a> and paste the 'Direct Link' here.
                     </p>
 
                     <img id="imgPreview" class="hidden mt-4 h-48 w-full object-contain border rounded bg-gray-50">
@@ -89,13 +116,43 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        // --- AUTH CHECK ---
+        // --- AUTH LOGIC (Updated) ---
         auth.onAuthStateChanged(user => {
-            if (!user || !ADMIN_EMAILS.includes(user.email)) {
-                alert("Access Denied: Admins Only");
-                window.location.href = "index.html";
+            const loginOverlay = document.getElementById('loginOverlay');
+            const mainContent = document.getElementById('mainContent');
+
+            if (user && ADMIN_EMAILS.includes(user.email)) {
+                // User is Admin -> Show Content
+                loginOverlay.classList.add('hidden');
+                mainContent.classList.remove('hidden');
+            } else {
+                // Not logged in OR Not Admin -> Show Login
+                loginOverlay.classList.remove('hidden');
+                mainContent.classList.add('hidden');
+                if (user && !ADMIN_EMAILS.includes(user.email)) {
+                    alert("Unauthorized access. Please login with an admin account.");
+                    auth.signOut();
+                }
             }
         });
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+            btn.disabled = true;
+
+            auth.signInWithEmailAndPassword(email, password)
+                .catch(error => {
+                    alert("Login Failed: " + error.message);
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                });
+        }
 
         // --- PREVIEW LOGIC ---
         function previewImage(url) {
@@ -118,24 +175,28 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
             try {
-                // Save Data to Firestore
                 await db.collection("products").add({
                     name: document.getElementById('pName').value,
                     price: Number(document.getElementById('pPrice').value),
                     category: document.getElementById('pCategory').value,
                     stock: Number(document.getElementById('pStock').value),
-                    img: document.getElementById('pImg').value, // Saving URL string directly
+                    img: document.getElementById('pImg').value,
                     active: true,
                     rating: 5,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
                 alert("Product Added Successfully!");
-                window.location.reload(); 
-
+                // Clear form but keep login
+                document.getElementById('pName').value = "";
+                document.getElementById('pPrice').value = "";
+                document.getElementById('pImg').value = "";
+                document.getElementById('imgPreview').classList.add('hidden');
+                
             } catch (error) {
                 console.error(error);
                 alert("Error: " + error.message);
+            } finally {
                 btn.innerText = originalText;
                 btn.disabled = false;
             }
