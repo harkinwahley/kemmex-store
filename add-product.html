@@ -10,7 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 </head>
 
 <body class="bg-gray-100 min-h-screen font-sans">
@@ -22,27 +21,20 @@
         </div>
 
         <div class="bg-white rounded-lg shadow-lg p-8">
-            <form onsubmit="handleUpload(event)" class="space-y-6">
+            <form onsubmit="handleAddProduct(event)" class="space-y-6">
                 
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Product Image</label>
+                    <label class="block text-sm font-bold text-gray-700 mb-2">Product Image Link</label>
+                    <input id="pImg" type="url" required placeholder="https://..." 
+                        class="w-full border p-3 rounded focus:ring-2 focus:ring-orange-500 outline-none"
+                        onchange="previewImage(this.value)">
                     
-                    <div id="drop-zone" class="border-2 border-dashed border-gray-300 rounded-lg p-10 text-center hover:bg-gray-50 transition cursor-pointer relative"
-                         onclick="document.getElementById('fileInput').click()">
-                        
-                        <input type="file" id="fileInput" accept="image/*" class="hidden" onchange="previewFile(this.files[0])">
-                        
-                        <div id="preview-container" class="hidden">
-                            <img id="preview-img" class="h-48 mx-auto object-contain rounded mb-2">
-                            <p class="text-xs text-green-600 font-bold">Image Selected!</p>
-                        </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        <i class="fas fa-info-circle"></i> 
+                        Tip: Upload image to <a href="https://postimages.org/" target="_blank" class="text-blue-500 underline">PostImages.org</a> and paste the 'Direct Link' here.
+                    </p>
 
-                        <div id="upload-prompt">
-                            <i class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-3"></i>
-                            <p class="text-gray-600 font-medium">Drag & Drop image here</p>
-                            <p class="text-xs text-gray-400 mt-1">or click to browse</p>
-                        </div>
-                    </div>
+                    <img id="imgPreview" class="hidden mt-4 h-48 w-full object-contain border rounded bg-gray-50">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -73,7 +65,7 @@
                 </div>
 
                 <button type="submit" id="submitBtn" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded shadow-lg transition">
-                    Upload & Add Product
+                    Save Product
                 </button>
 
             </form>
@@ -96,7 +88,6 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
-        const storage = firebase.storage();
 
         // --- AUTH CHECK ---
         auth.onAuthStateChanged(user => {
@@ -106,86 +97,41 @@
             }
         });
 
-        // --- DRAG & DROP LOGIC ---
-        const dropZone = document.getElementById('drop-zone');
-        let selectedFile = null;
-
-        // Prevent default drag behaviors
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, preventDefaults, false);
-        });
-
-        function preventDefaults(e) {
-            e.preventDefault();
-            e.stopPropagation();
-        }
-
-        // Highlight drop zone
-        ['dragenter', 'dragover'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.add('bg-orange-50', 'border-orange-400'));
-        });
-
-        ['dragleave', 'drop'].forEach(eventName => {
-            dropZone.addEventListener(eventName, () => dropZone.classList.remove('bg-orange-50', 'border-orange-400'));
-        });
-
-        // Handle Drop
-        dropZone.addEventListener('drop', (e) => {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            if(files.length > 0) previewFile(files[0]);
-        });
-
-        // Preview File
-        function previewFile(file) {
-            if(!file.type.startsWith('image/')) return alert("Only images allowed!");
-            
-            selectedFile = file;
-            const reader = new FileReader();
-            
-            reader.readAsDataURL(file);
-            reader.onloadend = () => {
-                document.getElementById('preview-img').src = reader.result;
-                document.getElementById('preview-container').classList.remove('hidden');
-                document.getElementById('upload-prompt').classList.add('hidden');
+        // --- PREVIEW LOGIC ---
+        function previewImage(url) {
+            const img = document.getElementById('imgPreview');
+            if(url) {
+                img.src = url;
+                img.classList.remove('hidden');
+            } else {
+                img.classList.add('hidden');
             }
         }
 
-        // --- UPLOAD LOGIC ---
-        async function handleUpload(e) {
+        // --- SAVE LOGIC ---
+        async function handleAddProduct(e) {
             e.preventDefault();
-
-            if(!selectedFile) return alert("Please drag and drop an image first!");
 
             const btn = document.getElementById('submitBtn');
             const originalText = btn.innerText;
             btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading Image...';
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
 
             try {
-                // 1. Upload Image to Storage
-                const fileName = `${Date.now()}_${selectedFile.name}`;
-                const storageRef = storage.ref(`products/${fileName}`);
-                await storageRef.put(selectedFile);
-                const downloadUrl = await storageRef.getDownloadURL();
-
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving to Database...';
-
-                // 2. Save Data to Firestore
+                // Save Data to Firestore
                 await db.collection("products").add({
                     name: document.getElementById('pName').value,
                     price: Number(document.getElementById('pPrice').value),
                     category: document.getElementById('pCategory').value,
                     stock: Number(document.getElementById('pStock').value),
-                    img: downloadUrl, // The URL from Storage
+                    img: document.getElementById('pImg').value, // Saving URL string directly
                     active: true,
                     rating: 5,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // 3. Success
                 alert("Product Added Successfully!");
-                window.location.reload(); // Reset form
+                window.location.reload(); 
 
             } catch (error) {
                 console.error(error);
