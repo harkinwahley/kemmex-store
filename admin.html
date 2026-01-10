@@ -11,24 +11,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
-      authDomain: "kemmex-store-9ffa3.firebaseapp.com",
-      projectId: "kemmex-store-9ffa3",
-      storageBucket: "kemmex-store-9ffa3.firebasestorage.app",
-      messagingSenderId: "500875032118",
-      appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // 🔐 ⚠️ REPLACE THIS WITH YOUR ACTUAL LOGIN EMAIL
-    const ADMIN_EMAILS = ["aakinwale16@gmail.com"]; 
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
 </head>
 
 <body class="bg-gray-100 p-6 font-sans">
@@ -50,7 +33,7 @@
             <th class="border p-3 text-gray-600">Items</th>
             <th class="border p-3 text-gray-600">Total</th>
             <th class="border p-3 text-gray-600">Status</th>
-            <th class="border p-3 text-gray-600">Action</th>
+            <th class="border p-3 text-gray-600">Update Action</th>
             </tr>
         </thead>
         <tbody id="ordersTable" class="bg-white">
@@ -63,15 +46,51 @@
   </div>
 
   <script>
-    // 1. Check if user is logged in AND is an admin
+    // ==========================================
+    // ⚙️ CONFIGURATION SECTION (EDIT HERE ONLY)
+    // ==========================================
+
+    // 1. ADMIN SETUP
+    const ADMIN_EMAILS = ["aakinwale16@gmail.com"]; 
+
+    // 2. EMAILJS KEYS (Get these from emailjs.com)
+    const EMAILJS_PUBLIC_KEY = "WsjcWcIMjnLefjP2o";  // e.g. "user_..."
+    const EMAILJS_SERVICE_ID = "service_mn2qs7h";  // e.g. "service_..."
+    const EMAILJS_TEMPLATE_ID = "template_majk5sn"; // e.g. "template_..."
+
+    // 3. FIREBASE CONFIG
+    const firebaseConfig = {
+      apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
+      authDomain: "kemmex-store-9ffa3.firebaseapp.com",
+      projectId: "kemmex-store-9ffa3",
+      storageBucket: "kemmex-store-9ffa3.firebasestorage.app",
+      messagingSenderId: "500875032118",
+      appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
+    };
+
+    // ==========================================
+    // 🚀 END CONFIGURATION (DO NOT EDIT BELOW)
+    // ==========================================
+
+    // Initialize Services
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    
+    // Initialize EmailJS immediately
+    (function(){
+      if(EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") {
+          emailjs.init(EMAILJS_PUBLIC_KEY);
+      }
+    })();
+
+    // --- AUTH CHECK ---
     auth.onAuthStateChanged(user => {
       if (!user) {
-        // Not logged in -> Go to home
         window.location.href = "index.html"; 
         return;
       }
       
-      // Basic security: Check if email is in the allowed list
       if (!ADMIN_EMAILS.includes(user.email)) {
         alert("Unauthorized access! You are not an admin.");
         auth.signOut();
@@ -79,11 +98,10 @@
         return;
       }
 
-      // If allowed, load the orders
       loadOrders();
     });
 
-    // 2. Load Orders from Firestore (Real-time)
+    // --- LOAD ORDERS ---
     function loadOrders() {
       db.collection("orders")
         .orderBy("createdAt", "desc")
@@ -95,16 +113,18 @@
               return;
           }
 
-          table.innerHTML = ""; // Clear table
+          table.innerHTML = ""; 
 
           snapshot.forEach(doc => {
             const order = doc.data();
             const date = order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
 
-            // Determine status color
-            let statusColor = "text-orange-600 bg-orange-100";
-            if (order.status === 'confirmed') statusColor = "text-blue-600 bg-blue-100";
-            if (order.status === 'delivered') statusColor = "text-green-600 bg-green-100";
+            // Status Badge Color logic
+            let statusColor = "bg-gray-100 text-gray-800";
+            if(order.status === 'confirmed') statusColor = "bg-blue-100 text-blue-800";
+            if(order.status === 'processing') statusColor = "bg-yellow-100 text-yellow-800";
+            if(order.status === 'shipped') statusColor = "bg-purple-100 text-purple-800";
+            if(order.status === 'delivered') statusColor = "bg-green-100 text-green-800";
 
             table.innerHTML += `
               <tr class="hover:bg-gray-50 transition">
@@ -128,7 +148,14 @@
                   </span>
                 </td>
                 <td class="border p-3">
-                  ${getActionButtons(doc.id, order.status)}
+                  <select onchange="updateStatus('${doc.id}', this.value, '${order.email}', '${order.customer.firstName}')" 
+                    class="border border-gray-300 rounded px-2 py-1 text-xs outline-none focus:border-blue-500 cursor-pointer bg-white">
+                    <option value="pending" ${order.status === "pending" ? "selected" : ""}>Pending</option>
+                    <option value="confirmed" ${order.status === "confirmed" ? "selected" : ""}>Confirmed</option>
+                    <option value="processing" ${order.status === "processing" ? "selected" : ""}>Processing</option>
+                    <option value="shipped" ${order.status === "shipped" ? "selected" : ""}>Shipped</option>
+                    <option value="delivered" ${order.status === "delivered" ? "selected" : ""}>Delivered</option>
+                  </select>
                 </td>
               </tr>
             `;
@@ -136,24 +163,37 @@
         });
     }
 
-    // 3. Generate buttons based on status
-    function getActionButtons(id, status) {
-        if (status === "pending") {
-            return `<button onclick="updateStatus('${id}', 'confirmed')" class="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-xs shadow transition">Confirm Payment</button>`;
-        } else if (status === "confirmed") {
-            return `<button onclick="updateStatus('${id}', 'delivered')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs shadow transition">Mark Delivered</button>`;
-        } else {
-            return `<span class="text-green-500 font-bold text-xs"><i class="fas fa-check-circle"></i> Complete</span>`;
-        }
+    // --- UPDATE STATUS & SEND EMAIL ---
+    function updateStatus(orderId, status, customerEmail, customerName) {
+      if(!confirm(`Update status to "${status}"?`)) return;
+
+      // 1. Update Firestore
+      db.collection("orders").doc(orderId).update({
+        status: status,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      })
+      .then(() => {
+          alert(`Order updated to ${status}`);
+          
+          // 2. Send Email (Only if keys are configured)
+          if (customerEmail && EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") {
+             sendEmail(customerEmail, customerName, status, orderId);
+          }
+      })
+      .catch(err => alert("Error: " + err.message));
     }
 
-    // 4. Update Status in Firestore
-    function updateStatus(orderId, status) {
-      if(!confirm(`Are you sure you want to mark this order as ${status}?`)) return;
+    function sendEmail(email, name, status, orderId) {
+        const params = {
+            to_email: email,
+            to_name: name,
+            order_status: status,
+            order_id: orderId
+        };
 
-      db.collection("orders").doc(orderId).update({ status: status })
-        .then(() => alert("Order updated!"))
-        .catch(err => alert("Error: " + err.message));
+        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
+            .then(res => console.log("Email sent!", res.status, res.text))
+            .catch(err => console.error("Email failed:", err));
     }
 
     function logout() {
