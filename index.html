@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KEMMEX STORE | Online Shopping for Fashion</title>
+    
     <meta property="og:title" content="Kemmex Store | Premium & Thrift Fashion">
-<meta property="og:description" content="Shop the best in Baby Wears, Maternity, Adult Fashion, and Accessories. Quality for less.">
-<meta property="og:image" content="https://images.unsplash.com/photo-1551644342-6e2e5e11f71a?auto=format&fit=crop&w=1200&q=80">
-<meta property="og:url" content="https://kemmex-store.com">
-<meta property="og:type" content="website">
+    <meta property="og:description" content="Shop the best in Baby Wears, Maternity, Adult Fashion, and Accessories. Quality for less.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1551644342-6e2e5e11f71a?auto=format&fit=crop&w=1200&q=80">
+    <meta property="og:url" content="https://kemmex-store.com">
+    <meta property="og:type" content="website">
+
     <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/shop-local.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -110,9 +112,9 @@
                 </div>
 
                 <button onclick="document.querySelector('footer').scrollIntoView({behavior: 'smooth'})" class="hidden sm:flex items-center gap-2 cursor-pointer hover:text-jumia-orange bg-transparent border-none">
-    <i class="far fa-question-circle text-xl"></i>
-    <span class="font-medium">Help</span>
-</button>
+                    <i class="far fa-question-circle text-xl"></i>
+                    <span class="font-medium">Help</span>
+                </button>
 
                 <div onclick="toggleCart()" class="flex items-center gap-2 cursor-pointer hover:text-jumia-orange relative">
                     <i class="fas fa-shopping-cart text-xl"></i>
@@ -221,7 +223,7 @@
                     </div>
                 </div>
             </div>
-            ```
+
             <div class="md:hidden flex gap-3 overflow-x-auto pb-4 hide-scrollbar mb-4">
                 <button onclick="filterCategory('all')" class="whitespace-nowrap bg-white px-4 py-2 rounded-full shadow-sm text-sm font-medium border border-gray-200">All</button>
                 <button onclick="filterCategory('Baby & Kids')" class="whitespace-nowrap bg-white px-4 py-2 rounded-full shadow-sm text-sm font-medium border border-gray-200">Baby & Kids</button>
@@ -345,8 +347,18 @@
                     <div><label class="block text-xs font-bold text-gray-600">Last Name</label><input id="lastName" type="text" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
                 </div>
                 <div><label class="block text-xs font-bold text-gray-600">Delivery Address</label><textarea id="address" required rows="2" class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></textarea></div>
+                
                 <div><label class="block text-xs font-bold text-gray-600">Phone Number</label><input id="phone" type="tel" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
 
+                <div class="mt-4 mb-2">
+                    <label class="block text-xs font-bold text-gray-600 mb-1">Delivery Location</label>
+                    <select id="delivery-location" onchange="updateTotalWithShipping()" class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
+                        <option value="0">Select Location...</option>
+                        <option value="1000">Abeokuta (Within Ogun) - ₦1,000</option>
+                        <option value="3000">Outside Ogun State - ₦3,000</option>
+                        <option value="0">Store Pickup (Abeokuta) - Free</option>
+                    </select>
+                </div>
                 <div class="mt-4 mb-2">
                     <label class="block text-xs font-bold text-gray-600 mb-2 uppercase">Payment Method</label>
                     <div class="border-2 border-jumia-orange rounded-md p-4 bg-orange-50 relative">
@@ -371,9 +383,12 @@
                 </div>
 
                 <div class="bg-blue-50 p-3 rounded border border-blue-100 mb-4">
-                    <div class="flex justify-between font-bold text-lg"><span>Total to Pay</span><span class="text-jumia-orange">₦<span id="checkout-final">0</span></span></div>
+                    <div class="flex justify-between font-bold text-lg">
+                        <span>Total to Pay</span>
+                        <span class="text-jumia-orange">₦<span id="checkout-total">0</span></span>
+                    </div>
+                    <p id="shipping-display" class="text-right text-xs text-gray-500 mt-1 italic">Shipping fee not included yet.</p>
                 </div>
-
                 <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded shadow-lg text-lg uppercase tracking-wide">Complete Order</button>
             </form>
         </div>
@@ -442,7 +457,7 @@
             if (!section.contains(e.target)) menu.classList.add('hidden');
         });
 
-     function renderProducts(items) {
+      function renderProducts(items) {
             const grid = document.getElementById('products-grid');
             if(items.length === 0) {
                 grid.innerHTML = '<p class="col-span-full text-center text-gray-500">No products found.</p>';
@@ -524,7 +539,6 @@
             const headerQty = document.getElementById('cart-qty-header');
             const totalEl = document.getElementById('cart-total');
             const checkoutTotal = document.getElementById('checkout-total');
-            const checkoutFinal = document.getElementById('checkout-final');
             const transferAmount = document.getElementById('transfer-amount');
 
             localStorage.setItem('kemmex_cart', JSON.stringify(cart));
@@ -537,7 +551,6 @@
             totalEl.innerText = totalPrice.toLocaleString();
             
             if(checkoutTotal) checkoutTotal.innerText = totalPrice.toLocaleString();
-            if(checkoutFinal) checkoutFinal.innerText = totalPrice.toLocaleString();
             if(transferAmount) transferAmount.innerText = totalPrice.toLocaleString();
 
             if(cart.length === 0) {
@@ -642,19 +655,57 @@
 
         function logout() { auth.signOut(); }
         
+        // 🟢 STEP 3C: UPDATED CHECKOUT LOGIC
         function checkout() { 
             toggleCart(); 
             if(!isLoggedIn) openModal('loginModal'); 
             else { 
                 if(cart.length === 0) return alert("Cart is empty"); 
+                
+                // Calculate Subtotal & Reset Dropdown
+                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+                document.getElementById('delivery-location').value = "0"; 
+                document.getElementById('checkout-total').innerText = subtotal.toLocaleString();
+                document.getElementById('checkout-total').dataset.subtotal = subtotal; 
+                document.getElementById('transfer-amount').innerText = subtotal.toLocaleString();
+                document.getElementById('shipping-display').innerText = "Select delivery location to see final total.";
+                
                 openModal('checkoutModal'); 
             } 
         }
 
+        // 🟢 STEP 3C: NEW FUNCTION
+        function updateTotalWithShipping() {
+            const shippingFee = Number(document.getElementById('delivery-location').value);
+            const subtotal = Number(document.getElementById('checkout-total').dataset.subtotal || 0);
+            const finalTotal = subtotal + shippingFee;
+            
+            document.getElementById('checkout-total').innerText = finalTotal.toLocaleString();
+            document.getElementById('transfer-amount').innerText = finalTotal.toLocaleString();
+            
+            if(shippingFee > 0) {
+                document.getElementById('shipping-display').innerText = `(Includes ₦${shippingFee.toLocaleString()} Delivery Fee)`;
+            } else {
+                const sel = document.getElementById('delivery-location');
+                const text = sel.options[sel.selectedIndex].text;
+                if(text.includes("Pickup")) document.getElementById('shipping-display').innerText = "Store Pickup (Free)";
+                else document.getElementById('shipping-display').innerText = "Shipping fee pending...";
+            }
+        }
+
+        // 🟢 STEP 3D: UPDATED PAYMENT HANDLER
         function handlePayment(e) {
             e.preventDefault();
             if (!auth.currentUser) return alert("Please log in");
             if (cart.length === 0) return alert("Cart is empty");
+
+            // Validation: Ensure location selected
+            const deliverySelect = document.getElementById('delivery-location');
+            if (deliverySelect.value === "0" && deliverySelect.options[deliverySelect.selectedIndex].text.includes("Select")) {
+                 alert("Please select a delivery location.");
+                 return;
+            }
+
             if (!document.getElementById('confirmPaid').checked) return alert("Please confirm payment");
 
             const btn = e.target.querySelector('button[type="submit"]');
@@ -662,16 +713,25 @@
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
             btn.disabled = true;
 
+            // Calculate Finals
+            const shippingFee = Number(deliverySelect.value);
+            const subtotal = Number(document.getElementById('checkout-total').dataset.subtotal);
+            const total = subtotal + shippingFee;
+
             const orderData = {
                 userId: auth.currentUser.uid,
                 email: auth.currentUser.email,
                 items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
-                totalAmount: cart.reduce((sum, i) => sum + i.price * i.qty, 0),
+                // New Fields
+                subtotal: subtotal,
+                shipping: shippingFee,
+                totalAmount: total, 
                 customer: {
                     firstName: document.getElementById('firstName').value,
                     lastName: document.getElementById('lastName').value,
                     phone: document.getElementById('phone').value,
-                    address: document.getElementById('address').value
+                    address: document.getElementById('address').value,
+                    state: deliverySelect.options[deliverySelect.selectedIndex].text // Save location name
                 },
                 paymentMethod: "bank_transfer",
                 status: "pending", 
@@ -696,25 +756,22 @@
                 .finally(() => { btn.innerHTML = originalHTML; btn.disabled = false; });
         }
 
-// 🟢 AUTOMATIC SLIDER SCRIPT
+        // 🟢 AUTOMATIC SLIDER SCRIPT
         let currentSlide = 0;
-        const slides = document.querySelectorAll('.slide-item');
-        
-        function nextSlide() {
-            // Hide current
-            slides[currentSlide].classList.remove('opacity-100');
-            slides[currentSlide].classList.add('opacity-0');
-            
-            // Calculate next
-            currentSlide = (currentSlide + 1) % slides.length;
-            
-            // Show next
-            slides[currentSlide].classList.remove('opacity-0');
-            slides[currentSlide].classList.add('opacity-100');
-        }
-
-        // Change slide every 5 seconds
-        setInterval(nextSlide, 5000);
+        // Wait for elements to exist
+        setTimeout(() => {
+            const slides = document.querySelectorAll('.slide-item');
+            if(slides.length > 0) {
+                function nextSlide() {
+                    slides[currentSlide].classList.remove('opacity-100');
+                    slides[currentSlide].classList.add('opacity-0');
+                    currentSlide = (currentSlide + 1) % slides.length;
+                    slides[currentSlide].classList.remove('opacity-0');
+                    slides[currentSlide].classList.add('opacity-100');
+                }
+                setInterval(nextSlide, 5000);
+            }
+        }, 1000);
         
     </script>
 </body>
