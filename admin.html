@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Kemmex Admin – Orders</title>
-
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -18,7 +17,10 @@
 
   <div class="max-w-7xl mx-auto bg-white shadow-lg rounded-lg p-6">
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Kemmex Orders Dashboard</h1>
+        <div>
+            <h1 class="text-2xl font-bold text-gray-800">Kemmex Orders Dashboard</h1>
+            <p class="text-xs text-gray-500 mt-1">Logged in as: <span id="admin-email" class="font-mono text-orange-600">...</span></p>
+        </div>
         <button onclick="logout()" class="text-red-500 hover:text-red-700 font-bold text-sm">
             <i class="fas fa-sign-out-alt"></i> Logout
         </button>
@@ -38,7 +40,12 @@
         </thead>
         <tbody id="ordersTable" class="bg-white">
             <tr>
-                <td colspan="6" class="p-4 text-center text-gray-500">Loading orders...</td>
+                <td colspan="6" class="p-10 text-center">
+                    <div class="flex flex-col items-center justify-center">
+                        <i class="fas fa-spinner fa-spin text-3xl text-orange-500 mb-3"></i>
+                        <span class="text-gray-500">Connecting to Database...</span>
+                    </div>
+                </td>
             </tr>
         </tbody>
         </table>
@@ -47,56 +54,67 @@
 
   <script>
     // ==========================================
-    // ⚙️ CONFIGURATION SECTION (EDIT HERE ONLY)
+    // ⚙️ CONFIGURATION
     // ==========================================
-
-    // 1. ADMIN SETUP
     const ADMIN_EMAILS = ["aakinwale16@gmail.com"]; 
-
-    // 2. EMAILJS KEYS (Get these from emailjs.com)
     const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY";  
     const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID"; 
     const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID"; 
 
-    // 3. FIREBASE CONFIG
     const firebaseConfig = {
       apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
       authDomain: "kemmex-store-9ffa3.firebaseapp.com",
       projectId: "kemmex-store-9ffa3",
-      storageBucket: "kemmex-store-9ffa3.firebasestorage.app",
+      storageBucket: "kemmex-store-9ffa3.appspot.com",
       messagingSenderId: "500875032118",
       appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
     };
 
     // ==========================================
-    // 🚀 END CONFIGURATION (DO NOT EDIT BELOW)
+    // 🚀 LOGIC
     // ==========================================
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
     
-    (function(){
-      if(EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") emailjs.init(EMAILJS_PUBLIC_KEY);
-    })();
-
+    // Auth Check
     auth.onAuthStateChanged(user => {
-      if (!user) { window.location.href = "index.html"; return; }
-      if (!ADMIN_EMAILS.includes(user.email)) {
-        alert("Unauthorized access!"); auth.signOut(); window.location.href = "index.html"; return;
+      if (!user) {
+        window.location.href = "index.html"; 
+        return;
       }
+      
+      document.getElementById('admin-email').innerText = user.email;
+
+      if (!ADMIN_EMAILS.includes(user.email)) {
+        alert("Unauthorized! You are logged in as " + user.email + "\nBut the admin is: " + ADMIN_EMAILS[0]);
+        auth.signOut();
+        window.location.href = "index.html";
+        return;
+      }
+
       loadOrders();
     });
 
+    // Load Orders with Error Handling
     function loadOrders() {
-      db.collection("orders").orderBy("createdAt", "desc").onSnapshot(snapshot => {
+      db.collection("orders")
+        .orderBy("createdAt", "desc")
+        .onSnapshot((snapshot) => {
           const table = document.getElementById("ordersTable");
-          if (snapshot.empty) { table.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">No orders found.</td></tr>`; return; }
+          
+          if (snapshot.empty) {
+              table.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-gray-500">No orders found in database.</td></tr>`;
+              return;
+          }
+
           table.innerHTML = ""; 
 
           snapshot.forEach(doc => {
             const order = doc.data();
             const date = order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString() : 'Just now';
+
+            // Status Color
             let statusColor = "bg-gray-100 text-gray-800";
             if(order.status === 'confirmed') statusColor = "bg-blue-100 text-blue-800";
             if(order.status === 'processing') statusColor = "bg-yellow-100 text-yellow-800";
@@ -104,23 +122,22 @@
             if(order.status === 'delivered') statusColor = "bg-green-100 text-green-800";
 
             table.innerHTML += `
-              <tr class="hover:bg-gray-50 transition">
-                <td class="border p-3 whitespace-nowrap text-gray-500 text-xs">${date}</td>
-                <td class="border p-3">
+              <tr class="hover:bg-gray-50 transition border-b">
+                <td class="border-r p-3 whitespace-nowrap text-gray-500 text-xs">${date}</td>
+                <td class="border-r p-3">
                   <div class="font-bold text-gray-800 text-sm">${order.customer.firstName} ${order.customer.lastName}</div>
                   <div class="text-xs text-gray-500">${order.customer.phone}</div>
-                  <div class="text-xs text-gray-400 italic">${order.customer.address}</div>
                 </td>
-                <td class="border p-3">
+                <td class="border-r p-3">
                   <ul class="list-disc list-inside text-gray-700 text-sm">
                     ${order.items.map(i => `<li>${i.name} <span class="text-gray-400 text-xs">x${i.qty}</span></li>`).join("")}
                   </ul>
                 </td>
-                <td class="border p-3 font-bold text-gray-800 text-sm">₦${order.totalAmount.toLocaleString()}</td>
-                <td class="border p-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${statusColor}">${order.status}</span></td>
-                <td class="border p-3">
+                <td class="border-r p-3 font-bold text-gray-800 text-sm">₦${order.totalAmount.toLocaleString()}</td>
+                <td class="border-r p-3"><span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${statusColor}">${order.status}</span></td>
+                <td class="p-3">
                   <select onchange="updateStatus('${doc.id}', this.value, '${order.email}', '${order.customer.firstName}')" 
-                    class="border border-gray-300 rounded px-2 py-1 text-xs outline-none focus:border-blue-500 cursor-pointer bg-white">
+                    class="border border-gray-300 rounded px-2 py-1 text-xs outline-none focus:border-blue-500 cursor-pointer bg-white w-full">
                     <option value="pending" ${order.status === "pending" ? "selected" : ""}>Pending</option>
                     <option value="confirmed" ${order.status === "confirmed" ? "selected" : ""}>Confirmed</option>
                     <option value="processing" ${order.status === "processing" ? "selected" : ""}>Processing</option>
@@ -131,24 +148,25 @@
               </tr>
             `;
           });
+        }, (error) => {
+            // 🚨 THIS IS THE DEBUGGER 🚨
+            console.error("Firestore Error:", error);
+            
+            if (error.message.includes("indexes")) {
+                alert("⚠️ MISSING INDEX ERROR!\n\nOpen your browser console (F12) and click the link generated by Firebase to create the index.");
+            } else if (error.code === "permission-denied") {
+                alert("⚠️ PERMISSION DENIED!\n\nYour Admin Email doesn't match the Security Rules.\nCheck if you are logged in as: aakinwale16@gmail.com");
+            } else {
+                alert("⚠️ ERROR: " + error.message);
+            }
         });
     }
 
     function updateStatus(orderId, status, customerEmail, customerName) {
       if(!confirm(`Update status to "${status}"?`)) return;
       db.collection("orders").doc(orderId).update({ status: status, updatedAt: firebase.firestore.FieldValue.serverTimestamp() })
-      .then(() => {
-          alert(`Order updated to ${status}`);
-          if (customerEmail && EMAILJS_PUBLIC_KEY !== "YOUR_PUBLIC_KEY") sendEmail(customerEmail, customerName, status, orderId);
-      })
+      .then(() => alert(`Order updated to ${status}`))
       .catch(err => alert("Error: " + err.message));
-    }
-
-    function sendEmail(email, name, status, orderId) {
-        const params = { to_email: email, to_name: name, order_status: status, order_id: orderId };
-        emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
-            .then(res => console.log("Email sent!", res.status, res.text))
-            .catch(err => console.error("Email failed:", err));
     }
 
     function logout() { auth.signOut().then(() => window.location.href = "index.html"); }
