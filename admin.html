@@ -49,14 +49,13 @@
             <th class="border p-3 text-gray-600">Customer</th>
             <th class="border p-3 text-gray-600">Items</th>
             <th class="border p-3 text-gray-600">Total</th>
-            <th class="border p-3 text-gray-600">Proof</th>
             <th class="border p-3 text-gray-600">Status</th>
             <th class="border p-3 text-gray-600">Action</th>
             </tr>
         </thead>
         <tbody id="ordersTable" class="bg-white">
             <tr>
-                <td colspan="7" class="p-4 text-center text-gray-500">Loading orders...</td>
+                <td colspan="6" class="p-4 text-center text-gray-500">Loading orders...</td>
             </tr>
         </tbody>
         </table>
@@ -92,7 +91,7 @@
           const table = document.getElementById("ordersTable");
           
           if (snapshot.empty) {
-              table.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-gray-500">No orders found.</td></tr>`;
+              table.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-gray-500">No orders found.</td></tr>`;
               return;
           }
 
@@ -106,16 +105,6 @@
             let statusColor = "text-orange-600 bg-orange-100";
             if (order.status === 'confirmed') statusColor = "text-blue-600 bg-blue-100";
             if (order.status === 'delivered') statusColor = "text-green-600 bg-green-100";
-
-            // Handle Proof Display
-            let proofHtml = `<span class="text-gray-400 text-xs italic">No Receipt</span>`;
-            if (order.paymentProofUrl) {
-                proofHtml = `
-                    <a href="${order.paymentProofUrl}" target="_blank" class="flex items-center gap-1 text-blue-600 hover:text-blue-800 font-bold text-xs bg-blue-50 px-2 py-1 rounded">
-                        <i class="fas fa-paperclip"></i> View Receipt
-                    </a>
-                `;
-            }
 
             table.innerHTML += `
               <tr class="hover:bg-gray-50 transition">
@@ -132,9 +121,6 @@
                 </td>
                 <td class="border p-3 font-bold text-gray-800 text-sm">
                   ₦${order.totalAmount.toLocaleString()}
-                </td>
-                <td class="border p-3">
-                  ${proofHtml}
                 </td>
                 <td class="border p-3">
                   <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase ${statusColor}">
