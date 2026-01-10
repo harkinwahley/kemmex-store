@@ -27,6 +27,18 @@
         .modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
         .modal.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         .modal.flex { opacity: 1; visibility: visible; pointer-events: auto; }
+        
+        /* WhatsApp Button Animation */
+        .whatsapp-float {
+            position: fixed; bottom: 20px; right: 20px;
+            background-color: #25d366; color: white;
+            border-radius: 50px; text-align: center;
+            font-size: 30px; box-shadow: 2px 2px 3px #999;
+            z-index: 100; width: 60px; height: 60px;
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.3s;
+        }
+        .whatsapp-float:hover { transform: scale(1.1); background-color: #20ba5a; }
     </style>
 </head>
 
@@ -35,12 +47,11 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // ✅ USE YOUR REAL CONFIG HERE
   const firebaseConfig = {
     apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
     authDomain: "kemmex-store-9ffa3.firebaseapp.com",
     projectId: "kemmex-store-9ffa3",
-    storageBucket: "kemmex-store-9ffa3.firebasestorage.app",
+    storageBucket: "kemmex-store-9ffa3.appspot.com",
     messagingSenderId: "500875032118",
     appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
   };
@@ -51,6 +62,10 @@
 </script>
 
 <body class="font-sans text-jumia-dark">
+
+    <a href="https://wa.me/2348039468706?text=Hello%20Kemmex%20Store,%20I%20have%20an%20enquiry" target="_blank" class="whatsapp-float">
+        <i class="fab fa-whatsapp"></i>
+    </a>
 
     <header class="bg-white shadow-md sticky top-0 z-50">
         <div class="bg-jumia-orange text-white text-xs text-center py-1 hidden md:block">
@@ -115,9 +130,11 @@
             <div class="p-3 border-b font-bold text-gray-600 text-sm uppercase">Categories</div>
             <nav class="flex flex-col text-sm">
                 <button onclick="filterCategory('all')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition">All Categories</button>
-                <button onclick="filterCategory('Baby Wear')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-baby mr-2"></i>Baby Wear</button>
-                <button onclick="filterCategory('Maternity')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-person-pregnant mr-2"></i>Maternity Wear</button>
-                <button onclick="filterCategory('Adult Fashion')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-tshirt mr-2"></i>Adult Clothing</button>
+                <button onclick="filterCategory('Baby & Kids')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-baby mr-2"></i>Baby & Kids</button>
+                <button onclick="filterCategory('Maternity')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-person-pregnant mr-2"></i>Maternity</button>
+                <button onclick="filterCategory('Adult Wears')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-tshirt mr-2"></i>Adult Wears</button>
+                <button onclick="filterCategory('Thrift Wears')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-recycle mr-2"></i>Thrift Wears</button>
+                <button onclick="filterCategory('Toys')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-gamepad mr-2"></i>Toys</button>
                 <button onclick="filterCategory('Accessories')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-hat-cowboy mr-2"></i>Accessories</button>
             </nav>
         </aside>
@@ -134,9 +151,11 @@
 
             <div class="md:hidden flex gap-3 overflow-x-auto pb-4 hide-scrollbar mb-4">
                 <button onclick="filterCategory('all')" class="whitespace-nowrap bg-white px-4 py-2 rounded-full shadow-sm text-sm font-medium border border-gray-200">All</button>
-                <button onclick="filterCategory('Baby Wear')" class="whitespace-nowrap bg-white px-4 py-2 rounded-full shadow-sm text-sm font-medium border border-gray-200">Baby</button>
+                <button onclick="filterCategory('Baby & Kids')" class="whitespace-nowrap bg-white px-4 py-2 rounded-full shadow-sm text-sm font-medium border border-gray-200">Baby & Kids</button>
                 <button onclick="filterCategory('Maternity')" class="whitespace-nowrap bg-white px-4 py-2 rounded-full shadow-sm text-sm font-medium border border-gray-200">Maternity</button>
-                <button onclick="filterCategory('Adult Fashion')" class="whitespace-nowrap bg-white px-4 py-2 rounded-full shadow-sm text-sm font-medium border border-gray-200">Adult</button>
+                <button onclick="filterCategory('Adult Wears')" class="whitespace-nowrap bg-white px-4 py-2 rounded-full shadow-sm text-sm font-medium border border-gray-200">Adult</button>
+                <button onclick="filterCategory('Thrift Wears')" class="whitespace-nowrap bg-white px-4 py-2 rounded-full shadow-sm text-sm font-medium border border-gray-200">Thrift</button>
+                <button onclick="filterCategory('Toys')" class="whitespace-nowrap bg-white px-4 py-2 rounded-full shadow-sm text-sm font-medium border border-gray-200">Toys</button>
             </div>
 
             <div class="bg-white p-3 rounded-t-md border-b flex justify-between items-center">
@@ -259,13 +278,11 @@
     </div>
 
     <script>
-        // ✅ INSTRUCTION 9: REPLACED HARDCODED PRODUCTS WITH EMPTY ARRAY
         let products = [];
         let cart = JSON.parse(localStorage.getItem('kemmex_cart')) || [];
         let isLoggedIn = false;
         let currentFilter = 'all';
 
-        // ✅ INSTRUCTION 9: LOAD PRODUCTS FROM FIRESTORE
         function loadProducts() {
           db.collection("products")
             .where("active", "==", true)
@@ -283,13 +300,11 @@
             });
         }
 
-        // Run loadProducts on page load
         document.addEventListener("DOMContentLoaded", () => {
             loadProducts();
             updateCartUI();
         });
 
-        // --- AUTH ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 isLoggedIn = true;
@@ -306,7 +321,6 @@
             }
         });
 
-        // --- UI FUNCTIONS ---
         function toggleUserMenu() {
             const menu = document.getElementById('userMenu');
             menu.classList.toggle('hidden');
@@ -357,19 +371,16 @@
             return stars;
         }
 
-        // ✅ INSTRUCTION 11: UPDATE ADD TO CART (CHECK STOCK)
         function addToCart(id) {
             const product = products.find(p => p.id === id);
             if (!product) return;
 
-            // Check global stock
             if (product.stock <= 0) {
                 alert("Out of stock");
                 return;
             }
 
             const existing = cart.find(item => item.id === id);
-            // Check local cart quantity against stock
             if (existing && existing.qty >= product.stock) {
                 alert("You have reached the maximum stock available for this item.");
                 return;
@@ -442,7 +453,6 @@
             const product = products.find(p => p.id === id);
             
             if(item) {
-                // Stock check on increment
                 if (change > 0 && product && item.qty >= product.stock) {
                     alert("Max stock reached");
                     return;
@@ -525,7 +535,6 @@
             } 
         }
 
-        // ✅ INSTRUCTION 11: HANDLE PAYMENT & REDUCE STOCK
         function handlePayment(e) {
             e.preventDefault();
             if (!auth.currentUser) return alert("Please log in");
@@ -555,7 +564,6 @@
 
             db.collection("orders").add(orderData)
                 .then(() => {
-                    // ✅ PART F: REDUCE STOCK AFTER PAYMENT
                     cart.forEach(item => {
                         db.collection("products").doc(item.id).update({
                             stock: firebase.firestore.FieldValue.increment(-item.qty)
