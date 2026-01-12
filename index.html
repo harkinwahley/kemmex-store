@@ -17,16 +17,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <script>
-       tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    jumia: { orange: '#1e40af', hover: '#1e3a8a', dark: '#282828', gray: '#f1f1f2' }
-                },
-                fontFamily: { sans: ['Roboto', 'sans-serif'] }
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // 🔵 ROYAL BLUE CONFIGURATION
+                        jumia: { orange: '#1e40af', hover: '#1e3a8a', dark: '#282828', gray: '#f1f1f2' }
+                    },
+                    fontFamily: { sans: ['Roboto', 'sans-serif'] }
+                }
             }
         }
-    }
     </script>
     <style>
         body { background-color: #f1f1f2; }
@@ -35,6 +36,8 @@
         .modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
         .modal.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         .modal.flex { opacity: 1; visibility: visible; pointer-events: auto; }
+        
+        /* WhatsApp Float */
         .whatsapp-float {
             position: fixed; bottom: 20px; right: 20px;
             background-color: #25d366; color: white;
@@ -45,6 +48,8 @@
             transition: transform 0.3s;
         }
         .whatsapp-float:hover { transform: scale(1.1); background-color: #20ba5a; }
+
+        /* Skeleton Loading Animation */
         @keyframes shimmer {
             0% { background-position: -1000px 0; }
             100% { background-position: 1000px 0; }
@@ -73,6 +78,7 @@
     messagingSenderId: "500875032118",
     appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
   };
+
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
@@ -142,6 +148,7 @@
     </header>
 
     <main class="container mx-auto px-4 py-6 flex flex-col md:flex-row gap-4 min-h-screen">
+        
         <aside class="w-full md:w-1/5 hidden md:block bg-white rounded-md shadow-sm h-fit overflow-hidden">
             <div class="p-3 border-b font-bold text-gray-600 text-sm uppercase">Categories</div>
             <nav class="flex flex-col text-sm">
@@ -156,7 +163,9 @@
         </aside>
 
         <section class="w-full md:w-4/5 relative group">
+            
             <div id="hero-slider" class="h-48 md:h-72 rounded-md mb-6 relative overflow-hidden bg-gray-200">
+                
                 <div class="absolute inset-0 transition-opacity duration-1000 opacity-100 slide-item">
                     <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
@@ -168,6 +177,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
                     <img src="https://images.unsplash.com/photo-1581539250439-c96689b516dd?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
@@ -176,6 +186,54 @@
                             <h2 class="text-3xl md:text-5xl font-bold mb-2">Glowing & Stylish</h2>
                             <p class="mb-4 text-gray-200 text-sm md:text-base">Comfort for every step of your journey.</p>
                             <button onclick="filterCategory('Maternity')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-pink-500 hover:text-white transition">Shop Maternity</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
+                    <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
+                        <div class="text-white max-w-lg">
+                            <span class="bg-blue-600 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">ADULT WEARS</span>
+                            <h2 class="text-3xl md:text-5xl font-bold mb-2">Classy & Bold</h2>
+                            <p class="mb-4 text-gray-200 text-sm md:text-base">Upgrade your wardrobe today.</p>
+                            <button onclick="filterCategory('Adult Wears')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-blue-600 hover:text-white transition">Shop Adult</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
+                    <img src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
+                        <div class="text-white max-w-lg">
+                            <span class="bg-green-600 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">THRIFT WEARS</span>
+                            <h2 class="text-3xl md:text-5xl font-bold mb-2">Unbeatable Value</h2>
+                            <p class="mb-4 text-gray-200 text-sm md:text-base">High quality fashion for less.</p>
+                            <button onclick="filterCategory('Thrift Wears')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-green-600 hover:text-white transition">Shop Thrift</button>
+                        </div>
+                    </div>
+                </div>
+                
+                 <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
+                    <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
+                        <div class="text-white max-w-lg">
+                            <span class="bg-yellow-500 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">TOYS & FUN</span>
+                            <h2 class="text-3xl md:text-5xl font-bold mb-2">Playtime Joy</h2>
+                            <p class="mb-4 text-gray-200 text-sm md:text-base">Spark their imagination.</p>
+                            <button onclick="filterCategory('Toys')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-yellow-500 hover:text-white transition">Shop Toys</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
+                    <img src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
+                        <div class="text-white max-w-lg">
+                            <span class="bg-purple-500 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">ACCESSORIES</span>
+                            <h2 class="text-3xl md:text-5xl font-bold mb-2">The Perfect Finish</h2>
+                            <p class="mb-4 text-gray-200 text-sm md:text-base">Shoes, bags, and more.</p>
+                            <button onclick="filterCategory('Accessories')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-purple-500 hover:text-white transition">Shop Accessories</button>
                         </div>
                     </div>
                 </div>
@@ -352,63 +410,68 @@
       </div>
     </div>
 
-    <div id="checkoutModal" class="modal fixed inset-0 bg-black/60 z-[60] hidden justify-center items-center overflow-y-auto py-10">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg p-6 relative m-4">
-            <button onclick="closeModal('checkoutModal')" class="absolute top-3 right-3 text-gray-400 hover:text-black text-xl">&times;</button>
-            <h2 class="text-xl font-bold border-b pb-3 mb-4">Finalize Order</h2>
+    <div id="checkoutModal" class="modal fixed inset-0 z-[60] hidden justify-center items-center bg-black/60 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg relative flex flex-col max-h-[90vh]">
+            <button onclick="closeModal('checkoutModal')" class="absolute top-3 right-3 text-gray-400 hover:text-black text-xl z-10">&times;</button>
             
-            <form onsubmit="handlePayment(event)" class="space-y-4">
-                <div class="grid grid-cols-2 gap-4">
-                    <div><label class="block text-xs font-bold text-gray-600">First Name</label><input id="firstName" type="text" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
-                    <div><label class="block text-xs font-bold text-gray-600">Last Name</label><input id="lastName" type="text" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
-                </div>
-                <div><label class="block text-xs font-bold text-gray-600">Delivery Address</label><textarea id="address" required rows="2" class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></textarea></div>
-                
-                <div><label class="block text-xs font-bold text-gray-600">Phone Number</label><input id="phone" type="tel" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
+            <div class="p-6 pb-0">
+                <h2 class="text-xl font-bold border-b pb-3 text-jumia-orange">Finalize Order</h2>
+            </div>
 
-                <div class="mt-4 mb-2">
-                    <label class="block text-xs font-bold text-gray-600 mb-1">Delivery Location</label>
-                    <select id="delivery-location" onchange="updateTotalWithShipping()" class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
-                        <option value="0">Select Location...</option>
-                        <option value="1000">Abeokuta (Within Ogun) - ₦1,000</option>
-                        <option value="3000">Outside Ogun State - ₦3,000</option>
-                        <option value="0">Store Pickup (Abeokuta) - Free</option>
-                    </select>
-                </div>
+            <div class="overflow-y-auto p-6 pt-4">
+                <form onsubmit="handlePayment(event)" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-bold text-gray-600">First Name</label><input id="firstName" type="text" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
+                        <div><label class="block text-xs font-bold text-gray-600">Last Name</label><input id="lastName" type="text" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
+                    </div>
+                    <div><label class="block text-xs font-bold text-gray-600">Delivery Address</label><textarea id="address" required rows="2" class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></textarea></div>
+                    
+                    <div><label class="block text-xs font-bold text-gray-600">Phone Number</label><input id="phone" type="tel" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
 
-                <div class="mt-4 mb-2">
-                    <label class="block text-xs font-bold text-gray-600 mb-2 uppercase">Payment Method</label>
-                    <div class="border-2 border-jumia-orange rounded-md p-4 bg-orange-50 relative">
-                        <div class="flex items-center gap-2 mb-3">
-                            <input type="radio" checked name="payment" class="accent-jumia-orange w-4 h-4">
-                            <span class="font-bold text-sm text-gray-800">Bank Transfer</span>
-                        </div>
-                        <div class="ml-6 space-y-2">
-                            <p class="text-sm text-gray-700">Transfer <strong class="text-black text-lg">₦<span id="transfer-amount">0</span></strong> to:</p>
-                            <div class="bg-white p-3 rounded border border-orange-200 shadow-sm">
-                                <div class="flex justify-between mb-1"><span class="text-gray-500 text-xs">Bank:</span><span class="font-bold text-jumia-dark">Opay</span></div>
-                                <div class="flex justify-between mb-1"><span class="text-gray-500 text-xs">Name:</span><span class="font-bold text-jumia-dark">Sokunbi Oluwakemi</span></div>
-                                <div class="flex justify-between pt-2 border-t border-dashed"><span class="text-gray-500 text-xs">Acct No:</span><span class="font-bold text-xl text-jumia-orange tracking-widest">8039468706</span></div>
+                    <div class="mt-4 mb-2">
+                        <label class="block text-xs font-bold text-gray-600 mb-1">Delivery Location</label>
+                        <select id="delivery-location" onchange="updateTotalWithShipping()" class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
+                            <option value="0">Select Location...</option>
+                            <option value="1000">Abeokuta (Within Ogun) - ₦1,000</option>
+                            <option value="3000">Outside Ogun State - ₦3,000</option>
+                            <option value="0">Store Pickup (Abeokuta) - Free</option>
+                        </select>
+                    </div>
+
+                    <div class="mt-4 mb-2">
+                        <label class="block text-xs font-bold text-gray-600 mb-2 uppercase">Payment Method</label>
+                        <div class="border-2 border-jumia-orange rounded-md p-4 bg-gray-50 relative">
+                            <div class="flex items-center gap-2 mb-3">
+                                <input type="radio" checked name="payment" class="accent-jumia-orange w-4 h-4">
+                                <span class="font-bold text-sm text-gray-800">Bank Transfer</span>
+                            </div>
+                            <div class="ml-6 space-y-2">
+                                <p class="text-sm text-gray-700">Transfer <strong class="text-black text-lg">₦<span id="transfer-amount">0</span></strong> to:</p>
+                                <div class="bg-white p-3 rounded border border-gray-200 shadow-sm">
+                                    <div class="flex justify-between mb-1"><span class="text-gray-500 text-xs">Bank:</span><span class="font-bold text-jumia-dark">Opay</span></div>
+                                    <div class="flex justify-between mb-1"><span class="text-gray-500 text-xs">Name:</span><span class="font-bold text-jumia-dark">Sokunbi Oluwakemi</span></div>
+                                    <div class="flex justify-between pt-2 border-t border-dashed"><span class="text-gray-500 text-xs">Acct No:</span><span class="font-bold text-xl text-jumia-orange tracking-widest">8039468706</span></div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="mb-6 flex items-start gap-3 p-3 bg-gray-50 rounded border">
-                    <input type="checkbox" id="confirmPaid" required class="mt-1 w-5 h-5 accent-green-600 cursor-pointer">
-                    <label for="confirmPaid" class="text-sm text-gray-700 cursor-pointer">I have sent the money to the account above.</label>
-                </div>
-
-                <div class="bg-blue-50 p-3 rounded border border-blue-100 mb-4">
-                    <div class="flex justify-between font-bold text-lg">
-                        <span>Total to Pay</span>
-                        <span class="text-jumia-orange">₦<span id="checkout-total">0</span></span>
+                    <div class="mb-6 flex items-start gap-3 p-3 bg-gray-50 rounded border">
+                        <input type="checkbox" id="confirmPaid" required class="mt-1 w-5 h-5 accent-jumia-orange cursor-pointer">
+                        <label for="confirmPaid" class="text-sm text-gray-700 cursor-pointer">I have sent the money to the account above.</label>
                     </div>
-                    <p id="shipping-display" class="text-right text-xs text-gray-500 mt-1 italic">Shipping fee not included yet.</p>
-                </div>
 
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded shadow-lg text-lg uppercase tracking-wide">Complete Order</button>
-            </form>
+                    <div class="bg-blue-50 p-3 rounded border border-blue-100 mb-4">
+                        <div class="flex justify-between font-bold text-lg">
+                            <span>Total to Pay</span>
+                            <span class="text-jumia-orange">₦<span id="checkout-total">0</span></span>
+                        </div>
+                        <p id="shipping-display" class="text-right text-xs text-gray-500 mt-1 italic">Shipping fee not included yet.</p>
+                    </div>
+
+                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded shadow-lg text-lg uppercase tracking-wide">Complete Order</button>
+                </form>
+            </div>
         </div>
     </div>
 
