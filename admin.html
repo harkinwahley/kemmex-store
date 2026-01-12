@@ -31,18 +31,18 @@
                 <h3 class="text-gray-500 text-sm font-bold uppercase">Total Orders</h3>
                 <p id="total-orders" class="text-3xl font-bold">...</p>
             </div>
-            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-blue-500">
+            <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-green-500">
                 <h3 class="text-gray-500 text-sm font-bold uppercase">Active Products</h3>
                 <p id="total-products" class="text-3xl font-bold">...</p>
             </div>
-            <a href="add-product.html" class="bg-green-600 text-white p-6 rounded-lg shadow-sm hover:bg-green-700 flex flex-col items-center justify-center transition">
+            <a href="add-product.html" class="bg-blue-600 text-white p-6 rounded-lg shadow-sm hover:bg-blue-700 flex flex-col items-center justify-center transition">
                 <i class="fas fa-plus-circle text-2xl mb-2"></i>
                 <span class="font-bold">Add New Product</span>
             </a>
         </div>
 
         <div class="flex gap-4 mb-6 border-b border-gray-200">
-            <button onclick="switchTab('orders')" id="tab-orders" class="px-4 py-2 font-bold border-b-2 border-blue-600 text-blue-700">Incoming Orders</button>
+            <button onclick="switchTab('orders')" id="tab-orders" class="px-4 py-2 font-bold border-b-2 border-blue-600 text-blue-600">Incoming Orders</button>
             <button onclick="switchTab('inventory')" id="tab-inventory" class="px-4 py-2 font-bold text-gray-500 hover:text-gray-700">Manage Inventory</button>
         </div>
 
@@ -139,7 +139,7 @@
     </div>
 
     <script>
-        // 🚨 CONFIG: Add your email here if different
+        // 🚨 CONFIG: Add your email here
         const ADMIN_EMAILS = ["aakinwale16@gmail.com", "kemzolin99@gmail.com"];
 
         const firebaseConfig = {
@@ -181,10 +181,10 @@
             document.getElementById('tab-inventory').className = "px-4 py-2 font-bold text-gray-500 hover:text-gray-700";
 
             document.getElementById(`section-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).className = "px-4 py-2 font-bold border-b-2 border-blue-600 text-blue-700";
+            document.getElementById(`tab-${tab}`).className = "px-4 py-2 font-bold border-b-2 border-blue-600 text-blue-600";
         }
 
-        // --- ORDER LOGIC (With Status Management) ---
+        // --- ORDER LOGIC ---
         function loadOrders() {
             db.collection("orders").onSnapshot(snapshot => {
                 const list = document.getElementById('orders-list');
@@ -195,7 +195,6 @@
                     return;
                 }
 
-                // Sort: Newest first (Safe Sort for old/new mix)
                 let orders = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 orders.sort((a, b) => {
                     const dateA = a.createdAt ? a.createdAt.toDate() : (a.date ? a.date.toDate() : new Date(0));
@@ -226,16 +225,22 @@
                                     <p class="text-xs text-gray-500">${dateStr}</p>
                                 </div>
                                 
-                                <div class="flex items-center gap-2 bg-gray-50 p-2 rounded border">
-                                    <select id="status-${o.id}" class="text-xs font-bold uppercase bg-transparent outline-none cursor-pointer">
-                                        <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                                        <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
-                                        <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
-                                        <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
-                                        <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
-                                    </select>
-                                    <button onclick="updateOrderStatus('${o.id}')" class="text-green-600 hover:text-green-800 p-1" title="Save Status">
-                                        <i class="fas fa-save text-lg"></i>
+                                <div class="flex items-center gap-2">
+                                    <div class="flex items-center gap-1 bg-gray-50 p-2 rounded border">
+                                        <select id="status-${o.id}" class="text-xs font-bold uppercase bg-transparent outline-none cursor-pointer">
+                                            <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                                            <option value="Confirmed" ${o.status === 'Confirmed' ? 'selected' : ''}>Confirmed</option>
+                                            <option value="Shipped" ${o.status === 'Shipped' ? 'selected' : ''}>Shipped</option>
+                                            <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>Delivered</option>
+                                            <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>Cancelled</option>
+                                        </select>
+                                        <button onclick="updateOrderStatus('${o.id}')" class="text-green-600 hover:text-green-800 p-1" title="Save Status">
+                                            <i class="fas fa-save text-lg"></i>
+                                        </button>
+                                    </div>
+
+                                    <button onclick="deleteOrder('${o.id}')" class="bg-red-50 text-red-500 hover:bg-red-100 p-2 rounded border border-red-200" title="Delete Order">
+                                        <i class="fas fa-trash-alt"></i>
                                     </button>
                                 </div>
                             </div>
@@ -244,7 +249,7 @@
                                 <div>
                                     <h4 class="font-bold text-gray-600 text-sm uppercase mb-2">Items</h4>
                                     ${itemsHtml}
-                                    <div class="flex justify-between font-bold mt-2 text-lg text-blue-700">
+                                    <div class="flex justify-between font-bold mt-2 text-lg text-blue-600">
                                         <span>Total:</span>
                                         <span>₦${(o.totalAmount || o.total || 0).toLocaleString()}</span>
                                     </div>
@@ -270,6 +275,15 @@
             });
         }
 
+        // --- NEW DELETE ORDER FUNCTION ---
+        function deleteOrder(id) {
+            if(confirm("⚠️ Are you sure you want to PERMANENTLY delete this order? This cannot be undone.")) {
+                db.collection("orders").doc(id).delete()
+                    .then(() => alert("Order deleted successfully."))
+                    .catch(err => alert("Error deleting order: " + err.message));
+            }
+        }
+
         // --- UPDATE STATUS FUNCTION ---
         function updateOrderStatus(orderId) {
             const newStatus = document.getElementById(`status-${orderId}`).value;
@@ -284,21 +298,18 @@
             }
         }
 
-        // --- SMART WHATSAPP LINK ---
         function generateWhatsAppLink(phone, name, status, orderId) {
             if(!phone) return "#";
             const p = phone.substring(1); 
             let msg = `Hello ${name}, regarding Order #${orderId.slice(0,6)}: `;
-            
             if(status === 'Shipped') msg += "Your package has been shipped and is on its way!";
             else if(status === 'Delivered') msg += "Your package has been delivered. Thank you for shopping with Kemmex!";
             else if(status === 'Confirmed') msg += "We have confirmed your payment. Preparing your order now.";
             else msg += "We received your order and will process it shortly.";
-
             return `https://wa.me/234${p}?text=${encodeURIComponent(msg)}`;
         }
 
-        // --- INVENTORY LOGIC (Safe Mode: Shows all items) ---
+        // --- INVENTORY LOGIC ---
         function loadInventory() {
             db.collection("products").onSnapshot(snapshot => {
                 const list = document.getElementById('inventory-list');
