@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Items | Kemmex Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/shop-local.png">
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-gray-50 font-sans min-h-screen">
+
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-bold tracking-tighter">KEMMEX<span class="text-orange-500">★</span></a>
+            <a href="index.html" class="text-sm font-bold text-orange-500 hover:underline"><i class="fas fa-arrow-left"></i> Back to Shop</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="flex justify-between items-end mb-6">
+            <h1 class="text-2xl font-bold">Saved Items (<span id="saved-count">0</span>)</h1>
+            <button onclick="clearSaved()" class="text-xs text-red-500 hover:underline">Clear All</button>
+        </div>
+        
+        <div id="loading" class="text-center py-10">
+            <i class="fas fa-spinner fa-spin text-2xl text-orange-500"></i>
+        </div>
+
+        <div id="saved-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            </div>
+    </main>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
+            authDomain: "kemmex-store-9ffa3.firebaseapp.com",
+            projectId: "kemmex-store-9ffa3",
+            storageBucket: "kemmex-store-9ffa3.appspot.com",
+            messagingSenderId: "500875032118",
+            appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        document.addEventListener("DOMContentLoaded", loadSavedItems);
+
+        function loadSavedItems() {
+            const savedIds = JSON.parse(localStorage.getItem('kemmex_saved')) || [];
+            document.getElementById('saved-count').innerText = savedIds.length;
+
+            if (savedIds.length === 0) {
+                document.getElementById('loading').classList.add('hidden');
+                document.getElementById('saved-grid').innerHTML = `
+                    <div class="col-span-full text-center py-10">
+                        <div class="text-gray-300 text-6xl mb-4"><i class="far fa-heart"></i></div>
+                        <p class="text-gray-500">You haven't saved any items yet.</p>
+                        <a href="index.html" class="inline-block mt-4 bg-orange-500 text-white px-6 py-2 rounded font-bold">Start Shopping</a>
+                    </div>`;
+                return;
+            }
+
+            // Load all products and filter (Simple method)
+            db.collection("products").where("active", "==", true).get()
+            .then(snapshot => {
+                const allProducts = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                const savedProducts = allProducts.filter(p => savedIds.includes(p.id));
+                
+                renderSaved(savedProducts);
+            })
+            .catch(err => console.error(err))
+            .finally(() => document.getElementById('loading').classList.add('hidden'));
+        }
+
+        function renderSaved(items) {
+            const grid = document.getElementById('saved-grid');
+            grid.innerHTML = items.map(p => `
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative group">
+                    <button onclick="removeSaved('${p.id}')" class="absolute top-2 right-2 bg-white rounded-full p-1.5 shadow text-red-500 hover:bg-red-50 z-10">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <a href="product.html?id=${p.id}">
+                        <img src="${p.img}" class="w-full h-40 object-cover">
+                        <div class="p-3">
+                            <h3 class="text-sm font-bold text-gray-800 line-clamp-1">${p.name}</h3>
+                            <p class="text-orange-600 font-bold mt-1">₦${p.price.toLocaleString()}</p>
+                        </div>
+                    </a>
+                    <button onclick="window.location.href='product.html?id=${p.id}'" class="w-full bg-gray-100 text-gray-700 py-2 text-xs font-bold uppercase hover:bg-orange-500 hover:text-white transition">
+                        View Item
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function removeSaved(id) {
+            let savedIds = JSON.parse(localStorage.getItem('kemmex_saved')) || [];
+            savedIds = savedIds.filter(item => item !== id);
+            localStorage.setItem('kemmex_saved', JSON.stringify(savedIds));
+            loadSavedItems(); // Reload
+        }
+
+        function clearSaved() {
+            if(confirm("Clear all saved items?")) {
+                localStorage.removeItem('kemmex_saved');
+                loadSavedItems();
+            }
+        }
+    </script>
+</body>
+</html>
