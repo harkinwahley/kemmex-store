@@ -1,11 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-PFWF2T8Q');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KEMMEX STORE | Online Shopping for Fashion</title>
@@ -37,14 +32,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         body { background-color: #f1f1f2; }
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        
-        /* Modal Transitions */
         .modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
         .modal.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        /* Note: We removed 'flex' from here to fix the mobile scroll issue */
-        .modal.active { opacity: 1; visibility: visible; pointer-events: auto; }
-        
-        /* WhatsApp Button Animation */
+        .modal.flex { opacity: 1; visibility: visible; pointer-events: auto; }
         .whatsapp-float {
             position: fixed; bottom: 20px; right: 20px;
             background-color: #25d366; color: white;
@@ -55,8 +45,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             transition: transform 0.3s;
         }
         .whatsapp-float:hover { transform: scale(1.1); background-color: #20ba5a; }
-
-        /* Shimmer Animation for Skeleton Loading */
         @keyframes shimmer {
             0% { background-position: -1000px 0; }
             100% { background-position: 1000px 0; }
@@ -66,6 +54,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             background: linear-gradient(to right, #f6f7f8 4%, #edeef1 25%, #f6f7f8 36%);
             background-size: 1000px 100%;
         }
+        /* Heart Animation */
+        .heart-btn:active { transform: scale(0.8); }
+        .heart-btn.saved i { color: red; font-weight: 900; }
     </style>
 </head>
 
@@ -82,7 +73,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     messagingSenderId: "500875032118",
     appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
   };
-
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
@@ -126,7 +116,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         <button onclick="openModal('loginModal')" id="loginBtn" class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-jumia-orange font-bold uppercase text-sm">Sign In</button>
                         <button onclick="logout()" id="logoutBtn" class="hidden block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 text-sm">Logout</button>
                         <a href="orders.html" class="block px-4 py-2 hover:bg-gray-100 text-sm">My Orders</a>
-                        <a href="#" class="block px-4 py-2 hover:bg-gray-100 text-sm">Saved Items</a>
+                        <a href="saved.html" class="block px-4 py-2 hover:bg-gray-100 text-sm">Saved Items</a>
                     </div>
                 </div>
 
@@ -152,7 +142,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     </header>
 
     <main class="container mx-auto px-4 py-6 flex flex-col md:flex-row gap-4 min-h-screen">
-        
         <aside class="w-full md:w-1/5 hidden md:block bg-white rounded-md shadow-sm h-fit overflow-hidden">
             <div class="p-3 border-b font-bold text-gray-600 text-sm uppercase">Categories</div>
             <nav class="flex flex-col text-sm">
@@ -167,9 +156,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         </aside>
 
         <section class="w-full md:w-4/5 relative group">
-            
             <div id="hero-slider" class="h-48 md:h-72 rounded-md mb-6 relative overflow-hidden bg-gray-200">
-                
                 <div class="absolute inset-0 transition-opacity duration-1000 opacity-100 slide-item">
                     <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
@@ -181,7 +168,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         </div>
                     </div>
                 </div>
-
                 <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
                     <img src="https://images.unsplash.com/photo-1581539250439-c96689b516dd?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
                     <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
@@ -193,53 +179,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
-                    <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
-                        <div class="text-white max-w-lg">
-                            <span class="bg-blue-600 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">ADULT WEARS</span>
-                            <h2 class="text-3xl md:text-5xl font-bold mb-2">Classy & Bold</h2>
-                            <p class="mb-4 text-gray-200 text-sm md:text-base">Upgrade your wardrobe today.</p>
-                            <button onclick="filterCategory('Adult Wears')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-blue-600 hover:text-white transition">Shop Adult</button>
-                        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div class="bg-orange-100 rounded-md p-6 flex justify-between items-center relative overflow-hidden group cursor-pointer" onclick="filterCategory('Baby & Kids')">
+                    <div class="relative z-10">
+                        <span class="text-orange-600 text-xs font-bold uppercase tracking-wider">New Arrivals</span>
+                        <h3 class="text-xl font-bold text-gray-800 mt-1">Baby Collections</h3>
+                        <button class="mt-3 text-sm font-bold underline hover:text-orange-600">Shop Now</button>
                     </div>
+                    <img src="https://cdn-icons-png.flaticon.com/512/3082/3082060.png" class="w-24 h-24 object-contain group-hover:scale-110 transition duration-300">
                 </div>
-
-                <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
-                    <img src="https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
-                        <div class="text-white max-w-lg">
-                            <span class="bg-green-600 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">THRIFT WEARS</span>
-                            <h2 class="text-3xl md:text-5xl font-bold mb-2">Unbeatable Value</h2>
-                            <p class="mb-4 text-gray-200 text-sm md:text-base">High quality fashion for less.</p>
-                            <button onclick="filterCategory('Thrift Wears')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-green-600 hover:text-white transition">Shop Thrift</button>
-                        </div>
+                <div class="bg-blue-100 rounded-md p-6 flex justify-between items-center relative overflow-hidden group cursor-pointer" onclick="filterCategory('Thrift Wears')">
+                    <div class="relative z-10">
+                        <span class="text-blue-600 text-xs font-bold uppercase tracking-wider">Flash Sale</span>
+                        <h3 class="text-xl font-bold text-gray-800 mt-1">Thrift Wears</h3>
+                        <button class="mt-3 text-sm font-bold underline hover:text-blue-600">View Deals</button>
                     </div>
-                </div>
-                
-                 <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
-                    <img src="https://images.unsplash.com/photo-1596461404969-9ae70f2830c1?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
-                        <div class="text-white max-w-lg">
-                            <span class="bg-yellow-500 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">TOYS & FUN</span>
-                            <h2 class="text-3xl md:text-5xl font-bold mb-2">Playtime Joy</h2>
-                            <p class="mb-4 text-gray-200 text-sm md:text-base">Spark their imagination.</p>
-                            <button onclick="filterCategory('Toys')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-yellow-500 hover:text-white transition">Shop Toys</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
-                    <img src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
-                        <div class="text-white max-w-lg">
-                            <span class="bg-purple-500 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">ACCESSORIES</span>
-                            <h2 class="text-3xl md:text-5xl font-bold mb-2">The Perfect Finish</h2>
-                            <p class="mb-4 text-gray-200 text-sm md:text-base">Shoes, bags, and more.</p>
-                            <button onclick="filterCategory('Accessories')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-purple-500 hover:text-white transition">Shop Accessories</button>
-                        </div>
-                    </div>
+                    <img src="https://cdn-icons-png.flaticon.com/512/2331/2331716.png" class="w-24 h-24 object-contain group-hover:scale-110 transition duration-300">
                 </div>
             </div>
 
@@ -252,26 +209,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 <button onclick="filterCategory('Toys')" class="whitespace-nowrap bg-white px-4 py-2 rounded-full shadow-sm text-sm font-medium border border-gray-200">Toys</button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div class="bg-orange-100 rounded-md p-6 flex justify-between items-center relative overflow-hidden group cursor-pointer" onclick="filterCategory('Baby & Kids')">
-                    <div class="relative z-10">
-                        <span class="text-orange-600 text-xs font-bold uppercase tracking-wider">New Arrivals</span>
-                        <h3 class="text-xl font-bold text-gray-800 mt-1">Baby Collections</h3>
-                        <button class="mt-3 text-sm font-bold underline hover:text-orange-600">Shop Now</button>
-                    </div>
-                    <img src="https://cdn-icons-png.flaticon.com/512/3082/3082060.png" class="w-24 h-24 object-contain group-hover:scale-110 transition duration-300">
-                </div>
-
-                <div class="bg-blue-100 rounded-md p-6 flex justify-between items-center relative overflow-hidden group cursor-pointer" onclick="filterCategory('Thrift Wears')">
-                    <div class="relative z-10">
-                        <span class="text-blue-600 text-xs font-bold uppercase tracking-wider">Flash Sale</span>
-                        <h3 class="text-xl font-bold text-gray-800 mt-1">Thrift Wears</h3>
-                        <button class="mt-3 text-sm font-bold underline hover:text-blue-600">View Deals</button>
-                    </div>
-                    <img src="https://cdn-icons-png.flaticon.com/512/2331/2331716.png" class="w-24 h-24 object-contain group-hover:scale-110 transition duration-300">
-                </div>
-            </div>
-
             <div class="bg-white p-3 rounded-t-md border-b flex justify-between items-center">
                 <h2 class="font-bold text-lg" id="section-title">Top Picks for You</h2>
                 <select id="sort" onchange="sortProducts()" class="text-sm border rounded px-2 py-1 outline-none">
@@ -282,11 +219,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </div>
 
             <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 bg-white p-2 rounded-b-md shadow-sm">
-                <div class="col-span-full text-center py-10">
-                    <i class="fas fa-spinner fa-spin text-3xl text-jumia-orange"></i>
-                    <p class="text-gray-500 mt-2">Loading products...</p>
                 </div>
-            </div>
         </section>
     </main>
 
@@ -337,10 +270,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             </div>
         </div>
     </section>
-    
+
     <footer class="bg-gray-900 text-gray-300 py-12 mt-10">
         <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
-            
             <div>
                 <h3 class="text-2xl font-bold text-white mb-4">KEMMEX STORE</h3>
                 <p class="text-sm mb-4">Your number one source for quality Baby & Kids wear, Maternity essentials, and premium Thrift Wears.</p>
@@ -350,18 +282,15 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     <a href="https://www.tiktok.com/@kemzolin?_r=1&_t=ZS-92xOiW9fuzd" class="hover:text-orange-500"><i class="fab fa-tiktok fa-lg"></i></a>
                 </div>
             </div>
-
             <div>
                 <h4 class="text-white font-bold uppercase mb-4">Quick Links</h4>
-               <ul class="space-y-2 text-sm">
-    <li><a href="about.html" class="hover:text-orange-500 hover:underline">About Us</a></li>
-    <li><a href="terms.html" class="hover:text-orange-500 hover:underline">Terms & Conditions</a></li>
-    <li><a href="privacy.html" class="hover:text-orange-500 hover:underline">Privacy Policy</a></li>
-    <li><a href="#" onclick="toggleCart(); return false;" class="hover:text-orange-500 hover:underline">View Cart</a></li>
-    <li><a href="admin.html" class="hover:text-orange-500 hover:underline">Admin Login</a></li>
-</ul>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="about.html" class="hover:text-orange-500 hover:underline">About Us</a></li>
+                    <li><a href="terms.html" class="hover:text-orange-500 hover:underline">Terms & Conditions</a></li>
+                    <li><a href="#" onclick="toggleCart(); return false;" class="hover:text-orange-500 hover:underline">View Cart</a></li>
+                    <li><a href="admin.html" class="hover:text-orange-500 hover:underline">Admin Login</a></li>
+                </ul>
             </div>
-
             <div>
                 <h4 class="text-white font-bold uppercase mb-4">Contact Us</h4>
                 <ul class="space-y-2 text-sm">
@@ -371,7 +300,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </ul>
             </div>
         </div>
-        
         <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
             <p>&copy; 2025 Kemmex Store. Built for greatness.</p>
         </div>
@@ -424,8 +352,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       </div>
     </div>
 
-    <div id="checkoutModal" class="modal fixed inset-0 bg-black/60 z-[60] hidden overflow-y-auto">
-        <div class="relative bg-white rounded-lg shadow-2xl w-full max-w-lg p-6 mx-auto my-10">
+    <div id="checkoutModal" class="modal fixed inset-0 bg-black/60 z-[60] hidden justify-center items-center overflow-y-auto py-10">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg p-6 relative m-4">
             <button onclick="closeModal('checkoutModal')" class="absolute top-3 right-3 text-gray-400 hover:text-black text-xl">&times;</button>
             <h2 class="text-xl font-bold border-b pb-3 mb-4">Finalize Order</h2>
             
@@ -446,14 +374,6 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                         <option value="3000">Outside Ogun State - ₦3,000</option>
                         <option value="0">Store Pickup (Abeokuta) - Free</option>
                     </select>
-
-                    <div id="pickup-details" class="hidden bg-orange-50 p-3 rounded border border-orange-200 mt-2 text-sm text-gray-700">
-                        <p class="font-bold mb-1">Pickup Locations:</p>
-                        <ul class="list-disc ml-4 space-y-1 text-xs">
-                            <li>No 6, Opelifa Street, Iyana Adigbe, Obada, Abeokuta.</li>
-                            <li>No 33, Sholoade Street, Near Bale's House, Ijeun Titun, Abeokuta.</li>
-                        </ul>
-                    </div>
                 </div>
 
                 <div class="mt-4 mb-2">
@@ -486,6 +406,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                     </div>
                     <p id="shipping-display" class="text-right text-xs text-gray-500 mt-1 italic">Shipping fee not included yet.</p>
                 </div>
+
                 <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded shadow-lg text-lg uppercase tracking-wide">Complete Order</button>
             </form>
         </div>
@@ -507,8 +428,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         let currentFilter = 'all';
 
         function loadProducts() {
-             const grid = document.getElementById('products-grid');
-             grid.innerHTML = Array(8).fill(0).map(() => `
+            // SKELETON LOADER
+            const grid = document.getElementById('products-grid');
+            grid.innerHTML = Array(8).fill(0).map(() => `
                 <div class="bg-white p-2 rounded-md shadow-sm h-64 flex flex-col gap-2">
                     <div class="skeleton h-40 w-full rounded-md"></div>
                     <div class="skeleton h-4 w-3/4 rounded"></div>
@@ -516,20 +438,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 </div>
              `).join('');
 
-             db.collection("products")
-             .where("active", "==", true)
-             .get()
-             .then(snapshot => {
-               products = snapshot.docs.map(doc => ({
-                 id: doc.id,
-                 ...doc.data()
-               }));
-               renderProducts(products);
-             })
-             .catch(err => {
-               console.error("Error loading products", err);
-               grid.innerHTML = `<p class="col-span-full text-center text-red-500">Failed to load products. Check console.</p>`;
-             });
+          db.collection("products")
+            .where("active", "==", true)
+            .get()
+            .then(snapshot => {
+              products = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+              }));
+              renderProducts(products);
+            })
+            .catch(err => {
+              console.error("Error loading products", err);
+              grid.innerHTML = `<p class="col-span-full text-center text-red-500">Failed to load products. Check console.</p>`;
+            });
         }
 
         document.addEventListener("DOMContentLoaded", () => {
@@ -571,14 +493,20 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             }
             grid.innerHTML = items.map(p => `
                 <div class="group bg-white border border-transparent hover:border-gray-200 hover:shadow-lg rounded-md transition duration-200 relative p-2 flex flex-col">
+                    <button onclick="toggleSave('${p.id}', this)" class="absolute top-3 right-3 z-10 bg-white/80 rounded-full p-2 hover:bg-white transition heart-btn ${isSaved(p.id) ? 'saved' : ''}">
+                        <i class="fas fa-heart text-gray-300 hover:text-red-500 text-lg"></i>
+                    </button>
+                    
                     <a href="product.html?id=${p.id}" class="block relative overflow-hidden mb-2 cursor-pointer">
                         <img src="${p.img}" alt="${p.name}" class="w-full h-40 object-cover rounded-md group-hover:scale-105 transition duration-300">
                         ${p.oldPrice ? `<span class="absolute top-0 right-0 bg-orange-100 text-jumia-orange text-xs font-bold px-2 py-1 rounded-bl-md">-${Math.round(((p.oldPrice - p.price)/p.oldPrice)*100)}%</span>` : ''}
                     </a>
+                    
                     <div class="flex-grow">
                         <a href="product.html?id=${p.id}" class="block">
                             <h3 class="text-sm text-gray-700 line-clamp-2 mb-1 group-hover:text-jumia-orange transition">${p.name}</h3>
                         </a>
+                        
                         <div class="mb-1">
                             <span class="text-lg font-bold text-gray-900">₦ ${p.price.toLocaleString()}</span>
                             ${p.oldPrice ? `<span class="text-xs text-gray-400 line-through ml-2">₦ ${p.oldPrice.toLocaleString()}</span>` : ''}
@@ -595,6 +523,24 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             `).join('');
         }
 
+        // 🟢 SAVED ITEMS LOGIC
+        function toggleSave(id, btn) {
+            let savedIds = JSON.parse(localStorage.getItem('kemmex_saved')) || [];
+            if (savedIds.includes(id)) {
+                savedIds = savedIds.filter(item => item !== id);
+                btn.classList.remove('saved');
+            } else {
+                savedIds.push(id);
+                btn.classList.add('saved');
+            }
+            localStorage.setItem('kemmex_saved', JSON.stringify(savedIds));
+        }
+
+        function isSaved(id) {
+            const savedIds = JSON.parse(localStorage.getItem('kemmex_saved')) || [];
+            return savedIds.includes(id);
+        }
+
         function getStars(rating) {
             let stars = '';
             for(let i=1; i<=5; i++) {
@@ -608,13 +554,27 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         function addToCart(id) {
             const product = products.find(p => p.id === id);
             if (!product) return;
-            if (product.stock <= 0) return alert("Out of stock");
+
+            if (product.stock <= 0) {
+                alert("Out of stock");
+                return;
+            }
+
             const existing = cart.find(item => item.id === id);
-            if (existing && existing.qty >= product.stock) return alert("Max stock reached");
-            if(existing) existing.qty++;
-            else cart.push({ ...product, qty: 1 });
+            if (existing && existing.qty >= product.stock) {
+                alert("Max stock reached");
+                return;
+            }
+
+            if(existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+            
             saveCart();
             updateCartUI();
+            
             const btn = event.target;
             const originalText = btn.innerText;
             btn.innerText = "Added!";
@@ -669,11 +629,19 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         function changeQty(id, change) {
             const item = cart.find(i => i.id === id);
             const product = products.find(p => p.id === id);
+            
             if(item) {
-                if (change > 0 && product && item.qty >= product.stock) return alert("Max stock reached");
+                if (change > 0 && product && item.qty >= product.stock) {
+                    alert("Max stock reached");
+                    return;
+                }
+                
                 item.qty += change;
                 if(item.qty <= 0) removeFromCart(id);
-                else { saveCart(); updateCartUI(); }
+                else {
+                    saveCart();
+                    updateCartUI();
+                }
             }
         }
 
@@ -711,26 +679,8 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             renderProducts(sortedProducts);
         }
 
-        // Updated Modal Handling for Mobile Scroll Fix
-        function openModal(id) { 
-            const el = document.getElementById(id);
-            el.classList.remove('hidden'); 
-            // Only add 'active' which sets opacity. Layout is handled by CSS now.
-            el.classList.add('active'); 
-            if(id === 'checkoutModal' || id === 'loginModal') {
-                el.classList.add('block'); // Ensure it displays
-            } else {
-                el.classList.add('flex'); // Center others
-            }
-        }
-        
-        function closeModal(id) { 
-            const el = document.getElementById(id);
-            el.classList.add('hidden'); 
-            el.classList.remove('active'); 
-            el.classList.remove('flex');
-            el.classList.remove('block');
-        }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
 
         function handleLogin(e) {
             e.preventDefault();
@@ -759,14 +709,14 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             if(!isLoggedIn) openModal('loginModal'); 
             else { 
                 if(cart.length === 0) return alert("Cart is empty"); 
+                
                 const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
                 document.getElementById('delivery-location').value = "0"; 
                 document.getElementById('checkout-total').innerText = subtotal.toLocaleString();
                 document.getElementById('checkout-total').dataset.subtotal = subtotal; 
                 document.getElementById('transfer-amount').innerText = subtotal.toLocaleString();
                 document.getElementById('shipping-display').innerText = "Select delivery location to see final total.";
-                // Hide pickup details initially
-                document.getElementById('pickup-details').classList.add('hidden');
+                
                 openModal('checkoutModal'); 
             } 
         }
@@ -779,20 +729,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             document.getElementById('checkout-total').innerText = finalTotal.toLocaleString();
             document.getElementById('transfer-amount').innerText = finalTotal.toLocaleString();
             
-            // 🟢 Handle Pickup Display Logic
-            const sel = document.getElementById('delivery-location');
-            const text = sel.options[sel.selectedIndex].text;
-            
-            if(text.includes("Pickup")) {
-                document.getElementById('shipping-display').innerText = "Store Pickup (Free)";
-                document.getElementById('pickup-details').classList.remove('hidden');
+            if(shippingFee > 0) {
+                document.getElementById('shipping-display').innerText = `(Includes ₦${shippingFee.toLocaleString()} Delivery Fee)`;
             } else {
-                document.getElementById('pickup-details').classList.add('hidden');
-                if(shippingFee > 0) {
-                    document.getElementById('shipping-display').innerText = `(Includes ₦${shippingFee.toLocaleString()} Delivery Fee)`;
-                } else {
-                    document.getElementById('shipping-display').innerText = "Shipping fee pending...";
-                }
+                const sel = document.getElementById('delivery-location');
+                const text = sel.options[sel.selectedIndex].text;
+                if(text.includes("Pickup")) document.getElementById('shipping-display').innerText = "Store Pickup (Free)";
+                else document.getElementById('shipping-display').innerText = "Shipping fee pending...";
             }
         }
 
@@ -855,7 +798,7 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
                 .finally(() => { btn.innerHTML = originalHTML; btn.disabled = false; });
         }
 
-        // 🟢 AUTOMATIC SLIDER SCRIPT
+        // Automatic Slider
         let currentSlide = 0;
         setTimeout(() => {
             const slides = document.querySelectorAll('.slide-item');
