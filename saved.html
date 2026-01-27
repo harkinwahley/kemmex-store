@@ -7,31 +7,47 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/shop-local.png">
-
+    
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        kemmex: { blue: '#1e40af', orange: '#f68b1e', dark: '#111827' }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 <body class="bg-gray-50 font-sans min-h-screen">
 
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-bold tracking-tighter">KEMMEX<span class="text-blue-600">★</span></a>
-            <a href="index.html" class="text-sm font-bold text-blue-600 hover:underline"><i class="fas fa-arrow-left"></i> Back to Shop</a>
+            <a href="index.html" class="text-2xl font-black tracking-tighter text-kemmex-dark">KEMMEX<span class="text-kemmex-blue">★</span></a>
+            <a href="index.html" class="text-xs font-black text-kemmex-blue uppercase tracking-widest hover:underline"><i class="fas fa-arrow-left mr-1"></i> Continue Shopping</a>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-8 max-w-4xl">
-        <div class="flex justify-between items-end mb-6">
-            <h1 class="text-2xl font-bold">Saved Items (<span id="saved-count">0</span>)</h1>
-            <button onclick="clearSaved()" class="text-xs text-red-500 hover:underline">Clear All</button>
+    <main class="container mx-auto px-4 py-10 max-w-5xl">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-kemmex-dark">Saved Items</h1>
+                <p class="text-gray-500 text-sm">You have <span id="saved-count" class="font-bold text-kemmex-blue">0</span> products in your wishlist.</p>
+            </div>
+            <button onclick="clearSaved()" class="text-[10px] font-black text-red-500 uppercase tracking-widest hover:bg-red-50 px-4 py-2 rounded-lg transition">
+                <i class="fas fa-trash-alt mr-1"></i> Clear Wishlist
+            </button>
         </div>
         
-        <div id="loading" class="text-center py-10">
-            <i class="fas fa-spinner fa-spin text-2xl text-blue-600"></i>
+        <div id="loading" class="text-center py-20">
+            <i class="fas fa-spinner fa-spin text-3xl text-kemmex-blue"></i>
         </div>
 
-        <div id="saved-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div id="saved-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             </div>
     </main>
 
@@ -41,71 +57,103 @@
             authDomain: "kemmex-store-9ffa3.firebaseapp.com",
             projectId: "kemmex-store-9ffa3",
             storageBucket: "kemmex-store-9ffa3.appspot.com",
-            messagingSenderId: "500875032118",
             appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        let productsList = [];
+
         document.addEventListener("DOMContentLoaded", loadSavedItems);
 
-        function loadSavedItems() {
+        async function loadSavedItems() {
             const savedIds = JSON.parse(localStorage.getItem('kemmex_saved')) || [];
             document.getElementById('saved-count').innerText = savedIds.length;
 
             if (savedIds.length === 0) {
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('saved-grid').innerHTML = `
-                    <div class="col-span-full text-center py-10">
-                        <div class="text-gray-300 text-6xl mb-4"><i class="far fa-heart"></i></div>
-                        <p class="text-gray-500">You haven't saved any items yet.</p>
-                        <a href="index.html" class="inline-block mt-4 bg-blue-600 text-white px-6 py-2 rounded font-bold">Start Shopping</a>
+                    <div class="col-span-full text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
+                        <div class="text-gray-200 text-7xl mb-6"><i class="far fa-heart"></i></div>
+                        <p class="text-gray-500 font-bold text-lg">Your wishlist is empty.</p>
+                        <p class="text-gray-400 text-sm mb-8">Save items you love to find them later.</p>
+                        <a href="index.html" class="inline-block bg-kemmex-blue text-white px-10 py-3 rounded-xl font-black uppercase text-xs tracking-widest shadow-lg shadow-blue-100 transition hover:scale-105">Shop Now</a>
                     </div>`;
                 return;
             }
 
-            // Load all products and filter (Simple method)
-            db.collection("products").where("active", "==", true).get()
-            .then(snapshot => {
-                const allProducts = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-                const savedProducts = allProducts.filter(p => savedIds.includes(p.id));
-                
+            try {
+                const snapshot = await db.collection("products").where("active", "==", true).get();
+                productsList = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+                const savedProducts = productsList.filter(p => savedIds.includes(p.id));
                 renderSaved(savedProducts);
-            })
-            .catch(err => console.error(err))
-            .finally(() => document.getElementById('loading').classList.add('hidden'));
+            } catch (err) {
+                console.error(err);
+            } finally {
+                document.getElementById('loading').classList.add('hidden');
+            }
         }
 
         function renderSaved(items) {
             const grid = document.getElementById('saved-grid');
             grid.innerHTML = items.map(p => `
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative group">
-                    <button onclick="removeSaved('${p.id}')" class="absolute top-2 right-2 bg-white rounded-full p-1.5 shadow text-red-500 hover:bg-red-50 z-10">
-                        <i class="fas fa-times"></i>
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative group">
+                    <button onclick="removeSaved('${p.id}')" class="absolute top-3 right-3 bg-white/90 rounded-full w-8 h-8 shadow text-red-500 hover:bg-red-500 hover:text-white z-10 transition">
+                        <i class="fas fa-times text-xs"></i>
                     </button>
-                    <a href="product.html?id=${p.id}">
-                        <img src="${p.img}" class="w-full h-40 object-cover">
-                        <div class="p-3">
-                            <h3 class="text-sm font-bold text-gray-800 line-clamp-1">${p.name}</h3>
-                            <p class="text-orange-600 font-bold mt-1">₦${p.price.toLocaleString()}</p>
-                        </div>
+                    
+                    <a href="product.html?id=${p.id}" class="block aspect-square overflow-hidden bg-gray-50">
+                        <img src="${p.img}" class="w-full h-full object-cover transition group-hover:scale-110 duration-500">
                     </a>
-                    <button onclick="window.location.href='product.html?id=${p.id}'" class="w-full bg-gray-100 text-gray-700 py-2 text-xs font-bold uppercase hover:bg-blue-600 hover:text-white transition">
-                        View Item
-                    </button>
+
+                    <div class="p-4">
+                        <h3 class="text-xs font-bold text-gray-800 truncate mb-1">${p.name}</h3>
+                        <p class="text-kemmex-blue font-black text-lg mb-3">₦${p.price.toLocaleString()}</p>
+                        
+                        <div class="space-y-2">
+                            <button onclick="moveToCart('${p.id}')" class="w-full bg-kemmex-orange text-white py-2 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm hover:shadow-orange-200 transition">
+                                Add to Cart
+                            </button>
+                            <button onclick="enquire('${p.name}', ${p.price})" class="w-full border border-green-500 text-green-600 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-green-50 transition">
+                                <i class="fab fa-whatsapp"></i> WhatsApp Buy
+                            </button>
+                        </div>
+                    </div>
                 </div>
             `).join('');
+        }
+
+        function moveToCart(id) {
+            const product = productsList.find(p => p.id === id);
+            if (!product) return;
+
+            let cart = JSON.parse(localStorage.getItem('kemmex_cart')) || [];
+            const existing = cart.find(item => item.id === id);
+
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+
+            localStorage.setItem('kemmex_cart', JSON.stringify(cart));
+            alert(`${product.name} added to cart!`);
+        }
+
+        function enquire(name, price) {
+            const msg = `Hello Kemmex Store, I'm interested in buying this item from my Saved List:%0A%0A*Product:* ${name}%0A*Price:* ₦${price.toLocaleString()}%0A%0AIs this still available?`;
+            window.open(`https://wa.me/2348039468706?text=${msg}`, '_blank');
         }
 
         function removeSaved(id) {
             let savedIds = JSON.parse(localStorage.getItem('kemmex_saved')) || [];
             savedIds = savedIds.filter(item => item !== id);
             localStorage.setItem('kemmex_saved', JSON.stringify(savedIds));
-            loadSavedItems(); // Reload
+            loadSavedItems();
         }
 
         function clearSaved() {
-            if(confirm("Clear all saved items?")) {
+            if(confirm("Are you sure you want to empty your wishlist?")) {
                 localStorage.removeItem('kemmex_saved');
                 loadSavedItems();
             }
