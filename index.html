@@ -3,247 +3,726 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kemmex Store | Quality Wears for Kids & Adults</title>
+    <title>KEMMEX STORE - Your Journey, Our Fashion</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/shop-local.png">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        kemmex: { blue: '#1e40af', orange: '#f68b1e', dark: '#111827' }
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, addDoc, setDoc, updateDoc, deleteDoc, onSnapshot, collection, query, where, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration
+        let firebaseConfig = {
+            apiKey: "AIzaSyDZDhAOl1JbQoPqUORB2QfqWgYUIfFGXbA",
+            authDomain: "kemmex-store.firebaseapp.com",
+            projectId: "kemmex-store",
+            storageBucket: "kemmex-store.firebasestorage.app",
+            messagingSenderId: "652069351107",
+            appId: "1:652069351107:web:9760a3ba825d296f7efc76"
+        };
+
+        // Initialize Firebase
+        let app, db, auth;
+        let authReadyPromise = new Promise(resolve => {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        console.log("User Authenticated:", user.uid);
+                    } else {
+                        console.log("No user, signing in anonymously...");
+                        await signInAnonymously(auth);
                     }
-                }
+                    resolve(true);
+                });
+            } catch (e) {
+                console.error("Firebase Init Error", e);
+                resolve(false);
             }
-        }
+        });
+
+        // Expose to window for the main script
+        window.db = db;
+        window.auth = auth;
+        window.authReadyPromise = authReadyPromise;
+        
+        // Expose SDK functions
+        window.collection = collection;
+        window.doc = doc;
+        window.getDoc = getDoc;
+        window.setDoc = setDoc;
+        window.addDoc = addDoc;
+        window.getDocs = getDocs;
+        window.query = query;
+        window.signOut = signOut;
+        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
     </script>
+
     <style>
-        .category-btn.active { background-color: #1e40af; color: white; border-color: #1e40af; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        :root {
+            --color-primary: #D02B62; /* Deep Pink */
+            --color-secondary: #FF8C00; /* Orange */
+            --color-bg-light: #F9FAFB;
+            --color-bg-header: #FFF0F3;
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--color-bg-light); }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #D02B62; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #b01b4e; }
+
+        .text-primary-pink { color: var(--color-primary); }
+        .text-accent-orange { color: var(--color-secondary); }
+        .bg-primary-pink { background-color: var(--color-primary); }
+        
+        .btn-main {
+            background: linear-gradient(135deg, #D02B62 0%, #b01b4e 100%);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        .btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(208, 43, 98, 0.3);
+        }
+        
+        .product-card {
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+            border-color: #ffe4e8;
+        }
+
+        /* Toast Notification Animation */
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        .toast { animation: slideIn 0.3s ease-out forwards; }
+
+        /* Loader */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #D02B62;
+            width: 24px;
+            height: 24px;
+            -webkit-animation: spin 1s linear infinite; /* Safari */
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-900">
+<body class="flex flex-col min-h-screen">
 
-    <div class="bg-kemmex-dark text-white text-[10px] py-2 text-center font-bold uppercase tracking-widest">
-        🚀 Nationwide Delivery | Pay Before Delivery Policy
-    </div>
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-[60] flex flex-col gap-2"></div>
 
-    <header class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="container mx-auto px-4">
-            <div class="flex items-center justify-between py-4">
-                <a href="index.html" class="text-2xl font-black tracking-tighter text-kemmex-dark">
-                    KEMMEX<span class="text-kemmex-blue">★</span>
+    <nav class="bg-white shadow-md sticky top-0 z-50">
+        <div class="container mx-auto px-4 py-3">
+            <div class="flex justify-between items-center">
+                <a href="#" id="homeLink" class="text-2xl md:text-3xl font-extrabold text-primary-pink tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-bag-shopping"></i> KEMMEX
                 </a>
 
-                <div class="flex items-center gap-5">
-                    <a href="saved.html" class="text-gray-600 hover:text-red-500 transition">
-                        <i class="far fa-heart text-xl"></i>
-                    </a>
-                    <a href="cart.html" class="relative group text-gray-600">
-                        <i class="fas fa-shopping-basket text-xl group-hover:text-kemmex-blue"></i>
-                        <span id="cart-count" class="absolute -top-2 -right-2 bg-kemmex-orange text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
-                    </a>
-                    <a href="admin.html" class="text-xs font-black uppercase tracking-tighter bg-gray-100 px-3 py-1 rounded">Admin</a>
+                <div class="hidden md:flex flex-1 mx-10 max-w-lg relative">
+                    <input type="text" id="searchInput" placeholder="Search for fashion..." class="w-full pl-4 pr-10 py-2 rounded-full border border-gray-200 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition-all bg-gray-50">
+                    <button class="absolute right-3 top-2.5 text-gray-400 hover:text-pink-600">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+
+                <div class="hidden md:flex items-center space-x-6">
+                    <button id="viewCartBtn" class="relative text-gray-700 hover:text-pink-600 transition-colors">
+                        <i class="fa-solid fa-cart-shopping text-xl"></i>
+                        <span id="cartItemCount" class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">0</span>
+                    </button>
+                    <div id="authButtons">
+                        <button id="loginSignupBtn" class="btn-main px-6 py-2 rounded-full font-medium text-sm shadow-md">Login</button>
+                        <button id="logoutBtn" class="hidden text-gray-600 hover:text-pink-600 font-medium text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-right-from-bracket"></i> Logout
+                        </button>
+                    </div>
+                </div>
+
+                <div class="md:hidden flex items-center gap-4">
+                    <button id="mobileCartBtn" class="relative text-gray-700">
+                        <i class="fa-solid fa-cart-shopping text-xl"></i>
+                        <span id="mobileCartCount" class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">0</span>
+                    </button>
+                    <button id="mobileMenuBtn" class="text-gray-700 text-2xl">
+                        <i class="fa-solid fa-bars"></i>
+                    </button>
                 </div>
             </div>
 
-            <div class="pb-4">
-                <div class="relative max-w-2xl mx-auto">
-                    <input type="text" id="searchInput" onkeyup="filterProducts()" placeholder="Search clothes, toys, maternity..." 
-                        class="w-full bg-gray-100 border-none rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-kemmex-blue outline-none transition text-sm">
-                    <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <div id="mobileMenu" class="hidden md:hidden mt-4 pb-4 border-t border-gray-100 pt-4">
+                <input type="text" id="mobileSearchInput" placeholder="Search products..." class="w-full px-4 py-2 rounded-lg border border-gray-200 mb-4 focus:outline-none focus:border-pink-500">
+                <div class="flex flex-col space-y-3">
+                    <button id="mobileLoginBtn" class="btn-main w-full py-2 rounded-lg">Login / Sign Up</button>
+                    <button id="mobileLogoutBtn" class="hidden w-full py-2 text-gray-600 border border-gray-300 rounded-lg">Logout</button>
                 </div>
             </div>
-        </div>
-    </header>
-
-    <nav class="bg-white border-b overflow-x-auto hide-scrollbar">
-        <div class="container mx-auto px-4 py-3 flex gap-3 whitespace-nowrap">
-            <button onclick="filterCategory('All')" class="category-btn active px-5 py-2 rounded-full border text-xs font-bold uppercase transition">All Items</button>
-            <button onclick="filterCategory('Baby & Kids')" class="category-btn px-5 py-2 rounded-full border text-xs font-bold uppercase transition">Baby & Kids</button>
-            <button onclick="filterCategory('Thrift Wears')" class="category-btn px-5 py-2 rounded-full border text-xs font-bold uppercase transition">Thrift (Okrika)</button>
-            <button onclick="filterCategory('Maternity')" class="category-btn px-5 py-2 rounded-full border text-xs font-bold uppercase transition">Maternity</button>
-            <button onclick="filterCategory('Toys')" class="category-btn px-5 py-2 rounded-full border text-xs font-bold uppercase transition">Toys</button>
         </div>
     </nav>
 
-    <main class="container mx-auto px-4 py-8">
-        <div id="hero" class="mb-10 bg-kemmex-blue rounded-3xl p-8 text-white flex flex-col md:flex-row items-center justify-between overflow-hidden relative">
-            <div class="z-10 relative">
-                <span class="bg-kemmex-orange px-3 py-1 rounded-full text-[10px] font-black uppercase">New Arrivals</span>
-                <h2 class="text-4xl font-black mt-4 leading-tight">Quality Wears <br> For Your Little Ones</h2>
-                <p class="text-blue-100 mt-2 text-sm max-w-xs">Affordable maternity and kids' fashion delivered to your doorstep.</p>
+    <header class="bg-gradient-to-r from-pink-50 to-orange-50 py-12 md:py-20">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-6xl font-black text-gray-800 mb-4 leading-tight">
+                Your Journey, <span class="text-primary-pink">Our Fashion</span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">Discover the latest trends in baby fashion, maternity wear, and stylish outfits for the modern family.</p>
+            <button onclick="document.getElementById('productListing').scrollIntoView({behavior: 'smooth'})" class="btn-main px-8 py-3 rounded-full text-lg font-bold shadow-lg transform hover:scale-105 transition-transform">
+                Shop Collection
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-grow container mx-auto px-4 py-12">
+
+        <div id="initialLoader" class="flex flex-col items-center justify-center h-64">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-pink-600"></div>
+            <p class="mt-4 text-gray-500 font-medium animate-pulse">Loading Kemmex Collections...</p>
+        </div>
+
+        <section id="productListing" class="hidden">
+            <div class="flex flex-nowrap overflow-x-auto md:flex-wrap justify-start md:justify-center gap-3 mb-12 pb-4 scrollbar-hide">
+                <button class="category-btn btn-main px-6 py-2 rounded-full text-sm whitespace-nowrap shadow-sm" data-category="all">All</button>
+                <button class="category-btn bg-white text-gray-600 border border-gray-200 hover:border-pink-500 hover:text-pink-500 px-6 py-2 rounded-full text-sm whitespace-nowrap transition-colors" data-category="Baby Fashion">Baby Fashion</button>
+                <button class="category-btn bg-white text-gray-600 border border-gray-200 hover:border-pink-500 hover:text-pink-500 px-6 py-2 rounded-full text-sm whitespace-nowrap transition-colors" data-category="Kids Fashion">Kids Fashion</button>
+                <button class="category-btn bg-white text-gray-600 border border-gray-200 hover:border-pink-500 hover:text-pink-500 px-6 py-2 rounded-full text-sm whitespace-nowrap transition-colors" data-category="Adult Female Fashion">Adult Female</button>
+                <button class="category-btn bg-white text-gray-600 border border-gray-200 hover:border-pink-500 hover:text-pink-500 px-6 py-2 rounded-full text-sm whitespace-nowrap transition-colors" data-category="Maternity Wear">Maternity</button>
+                <button class="category-btn bg-white text-gray-600 border border-gray-200 hover:border-pink-500 hover:text-pink-500 px-6 py-2 rounded-full text-sm whitespace-nowrap transition-colors" data-category="Hospital Kits">Hospital Kits</button>
             </div>
-            <i class="fas fa-stars absolute right-10 top-10 text-6xl opacity-20"></i>
-        </div>
 
-        <div id="loading" class="text-center py-20">
-            <i class="fas fa-spinner fa-spin text-4xl text-kemmex-blue"></i>
-        </div>
-
-        <div id="product-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+            <div id="productsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                </div>
+            
+            <div id="noProductsMessage" class="hidden text-center py-20">
+                <i class="fa-regular fa-face-frown-open text-6xl text-gray-300 mb-4"></i>
+                <p class="text-xl text-gray-500">No products found matching your search.</p>
             </div>
-
-        <div id="no-results" class="hidden text-center py-20">
-            <i class="fas fa-search text-5xl text-gray-200 mb-4"></i>
-            <p class="text-gray-500 font-bold">No products found matching your search.</p>
-        </div>
+        </section>
     </main>
 
-    <footer class="bg-white border-t mt-20 py-12">
-        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-10">
+    <footer class="bg-gray-900 text-white pt-16 pb-8">
+        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
-                <h3 class="text-xl font-black mb-4">KEMMEX<span class="text-kemmex-blue">★</span></h3>
-                <p class="text-sm text-gray-500 leading-relaxed">Your #1 destination for affordable thrift and new fashion in Abeokuta and across Nigeria.</p>
+                <h3 class="text-2xl font-bold text-primary-pink mb-4">KEMMEX STORE</h3>
+                <p class="text-gray-400 text-sm">Your one-stop shop for premium family fashion. Quality materials, trendy designs, and affordable prices.</p>
             </div>
             <div>
-                <h4 class="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Helpful Links</h4>
-                <ul class="text-sm space-y-2 font-bold">
-                    <li><a href="terms.html" class="hover:text-kemmex-blue">Terms & Conditions</a></li>
-                    <li><a href="about.html" class="hover:text-kemmex-blue">About Us</a></li>
-                    <li><a href="https://wa.me/2348039468706" class="text-green-600">Contact Support</a></li>
+                <h4 class="text-lg font-semibold mb-4">Quick Links</h4>
+                <ul class="space-y-2 text-gray-400 text-sm">
+                    <li><a href="#" class="hover:text-white">Home</a></li>
+                    <li><a href="#" class="hover:text-white">New Arrivals</a></li>
+                    <li><a href="#" class="hover:text-white">Track Order</a></li>
                 </ul>
             </div>
             <div>
-                <h4 class="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Pickup Hubs</h4>
-                <p class="text-xs text-gray-500 italic">Opelifa Street, Iyana Adigbe, Abeokuta.</p>
-                <p class="text-xs text-gray-500 italic mt-1">Sholoade Street, Ijeun Titun, Abeokuta.</p>
+                <h4 class="text-lg font-semibold mb-4">Contact Us</h4>
+                <p class="text-gray-400 text-sm mb-2"><i class="fa-solid fa-envelope mr-2"></i> support@kemmexstore.com</p>
+                <p class="text-gray-400 text-sm"><i class="fa-solid fa-phone mr-2"></i> +234 800 KEMMEX</p>
             </div>
         </div>
-        <div class="text-center mt-10 pt-8 border-t text-[10px] text-gray-400 uppercase font-bold tracking-widest">
-            &copy; 2026 Kemmex Store. All Rights Reserved.
+        <div class="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
+            &copy; 2025 KEMMEX STORE. All rights reserved.
         </div>
     </footer>
 
+    <div id="productDetailModal" class="fixed inset-0 bg-black bg-opacity-75 z-[100] hidden flex items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative shadow-2xl flex flex-col md:flex-row overflow-hidden">
+            <button class="modal-close-btn absolute top-4 right-4 text-gray-400 hover:text-red-500 text-2xl z-10 transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="w-full md:w-1/2 bg-gray-100 flex items-center justify-center p-6">
+                <img id="detailImg" src="" class="max-w-full max-h-96 object-contain mix-blend-multiply">
+            </div>
+            <div class="w-full md:w-1/2 p-8 flex flex-col">
+                <span id="detailCategory" class="text-pink-600 font-semibold text-sm tracking-wide uppercase mb-2"></span>
+                <h2 id="detailName" class="text-3xl font-bold text-gray-800 mb-2"></h2>
+                <div class="flex items-center gap-4 mb-6">
+                    <p id="detailPrice" class="text-3xl font-bold text-orange-500"></p>
+                    <span id="detailAvailability" class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">In Stock</span>
+                </div>
+                <p id="detailDescription" class="text-gray-600 mb-8 leading-relaxed flex-grow"></p>
+                
+                <div class="border-t border-gray-100 pt-6 mt-auto">
+                    <div class="flex items-center gap-4 mb-4">
+                        <label class="font-semibold text-gray-700">Quantity:</label>
+                        <div class="flex items-center border border-gray-300 rounded-lg">
+                            <button onclick="adjustDetailQty(-1)" class="px-3 py-1 text-gray-500 hover:bg-gray-100 rounded-l-lg">-</button>
+                            <input type="number" id="detailQuantity" value="1" min="1" class="w-12 text-center border-none focus:ring-0 py-1" readonly>
+                            <button onclick="adjustDetailQty(1)" class="px-3 py-1 text-gray-500 hover:bg-gray-100 rounded-r-lg">+</button>
+                        </div>
+                    </div>
+                    <button id="addToCartBtn" class="w-full btn-main py-3 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-cart-plus"></i> Add to Cart
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="cartModal" class="fixed inset-0 bg-black bg-opacity-60 z-[100] hidden justify-end">
+        <div class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col animate-[slideIn_0.3s_ease-out]">
+            <div class="p-5 border-b border-gray-100 flex justify-between items-center bg-pink-50">
+                <h3 class="text-xl font-bold text-gray-800"><i class="fa-solid fa-bag-shopping mr-2 text-pink-600"></i> Your Cart</h3>
+                <button class="modal-close-btn text-gray-500 hover:text-red-500 transition-colors"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            <div id="cartItemsContainer" class="flex-grow overflow-y-auto p-5 space-y-4">
+                </div>
+            <div class="p-6 bg-gray-50 border-t border-gray-200">
+                <div class="flex justify-between items-end mb-4">
+                    <span class="text-gray-600 font-medium">Total</span>
+                    <span id="cartTotal" class="text-3xl font-bold text-gray-900">₦0.00</span>
+                </div>
+                <button id="checkoutBtn" class="w-full btn-main py-3 rounded-xl font-bold text-lg shadow-md mb-3">Checkout Now</button>
+                <button id="clearCartBtn" class="w-full text-red-500 text-sm font-medium hover:underline">Clear Cart</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="checkoutModal" class="fixed inset-0 bg-black bg-opacity-75 z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-lg p-8 relative">
+            <button class="modal-close-btn absolute top-4 right-4 text-gray-400"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 class="text-2xl font-bold mb-6 text-gray-800">Checkout</h3>
+            <form id="checkoutForm" class="space-y-4">
+                <input type="text" id="customerName" placeholder="Full Name" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:outline-none" required>
+                <textarea id="customerAddress" placeholder="Delivery Address" rows="3" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:outline-none" required></textarea>
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <p class="font-semibold mb-2">Payment Method</p>
+                    <label class="flex items-center gap-2 mb-2 cursor-pointer">
+                        <input type="radio" name="paymentMethod" value="Online" checked class="text-pink-600 focus:ring-pink-500">
+                        <span>Pay Online (Card/Transfer)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="paymentMethod" value="Delivery" class="text-pink-600 focus:ring-pink-500">
+                        <span>Pay on Delivery</span>
+                    </label>
+                </div>
+                <div class="flex justify-between font-bold text-xl py-2">
+                    <span>Total:</span>
+                    <span id="checkoutTotal" class="text-orange-600">₦0.00</span>
+                </div>
+                <button type="submit" class="w-full btn-main py-3 rounded-lg font-bold">Place Order</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="authModal" class="fixed inset-0 bg-black bg-opacity-75 z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl w-full max-w-sm p-8 relative shadow-2xl">
+            <button class="modal-close-btn absolute top-4 right-4 text-gray-400"><i class="fa-solid fa-xmark text-xl"></i></button>
+            <h3 id="authModalTitle" class="text-2xl font-bold mb-2 text-center text-gray-800">Welcome Back</h3>
+            <p class="text-center text-gray-500 text-sm mb-6">Enter your details to access your account</p>
+            <form id="authForm" class="space-y-4">
+                <input type="email" id="authEmail" placeholder="Email Address" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:outline-none" required>
+                <input type="password" id="authPassword" placeholder="Password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:outline-none" required>
+                <div id="authError" class="text-red-500 text-xs text-center hidden"></div>
+                <button type="submit" id="authSubmitBtn" class="w-full btn-main py-3 rounded-lg font-bold">Login</button>
+            </form>
+            <button id="toggleAuthModeBtn" class="w-full text-center mt-4 text-sm text-pink-600 font-medium hover:underline">New here? Create account</button>
+        </div>
+    </div>
+
     <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
-            authDomain: "kemmex-store-9ffa3.firebaseapp.com",
-            projectId: "kemmex-store-9ffa3",
-            storageBucket: "kemmex-store-9ffa3.appspot.com",
-            appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
+        // === STATE & DOM ELEMENTS ===
         let allProducts = [];
-        let currentCategory = 'All';
+        let shoppingCart = [];
+        let authMode = 'login';
+        
+        const dom = {
+            grid: document.getElementById('productsGrid'),
+            loader: document.getElementById('initialLoader'),
+            listing: document.getElementById('productListing'),
+            cartCount: document.getElementById('cartItemCount'),
+            mobileCartCount: document.getElementById('mobileCartCount'),
+            cartContainer: document.getElementById('cartItemsContainer'),
+            total: document.getElementById('cartTotal'),
+            searchInput: document.getElementById('searchInput'),
+            mobileSearch: document.getElementById('mobileSearchInput'),
+            modals: {
+                detail: document.getElementById('productDetailModal'),
+                cart: document.getElementById('cartModal'),
+                checkout: document.getElementById('checkoutModal'),
+                auth: document.getElementById('authModal')
+            }
+        };
 
-        async function loadProducts() {
+        // === UTILITIES ===
+        const showToast = (message, type = 'success') => {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgClass = type === 'error' ? 'bg-red-500' : (type === 'info' ? 'bg-blue-500' : 'bg-green-600');
+            const icon = type === 'error' ? '<i class="fa-solid fa-circle-exclamation"></i>' : '<i class="fa-solid fa-circle-check"></i>';
+            
+            toast.className = `${bgClass} text-white px-6 py-4 rounded-lg shadow-xl flex items-center gap-3 toast min-w-[300px]`;
+            toast.innerHTML = `${icon} <span class="font-medium">${message}</span>`;
+            
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(20px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        };
+
+        const formatCurrency = (amount) => `₦${parseFloat(amount).toLocaleString()}`;
+
+        // === CORE FUNCTIONS ===
+        
+        async function initApp() {
+            await window.authReadyPromise; // Wait for Firebase
+            if(!window.db) {
+                showToast("Connection Error. Please refresh.", "error");
+                return;
+            }
+            fetchProducts();
+            setupEventListeners();
+        }
+
+        async function fetchProducts() {
             try {
-                const snapshot = await db.collection("products").where("active", "==", true).get();
+                const q = window.query(window.collection(window.db, 'products'));
+                const snapshot = await window.getDocs(q);
                 allProducts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderProducts(allProducts);
-                updateCartCount();
-                document.getElementById('loading').classList.add('hidden');
-            } catch (error) {
-                console.error("Error loading products:", error);
+                dom.loader.classList.add('hidden');
+                dom.listing.classList.remove('hidden');
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to load products", "error");
             }
         }
 
-        function renderProducts(items) {
-            const grid = document.getElementById('product-grid');
-            const noResults = document.getElementById('no-results');
-            
-            if (items.length === 0) {
-                grid.classList.add('hidden');
-                noResults.classList.remove('hidden');
+        function renderProducts(products) {
+            dom.grid.innerHTML = '';
+            if(products.length === 0) {
+                document.getElementById('noProductsMessage').classList.remove('hidden');
                 return;
             }
+            document.getElementById('noProductsMessage').classList.add('hidden');
 
-            grid.classList.remove('hidden');
-            noResults.classList.add('hidden');
-
-            grid.innerHTML = items.map(p => {
-                const isOutOfStock = p.stock <= 0;
-                return `
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden group hover:shadow-md transition duration-300">
-                        <a href="product.html?id=${p.id}" class="block relative aspect-square overflow-hidden bg-gray-50">
-                            <img src="${p.img}" class="w-full h-full object-contain transition duration-500 group-hover:scale-110">
-                            ${isOutOfStock ? 
-                                `<div class="absolute inset-0 bg-white/60 flex items-center justify-center">
-                                    <span class="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase">Sold Out</span>
-                                </div>` : '' 
-                            }
-                            <div class="absolute top-2 left-2">
-                                <span class="bg-white/90 text-kemmex-dark text-[8px] font-black px-2 py-1 rounded shadow-sm uppercase tracking-tighter border border-gray-100">${p.category}</span>
-                            </div>
-                        </a>
-                        <div class="p-4">
-                            <a href="product.html?id=${p.id}" class="block">
-                                <h3 class="font-bold text-sm text-gray-800 truncate mb-1 group-hover:text-kemmex-blue transition">${p.name}</h3>
-                                <p class="text-kemmex-orange font-black text-lg">₦${p.price.toLocaleString()}</p>
-                            </a>
-                            <button 
-                                onclick="addToCart('${p.id}')" 
-                                ${isOutOfStock ? 'disabled' : ''}
-                                class="w-full mt-3 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition 
-                                ${isOutOfStock ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-kemmex-blue text-white hover:bg-kemmex-dark shadow-sm'}">
-                                ${isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
-                            </button>
+            products.forEach(p => {
+                const el = document.createElement('div');
+                el.className = 'product-card bg-white rounded-xl overflow-hidden flex flex-col h-full';
+                el.innerHTML = `
+                    <div class="relative h-64 bg-gray-100 group overflow-hidden cursor-pointer" onclick="openDetail('${p.id}')">
+                        <img src="${p.imageUrl || 'https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?q=80&w=1000'}" 
+                             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                             onerror="this.src='https://via.placeholder.com/400x300?text=KEMMEX'">
+                        ${!p.isAvailable ? '<div class="absolute inset-0 bg-white/60 flex items-center justify-center"><span class="bg-red-500 text-white px-3 py-1 text-xs font-bold uppercase rounded">Out of Stock</span></div>' : ''}
+                        <button class="absolute bottom-3 right-3 bg-white w-10 h-10 rounded-full shadow-md flex items-center justify-center text-gray-800 hover:text-pink-600 hover:bg-pink-50 transition-colors z-10" onclick="event.stopPropagation(); quickAdd('${p.id}')">
+                            <i class="fa-solid fa-cart-plus"></i>
+                        </button>
+                    </div>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <div class="text-xs text-pink-500 font-semibold uppercase tracking-wider mb-1">${p.category}</div>
+                        <h3 class="font-bold text-gray-800 mb-2 truncate text-lg">${p.name}</h3>
+                        <div class="mt-auto flex items-center justify-between">
+                            <span class="text-xl font-bold text-gray-900">${formatCurrency(p.price)}</span>
                         </div>
                     </div>
                 `;
-            }).join('');
-        }
-
-        function filterProducts() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allProducts.filter(p => 
-                (currentCategory === 'All' || p.category === currentCategory) &&
-                (p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term))
-            );
-            renderProducts(filtered);
-        }
-
-        function filterCategory(cat) {
-            currentCategory = cat;
-            document.querySelectorAll('.category-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.innerText.toLowerCase() === cat.toLowerCase() || (cat === 'All' && btn.innerText === 'All Items'));
+                dom.grid.appendChild(el);
             });
-            filterProducts();
         }
 
-        function addToCart(id) {
-            const product = allProducts.find(p => p.id === id);
-            if (!product || product.stock <= 0) return;
+        // === CART LOGIC ===
 
-            let cart = JSON.parse(localStorage.getItem('kemmex_cart')) || [];
-            const existing = cart.find(item => item.id === id);
+        async function loadCart(userId) {
+            shoppingCart = [];
+            if(!userId || !window.db) return updateCartUI();
 
-            if (existing) {
-                if (existing.qty >= product.stock) return alert("No more items in stock!");
-                existing.qty++;
-            } else {
-                cart.push({ ...product, qty: 1 });
+            const cartRef = window.doc(window.db, 'carts', userId);
+            try {
+                const docSnap = await window.getDoc(cartRef);
+                if(docSnap.exists()) shoppingCart = docSnap.data().items || [];
+            } catch(e) { console.error("Cart load error", e); }
+            updateCartUI();
+        }
+
+        async function saveCart() {
+            const user = window.auth.currentUser;
+            if(!user) return;
+            try {
+                await window.setDoc(window.doc(window.db, 'carts', user.uid), { items: shoppingCart }, { merge: true });
+            } catch(e) { console.error("Save cart error", e); }
+        }
+
+        function updateCartUI() {
+            dom.cartContainer.innerHTML = '';
+            let total = 0;
+            let count = 0;
+
+            if(shoppingCart.length === 0) {
+                dom.cartContainer.innerHTML = `<div class="text-center py-10 text-gray-400"><i class="fa-solid fa-basket-shopping text-4xl mb-3"></i><p>Your cart is empty</p></div>`;
             }
 
-            localStorage.setItem('kemmex_cart', JSON.stringify(cart));
-            updateCartCount();
+            shoppingCart.forEach(item => {
+                total += item.price * item.quantity;
+                count += item.quantity;
+                
+                const div = document.createElement('div');
+                div.className = 'flex items-center gap-4 bg-white p-2 rounded-lg border border-gray-100';
+                div.innerHTML = `
+                    <img src="${item.imageUrl || 'https://via.placeholder.com/50'}" class="w-16 h-16 object-cover rounded-md bg-gray-100">
+                    <div class="flex-grow">
+                        <h4 class="font-bold text-gray-800 text-sm line-clamp-1">${item.name}</h4>
+                        <p class="text-xs text-gray-500">${formatCurrency(item.price)}</p>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                        <div class="flex items-center border border-gray-200 rounded">
+                            <button class="px-2 text-gray-500 hover:bg-gray-100" onclick="updateItemQty('${item.id}', -1)">-</button>
+                            <span class="text-sm px-1 min-w-[20px] text-center font-medium">${item.quantity}</span>
+                            <button class="px-2 text-gray-500 hover:bg-gray-100" onclick="updateItemQty('${item.id}', 1)">+</button>
+                        </div>
+                        <button class="text-red-400 text-xs hover:text-red-600" onclick="removeItem('${item.id}')">Remove</button>
+                    </div>
+                `;
+                dom.cartContainer.appendChild(div);
+            });
+
+            dom.total.textContent = formatCurrency(total);
+            dom.cartCount.textContent = count;
+            dom.mobileCartCount.textContent = count;
+            document.getElementById('checkoutTotal').textContent = formatCurrency(total);
+        }
+
+        // Exposed Global Helpers for HTML onclick attributes
+        window.openDetail = (id) => {
+            const p = allProducts.find(x => x.id === id);
+            if(!p) return;
             
-            // Visual feedback
-            const btn = event.currentTarget;
-            const originalText = btn.innerText;
-            btn.innerText = "✓ Added";
-            btn.classList.replace('bg-kemmex-blue', 'bg-green-600');
-            setTimeout(() => {
-                btn.innerText = originalText;
-                btn.classList.replace('bg-green-600', 'bg-kemmex-blue');
-            }, 1000);
+            document.getElementById('detailImg').src = p.imageUrl || 'https://via.placeholder.com/400';
+            document.getElementById('detailName').textContent = p.name;
+            document.getElementById('detailPrice').textContent = formatCurrency(p.price);
+            document.getElementById('detailCategory').textContent = p.category;
+            document.getElementById('detailDescription').textContent = p.description || "Premium quality fashion item from Kemmex Store.";
+            document.getElementById('detailAvailability').style.display = p.isAvailable ? 'inline-block' : 'none';
+            document.getElementById('addToCartBtn').onclick = () => {
+                const qty = parseInt(document.getElementById('detailQuantity').value);
+                addToCart(p, qty);
+                dom.modals.detail.classList.add('hidden');
+            };
+            
+            dom.modals.detail.classList.remove('hidden');
+            dom.modals.detail.classList.add('flex');
+        };
+
+        window.quickAdd = (id) => {
+            const p = allProducts.find(x => x.id === id);
+            if(p) addToCart(p, 1);
+        };
+
+        window.adjustDetailQty = (delta) => {
+            const input = document.getElementById('detailQuantity');
+            let val = parseInt(input.value) + delta;
+            if(val < 1) val = 1;
+            input.value = val;
+        };
+
+        window.updateItemQty = (id, delta) => {
+            const item = shoppingCart.find(i => i.id === id);
+            if(item) {
+                item.quantity += delta;
+                if(item.quantity <= 0) shoppingCart = shoppingCart.filter(i => i.id !== id);
+                saveCart();
+                updateCartUI();
+            }
+        };
+
+        window.removeItem = (id) => {
+            shoppingCart = shoppingCart.filter(i => i.id !== id);
+            saveCart();
+            updateCartUI();
+        };
+
+        function addToCart(product, qty) {
+            if(!product.isAvailable) {
+                showToast("Product is out of stock", "error");
+                return;
+            }
+            const exist = shoppingCart.find(i => i.id === product.id);
+            if(exist) exist.quantity += qty;
+            else shoppingCart.push({ ...product, quantity: qty });
+            
+            saveCart();
+            updateCartUI();
+            showToast(`${qty} x ${product.name} added to cart`);
         }
 
-        function updateCartCount() {
-            const cart = JSON.parse(localStorage.getItem('kemmex_cart')) || [];
-            const count = cart.reduce((sum, item) => sum + item.qty, 0);
-            document.getElementById('cart-count').innerText = count;
+        // === EVENT LISTENERS ===
+        function setupEventListeners() {
+            // Close Modals
+            document.querySelectorAll('.modal-close-btn').forEach(btn => {
+                btn.onclick = () => {
+                    Object.values(dom.modals).forEach(m => {
+                        m.classList.add('hidden');
+                        m.classList.remove('flex'); // remove flex for centered modals
+                    });
+                };
+            });
+
+            // Mobile Menu
+            const menuBtn = document.getElementById('mobileMenuBtn');
+            const menu = document.getElementById('mobileMenu');
+            menuBtn.onclick = () => menu.classList.toggle('hidden');
+
+            // Search
+            const performSearch = (val) => {
+                const term = val.toLowerCase();
+                const filtered = allProducts.filter(p => p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term));
+                renderProducts(filtered);
+            };
+            dom.searchInput.addEventListener('input', (e) => performSearch(e.target.value));
+            dom.mobileSearch.addEventListener('input', (e) => performSearch(e.target.value));
+
+            // Categories
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.onclick = (e) => {
+                    document.querySelectorAll('.category-btn').forEach(b => {
+                        b.classList.remove('btn-main', 'text-white');
+                        b.classList.add('bg-white', 'text-gray-600');
+                    });
+                    e.target.classList.remove('bg-white', 'text-gray-600');
+                    e.target.classList.add('btn-main', 'text-white');
+                    
+                    const cat = e.target.dataset.category;
+                    if(cat === 'all') renderProducts(allProducts);
+                    else renderProducts(allProducts.filter(p => p.category === cat));
+                };
+            });
+
+            // Auth
+            document.getElementById('loginSignupBtn').onclick = () => openAuth('login');
+            document.getElementById('mobileLoginBtn').onclick = () => openAuth('login');
+            
+            document.getElementById('logoutBtn').onclick = async () => {
+                await window.signOut(window.auth);
+                showToast("Logged out successfully");
+            };
+
+            // Checkout
+            document.getElementById('viewCartBtn').onclick = () => {
+                dom.modals.cart.classList.remove('hidden');
+                dom.modals.cart.classList.add('flex');
+            };
+            document.getElementById('mobileCartBtn').onclick = () => {
+                 dom.modals.cart.classList.remove('hidden');
+                 dom.modals.cart.classList.add('flex');
+            };
+            document.getElementById('checkoutBtn').onclick = () => {
+                dom.modals.cart.classList.add('hidden');
+                dom.modals.checkout.classList.remove('hidden');
+                dom.modals.checkout.classList.add('flex');
+            };
+
+            // Form Submissions
+            document.getElementById('checkoutForm').onsubmit = async (e) => {
+                e.preventDefault();
+                const usr = window.auth.currentUser;
+                if(!usr || usr.isAnonymous) {
+                    showToast("Please login to complete order", "info");
+                    dom.modals.checkout.classList.add('hidden');
+                    openAuth('login');
+                    return;
+                }
+                
+                // Logic to save order
+                try {
+                    const orderData = {
+                        userId: usr.uid,
+                        name: document.getElementById('customerName').value,
+                        address: document.getElementById('customerAddress').value,
+                        items: shoppingCart,
+                        total: shoppingCart.reduce((a,b) => a + (b.price*b.quantity), 0),
+                        date: new Date().toISOString(),
+                        status: 'Pending'
+                    };
+                    await window.addDoc(window.collection(window.db, 'orders'), orderData);
+                    shoppingCart = [];
+                    saveCart();
+                    updateCartUI();
+                    dom.modals.checkout.classList.add('hidden');
+                    showToast("Order placed successfully!", "success");
+                    document.getElementById('checkoutForm').reset();
+                } catch(err) {
+                    showToast("Order failed. Try again.", "error");
+                }
+            };
+
+            document.getElementById('authForm').onsubmit = async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('authEmail').value;
+                const pass = document.getElementById('authPassword').value;
+                const errBox = document.getElementById('authError');
+                errBox.classList.add('hidden');
+
+                try {
+                    if(authMode === 'login') await window.signInWithEmailAndPassword(window.auth, email, pass);
+                    else await window.createUserWithEmailAndPassword(window.auth, email, pass);
+                    
+                    dom.modals.auth.classList.add('hidden');
+                    showToast(`Successfully ${authMode === 'login' ? 'Logged In' : 'Signed Up'}`);
+                } catch(err) {
+                    errBox.textContent = err.message.replace('Firebase: ', '');
+                    errBox.classList.remove('hidden');
+                }
+            };
+
+            document.getElementById('toggleAuthModeBtn').onclick = () => {
+                authMode = authMode === 'login' ? 'signup' : 'login';
+                document.getElementById('authModalTitle').textContent = authMode === 'login' ? 'Welcome Back' : 'Create Account';
+                document.getElementById('authSubmitBtn').textContent = authMode === 'login' ? 'Login' : 'Sign Up';
+                document.getElementById('toggleAuthModeBtn').textContent = authMode === 'login' ? 'New here? Create account' : 'Already have account? Login';
+            };
         }
 
-        window.onload = loadProducts;
+        function openAuth(mode) {
+            authMode = mode;
+            dom.modals.auth.classList.remove('hidden');
+            dom.modals.auth.classList.add('flex');
+        }
+
+        // Monitor Auth State UI
+        window.auth.onAuthStateChanged((user) => {
+            if(user && !user.isAnonymous) {
+                document.getElementById('authButtons').innerHTML = `
+                   <span class="text-sm font-semibold mr-2 hidden lg:inline">Hi, User</span>
+                   <button id="logoutBtnRef" class="text-gray-600 hover:text-red-500 font-medium text-sm"><i class="fa-solid fa-right-from-bracket"></i></button>
+                `;
+                document.getElementById('logoutBtnRef').onclick = () => window.signOut(window.auth);
+                
+                document.getElementById('mobileLoginBtn').classList.add('hidden');
+                document.getElementById('mobileLogoutBtn').classList.remove('hidden');
+                document.getElementById('mobileLogoutBtn').onclick = () => window.signOut(window.auth);
+                
+                loadCart(user.uid);
+            } else {
+                // Reset UI for Guest
+                document.getElementById('authButtons').innerHTML = `<button id="loginBtnRef" class="btn-main px-6 py-2 rounded-full font-medium text-sm shadow-md">Login</button>`;
+                document.getElementById('loginBtnRef').onclick = () => openAuth('login');
+                
+                document.getElementById('mobileLoginBtn').classList.remove('hidden');
+                document.getElementById('mobileLogoutBtn').classList.add('hidden');
+                shoppingCart = [];
+                updateCartUI();
+            }
+        });
+
+        // Initialize
+        initApp();
     </script>
 </body>
 </html>
