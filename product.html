@@ -1,124 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-PFWF2T8Q');</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Details | Kemmex Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/shop-local.png">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        kemmex: { blue: '#1e40af', orange: '#ea580c', dark: '#111827' }
-                    }
-                }
-            }
-        }
-    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 
-<body class="bg-gray-50 font-sans min-h-screen">
+<body class="bg-gray-100 font-sans min-h-screen">
 
-    <header class="bg-white shadow-sm sticky top-0 z-50">
+    <header class="bg-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-bold text-kemmex-dark tracking-tighter">
-                KEMMEX<span class="text-kemmex-blue">★</span>
+            <a href="index.html" class="text-2xl font-bold text-black tracking-tighter">
+                KEMMEX<span class="text-[#1e40af]">★</span>
             </a>
-            <a href="index.html" class="text-sm font-bold text-kemmex-blue hover:underline flex items-center gap-2">
+            <a href="index.html" class="text-sm font-bold text-[#1e40af] hover:underline flex items-center gap-2">
                 <i class="fas fa-arrow-left"></i> Back to Store
             </a>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-8 max-w-5xl">
+    <main class="container mx-auto px-4 py-8 max-w-4xl">
         <div id="loading" class="text-center py-20">
-            <i class="fas fa-spinner fa-spin text-4xl text-kemmex-blue"></i>
+            <i class="fas fa-spinner fa-spin text-4xl text-[#1e40af]"></i>
         </div>
 
-        <div id="product-container" class="hidden grid md:grid-cols-2 gap-8 bg-white p-4 md:p-8 rounded-2xl shadow-sm border border-gray-100">
-            <div class="relative group bg-gray-50 rounded-xl overflow-hidden flex items-center justify-center min-h-[350px]">
-                <img id="pImg" class="max-h-[500px] object-contain w-full transition duration-500 group-hover:scale-105">
-                <button onclick="toggleSave()" id="saveBtn" class="absolute top-4 right-4 bg-white/90 p-3 rounded-full shadow-md text-gray-400 hover:text-red-500 transition">
-                    <i class="fas fa-heart text-xl"></i>
-                </button>
+        <div id="product-container" class="hidden bg-white rounded-lg shadow-lg overflow-hidden flex flex-col md:flex-row">
+            <div class="w-full md:w-1/2 bg-gray-50 flex items-center justify-center p-4">
+                <img id="pImg" class="max-h-[500px] object-contain w-full hover:scale-105 transition duration-500">
             </div>
 
-            <div class="flex flex-col justify-center">
-                <nav class="text-[10px] uppercase tracking-widest font-black text-gray-400 mb-2 flex gap-2">
-                    <span id="pCategory">Category</span>
-                </nav>
+            <div class="w-full md:w-1/2 p-8 flex flex-col justify-center">
+                <span id="pCategory" class="text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Category</span>
+                <h1 id="pName" class="text-3xl font-bold text-gray-800 mb-4 leading-tight">Product Name</h1>
                 
-                <h1 id="pName" class="text-3xl font-bold text-gray-900 mb-2 leading-tight">Product Name</h1>
-                
-                <div class="flex items-center gap-4 mb-6">
-                    <span class="text-kemmex-orange text-3xl font-black">₦<span id="pPrice">0</span></span>
-                    <span id="pStock" class="text-[10px] bg-green-100 text-green-700 px-3 py-1 rounded-full font-black uppercase">In Stock</span>
+                <div class="flex items-center mb-4">
+                    <span class="text-[#1e40af] text-2xl font-bold">₦ <span id="pPrice">0</span></span>
+                    <span id="pStock" class="ml-auto text-xs bg-green-100 text-green-800 px-3 py-1 rounded-full font-bold">In Stock</span>
                 </div>
 
-                <div class="space-y-4 mb-8">
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <h4 class="text-xs font-black uppercase text-gray-500 mb-2 tracking-widest">Description</h4>
-                        <p id="pDesc" class="text-sm text-gray-600 leading-relaxed"></p>
-                    </div>
-
-                    <div class="flex gap-6">
-                        <div>
-                            <span class="block text-[10px] font-black uppercase text-gray-400">Available Size</span>
-                            <span id="pSize" class="text-sm font-bold text-gray-800"></span>
-                        </div>
-                        <div class="border-l border-gray-200 pl-6">
-                            <span class="block text-[10px] font-black uppercase text-gray-400">Color</span>
-                            <span id="pColor" class="text-sm font-bold text-gray-800"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 gap-3">
-                    <button onclick="addToCartCurrent()" id="cartActionBtn" class="w-full bg-kemmex-blue hover:bg-kemmex-dark text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2">
-                        <i class="fas fa-shopping-basket"></i> Add to Cart
-                    </button>
+                <div class="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                    <p id="pDesc" class="text-sm text-gray-600 mb-3 leading-relaxed">No description available.</p>
                     
-                    <button onclick="buyNowWhatsApp()" class="w-full border-2 border-green-500 text-green-600 font-bold py-3 rounded-xl hover:bg-green-50 transition flex items-center justify-center gap-2">
-                        <i class="fab fa-whatsapp"></i> Buy via WhatsApp
-                    </button>
+                    <div class="flex gap-3 border-t border-gray-200 pt-3">
+                        <div class="text-xs uppercase font-bold text-gray-500">
+                            Size: <span id="pSize" class="text-black ml-1">Free</span>
+                        </div>
+                        <div class="text-xs uppercase font-bold text-gray-500 border-l border-gray-300 pl-3">
+                            Color: <span id="pColor" class="text-black ml-1">As seen</span>
+                        </div>
+                    </div>
                 </div>
+                <hr class="border-gray-100 mb-6">
+
+                <button onclick="addToCartCurrent()" class="w-full bg-[#1e40af] hover:bg-[#e07e1b] text-white font-bold py-4 rounded-lg shadow-md uppercase tracking-wide transition transform active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                </button>
+                
+                <a href="https://wa.me/2348039468706" target="_blank" class="mt-3 w-full border-2 border-green-500 text-green-600 font-bold py-3 rounded-lg hover:bg-green-50 text-center uppercase text-sm transition block">
+                    <i class="fab fa-whatsapp mr-1"></i> Order via WhatsApp
+                </a>
             </div>
         </div>
     </main>
 
     <script>
+        // CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
             authDomain: "kemmex-store-9ffa3.firebaseapp.com",
             projectId: "kemmex-store-9ffa3",
             storageBucket: "kemmex-store-9ffa3.appspot.com",
+            messagingSenderId: "500875032118",
             appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // LOGIC
         let currentProduct = null;
+
         const urlParams = new URLSearchParams(window.location.search);
         const productId = urlParams.get('id');
 
-        if (!productId) window.location.href = "index.html";
-        else loadProduct(productId);
+        if (!productId) {
+            window.location.href = "index.html";
+        } else {
+            loadProduct(productId);
+        }
 
         function loadProduct(id) {
             db.collection("products").doc(id).get().then(doc => {
                 if (!doc.exists) {
-                    document.getElementById('loading').innerHTML = "<p class='font-bold'>Item not found.</p>";
+                    document.getElementById('loading').innerHTML = "<p>Product not found.</p>";
                     return;
                 }
                 currentProduct = { id: doc.id, ...doc.data() };
                 render(currentProduct);
-                updateHeartStatus();
             });
         }
 
@@ -130,69 +120,41 @@
             document.getElementById('pCategory').innerText = p.category;
             document.getElementById('pName').innerText = p.name;
             document.getElementById('pPrice').innerText = p.price.toLocaleString();
+            
+            // 🟢 Update New Fields
             document.getElementById('pDesc').innerText = p.description || "Premium quality item from Kemmex Store.";
             document.getElementById('pSize').innerText = p.size || "Free Size";
             document.getElementById('pColor').innerText = p.color || "As seen";
             
             if(p.stock <= 0) {
-                const s = document.getElementById('pStock');
-                s.innerText = "Out of Stock";
-                s.className = "text-[10px] bg-red-100 text-red-700 px-3 py-1 rounded-full font-black uppercase";
-                document.getElementById('cartActionBtn').disabled = true;
-                document.getElementById('cartActionBtn').classList.add('opacity-50', 'cursor-not-allowed');
+                const stockEl = document.getElementById('pStock');
+                stockEl.innerText = "Out of Stock";
+                stockEl.className = "ml-auto text-xs bg-red-100 text-red-800 px-3 py-1 rounded-full font-bold";
             }
         }
 
         function addToCartCurrent() {
-            if(!currentProduct || currentProduct.stock <= 0) return;
+            if(!currentProduct) return;
             
             let cart = JSON.parse(localStorage.getItem('kemmex_cart')) || [];
-            const existing = cart.find(item => item.id === currentProduct.id);
+            
+            if (currentProduct.stock <= 0) return alert("Out of stock");
 
-            if (existing) {
-                if (existing.qty >= currentProduct.stock) return alert("Sorry, no more stock available.");
-                existing.qty++;
-            } else {
-                cart.push({ ...currentProduct, qty: 1 });
-            }
+            const existing = cart.find(item => item.id === currentProduct.id);
+            if (existing && existing.qty >= currentProduct.stock) return alert("Max stock reached");
+
+            if(existing) existing.qty++;
+            else cart.push({ ...currentProduct, qty: 1 });
             
             localStorage.setItem('kemmex_cart', JSON.stringify(cart));
             
-            const btn = document.getElementById('cartActionBtn');
-            btn.innerHTML = `<i class="fas fa-check"></i> Added to Cart!`;
-            btn.classList.replace('bg-kemmex-blue', 'bg-green-600');
+            const btn = event.currentTarget;
+            btn.innerText = "Added to Cart!";
+            btn.classList.add("bg-green-600");
             
             setTimeout(() => {
                 window.location.href = "index.html";
-            }, 800);
-        }
-
-        function buyNowWhatsApp() {
-            const msg = `Hello Kemmex Store! I want to buy this:%0A%0A*Product:* ${currentProduct.name}%0A*Price:* ₦${currentProduct.price.toLocaleString()}%0A*Link:* ${window.location.href}`;
-            window.open(`https://wa.me/2348039468706?text=${msg}`, '_blank');
-        }
-
-        function toggleSave() {
-            let saved = JSON.parse(localStorage.getItem('kemmex_saved')) || [];
-            if (saved.includes(currentProduct.id)) {
-                saved = saved.filter(id => id !== currentProduct.id);
-            } else {
-                saved.push(currentProduct.id);
-            }
-            localStorage.setItem('kemmex_saved', JSON.stringify(saved));
-            updateHeartStatus();
-        }
-
-        function updateHeartStatus() {
-            const saved = JSON.parse(localStorage.getItem('kemmex_saved')) || [];
-            const btn = document.getElementById('saveBtn');
-            if (saved.includes(currentProduct.id)) {
-                btn.classList.add('text-red-500');
-                btn.classList.remove('text-gray-400');
-            } else {
-                btn.classList.remove('text-red-500');
-                btn.classList.add('text-gray-400');
-            }
+            }, 500);
         }
     </script>
 </body>
