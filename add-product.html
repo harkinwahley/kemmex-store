@@ -10,7 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
 
@@ -70,8 +69,8 @@
 
                 <div>
                     <label class="block text-sm font-bold mb-1">Image URL</label>
-                    <input type="url" id="pImg" required placeholder="https://..." class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
-                    <p class="text-xs text-gray-500 mt-1">Tip: Use images from Unsplash or host your own.</p>
+                    <input type="text" id="pImg" required placeholder="Paste link from ImgBB here..." class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+                    <p class="text-xs text-gray-500 mt-1">Tip: Use the <strong>Direct Link</strong> from ImgBB (ends in .jpg or .png).</p>
                 </div>
 
                 <button type="submit" id="saveBtn" class="w-full bg-green-600 text-white font-bold py-3 rounded hover:bg-green-700 transition mt-4">
@@ -82,7 +81,6 @@
     </div>
 
     <script>
-        // 🚨 CONFIG
         const ADMIN_EMAILS = ["aakinwale16@gmail.com", "kemzolin99@gmail.com"];
 
         const firebaseConfig = {
@@ -97,7 +95,6 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // Check Auth
         auth.onAuthStateChanged(user => {
             if (!user || !ADMIN_EMAILS.includes(user.email)) {
                 alert("Unauthorized Access");
@@ -107,6 +104,29 @@
 
         function saveProduct(e) {
             e.preventDefault();
+            
+            let imgUrl = document.getElementById('pImg').value.trim();
+
+            // 🪄 AUTO-CLEAN: Extracts URL if they paste the BBCode block [img]...[/img]
+            if (imgUrl.includes('[img]')) {
+                const match = imgUrl.match(/\[img\](.*?)\[\/img\]/);
+                if (match && match[1]) {
+                    imgUrl = match[1];
+                }
+            }
+
+            // 🛑 VALIDATION: Block blob links
+            if (imgUrl.startsWith('blob:')) {
+                alert("⚠️ Error: You pasted a temporary preview link.\nPlease upload the image to ImgBB and copy the 'DIRECT LINK'.");
+                return;
+            }
+
+            // 🛑 VALIDATION: Ensure it's a real link
+            if (!imgUrl.startsWith('http')) {
+                alert("⚠️ Error: Please provide a valid web link starting with https://");
+                return;
+            }
+
             const btn = document.getElementById('saveBtn');
             btn.innerText = "Saving...";
             btn.disabled = true;
@@ -116,14 +136,11 @@
                 price: Number(document.getElementById('pPrice').value),
                 stock: Number(document.getElementById('pStock').value),
                 category: document.getElementById('pCategory').value,
-                img: document.getElementById('pImg').value,
-                // NEW FIELDS
+                img: imgUrl, // This is now the cleaned, working URL
                 size: document.getElementById('pSize').value || "Free Size",
                 color: document.getElementById('pColor').value || "As seen",
                 description: document.getElementById('pDesc').value || "No description provided.",
-                
-                active: true, // 🟢 THIS IS THE FIX THAT MAKES PRODUCTS SHOW UP!
-                
+                active: true,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
@@ -132,7 +149,10 @@
                 alert("Product Added Successfully! ✅");
                 document.getElementById('addProductForm').reset();
             })
-            .catch(error => alert("Error: " + error.message))
+            .catch(error => {
+                console.error("Firebase Error:", error);
+                alert("Error: " + error.message);
+            })
             .finally(() => {
                 btn.innerText = "Upload Product";
                 btn.disabled = false;
