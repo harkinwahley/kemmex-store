@@ -5,13 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KEMMEX STORE | Online Shopping for Fashion</title>
     
-    <meta property="og:title" content="Kemmex Store | Premium & Thrift Fashion">
-    <meta property="og:description" content="Shop the best in Baby Wears, Maternity, Adult Fashion, and Accessories. Quality for less.">
-    <meta property="og:image" content="https://images.unsplash.com/photo-1551644342-6e2e5e11f71a?auto=format&fit=crop&w=1200&q=80">
-    <meta property="og:url" content="https://kemmex-store.com">
-    <meta property="og:type" content="website">
-
-    <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/shop-local.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -22,839 +15,228 @@
                 extend: {
                     colors: {
                         jumia: { orange: '#1e40af', hover: '#1e3a8a', dark: '#282828', gray: '#f1f1f2' }
-                    },
-                    fontFamily: { sans: ['Roboto', 'sans-serif'] }
+                    }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #f1f1f2; -webkit-tap-highlight-color: transparent; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
-        .modal.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-        .modal.flex { opacity: 1; visibility: visible; pointer-events: auto; }
-        
-        /* iPhone Specific Fixes */
-        .modal-content { -webkit-overflow-scrolling: touch; }
-        button, input, select { touch-action: manipulation; }
-        
+        body { background-color: #f1f1f2; font-family: 'Roboto', sans-serif; }
         .whatsapp-float {
             position: fixed; bottom: 20px; right: 20px;
             background-color: #25d366; color: white;
-            border-radius: 50px; text-align: center;
-            font-size: 30px; box-shadow: 2px 2px 3px #999;
-            z-index: 100; width: 60px; height: 60px;
+            border-radius: 50px; width: 60px; height: 60px;
             display: flex; align-items: center; justify-content: center;
-            transition: transform 0.3s;
+            font-size: 30px; z-index: 100; box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
         }
-        .whatsapp-float:hover { transform: scale(1.1); background-color: #20ba5a; }
-
-        @keyframes shimmer {
-            0% { background-position: -1000px 0; }
-            100% { background-position: 1000px 0; }
-        }
-        .skeleton {
-            animation: shimmer 2s infinite linear;
-            background: linear-gradient(to right, #f6f7f8 4%, #edeef1 25%, #f6f7f8 36%);
-            background-size: 1000px 100%;
-        }
-        .heart-btn:active { transform: scale(0.8); }
-        .heart-btn.saved i { color: red; font-weight: 900; }
     </style>
 </head>
+<body class="text-jumia-dark">
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
-    authDomain: "kemmex-store-9ffa3.firebaseapp.com",
-    projectId: "kemmex-store-9ffa3",
-    storageBucket: "kemmex-store-9ffa3.appspot.com",
-    messagingSenderId: "500875032118",
-    appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-</script>
-
-<body class="font-sans text-jumia-dark">
-
-    <a href="https://wa.me/2348039468706?text=Hello%20Kemmex%20Store,%20I%20have%20an%20enquiry" target="_blank" class="whatsapp-float">
+    <a href="https://wa.me/2348039468706?text=Hello%20Kemmex%20Store" target="_blank" class="whatsapp-float">
         <i class="fab fa-whatsapp"></i>
     </a>
 
     <header class="bg-white shadow-md sticky top-0 z-50">
-        <div class="bg-jumia-orange text-white text-xs text-center py-1 hidden md:block">
-            <span class="font-bold">FREE DELIVERY</span> ON ORDERS OVER ₦50,000 | KEMMEX OFFICIAL STORE
-        </div>
-
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
-            <a href="#" onclick="window.location.reload()" class="text-2xl font-bold text-black tracking-tighter">
-                KEMMEX<span class="text-jumia-orange">★</span>
-            </a>
-
-            <div class="flex-grow max-w-xl hidden md:flex relative">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="fas fa-search text-gray-400"></i>
-                </div>
-                <input type="text" id="searchInput" placeholder="Search products..." 
-                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-jumia-orange">
-                <button onclick="filterProducts()" class="bg-jumia-orange text-white px-6 font-semibold rounded-r-md hover:bg-jumia-hover shadow-sm uppercase text-sm tracking-wide">
-                    Search
-                </button>
-            </div>
-
-            <div class="flex items-center gap-6">
-                <div class="relative cursor-pointer" id="authSection" onclick="toggleUserMenu()">
-                    <div class="flex items-center gap-2 hover:text-jumia-orange">
-                        <i class="far fa-user text-xl"></i>
-                        <span class="font-medium hidden sm:block" id="userDisplayName">Account</span>
-                        <i class="fas fa-chevron-down text-xs hidden sm:block"></i>
-                    </div>
-                    <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl py-2 hidden border border-gray-100 z-50">
-                        <button onclick="openModal('loginModal')" id="loginBtn" class="block w-full text-left px-4 py-2 hover:bg-gray-100 text-jumia-orange font-bold uppercase text-sm">Sign In</button>
-                        <button onclick="logout()" id="logoutBtn" class="hidden block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600 text-sm">Logout</button>
-                        <a href="orders.html" class="block px-4 py-2 hover:bg-gray-100 text-sm">My Orders</a>
-                        <a href="saved.html" class="block px-4 py-2 hover:bg-gray-100 text-sm">Saved Items</a>
-                    </div>
-                </div>
-
-                <button onclick="document.querySelector('footer').scrollIntoView({behavior: 'smooth'})" class="hidden sm:flex items-center gap-2 cursor-pointer hover:text-jumia-orange bg-transparent border-none">
-                    <i class="far fa-question-circle text-xl"></i>
-                    <span class="font-medium">Help</span>
-                </button>
-
-                <div onclick="toggleCart()" class="flex items-center gap-2 cursor-pointer hover:text-jumia-orange relative">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <a href="index.html" class="text-2xl font-bold">KEMMEX<span class="text-jumia-orange">★</span></a>
+            <div class="flex items-center gap-4">
+                <div onclick="toggleCart()" class="relative cursor-pointer">
                     <i class="fas fa-shopping-cart text-xl"></i>
-                    <span class="font-medium hidden sm:block">Cart</span>
-                    <span id="cartCount" class="absolute -top-2 -right-1 bg-jumia-orange text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">0</span>
+                    <span id="cartCount" class="absolute -top-2 -right-2 bg-jumia-orange text-white text-[10px] px-1.5 rounded-full">0</span>
                 </div>
-            </div>
-        </div>
-        
-        <div class="md:hidden px-4 pb-3">
-            <div class="relative">
-                <input type="text" id="mobileSearchInput" placeholder="Search products..." class="w-full pl-3 pr-10 py-2 border rounded-md focus:outline-none focus:border-jumia-orange">
-                <button onclick="filterProducts('mobile')" class="absolute right-0 top-0 h-full px-4 text-gray-500"><i class="fas fa-search"></i></button>
             </div>
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-6 flex flex-col md:flex-row gap-4 min-h-screen">
-        
-        <aside class="w-full md:w-1/5 hidden md:block bg-white rounded-md shadow-sm h-fit overflow-hidden">
-            <div class="p-3 border-b font-bold text-gray-600 text-sm uppercase">Categories</div>
-            <nav class="flex flex-col text-sm">
-                <button onclick="filterCategory('all')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition">All Categories</button>
-                <button onclick="filterCategory('Baby & Kids')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-baby mr-2"></i>Baby & Kids</button>
-                <button onclick="filterCategory('Maternity')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-person-pregnant mr-2"></i>Maternity</button>
-                <button onclick="filterCategory('Adult Wears')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-tshirt mr-2"></i>Adult Wears</button>
-                <button onclick="filterCategory('Thrift Wears')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-recycle mr-2"></i>Thrift Wears</button>
-                <button onclick="filterCategory('Toys')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-gamepad mr-2"></i>Toys</button>
-                <button onclick="filterCategory('Accessories')" class="text-left px-4 py-2 hover:text-jumia-orange hover:bg-gray-50 transition"><i class="fas fa-hat-cowboy mr-2"></i>Accessories</button>
-            </nav>
+    <main class="container mx-auto px-4 py-6 flex flex-col md:flex-row gap-6">
+        <aside class="hidden md:block w-1/4 bg-white p-4 rounded shadow-sm h-fit">
+            <h3 class="font-bold border-b pb-2 mb-2 uppercase text-xs text-gray-500">Categories</h3>
+            <ul class="space-y-2 text-sm">
+                <li><button onclick="filterCategory('all')" class="hover:text-jumia-orange">All Products</button></li>
+                <li><button onclick="filterCategory('Baby & Kids')" class="hover:text-jumia-orange">Baby & Kids</button></li>
+                <li><button onclick="filterCategory('Maternity')" class="hover:text-jumia-orange">Maternity</button></li>
+                <li><button onclick="filterCategory('Thrift Wears')" class="hover:text-jumia-orange">Thrift Wears</button></li>
+            </ul>
         </aside>
 
-        <section class="w-full md:w-4/5 relative group">
-            
-            <div id="hero-slider" class="h-48 md:h-72 rounded-md mb-6 relative overflow-hidden bg-gray-200">
-                <div class="absolute inset-0 transition-opacity duration-1000 opacity-100 slide-item">
-                    <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
-                        <div class="text-white max-w-lg">
-                            <span class="bg-orange-500 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">BABY & KIDS</span>
-                            <h2 class="text-3xl md:text-5xl font-bold mb-2">Cute & Comfortable</h2>
-                            <p class="mb-4 text-gray-200 text-sm md:text-base">Premium Looks, Pocket-Friendly Prices.</p>
-                            <button onclick="filterCategory('Baby & Kids')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-orange-500 hover:text-white transition">Shop Baby</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="absolute inset-0 transition-opacity duration-1000 opacity-0 slide-item">
-                    <img src="https://images.unsplash.com/photo-1581539250439-c96689b516dd?auto=format&fit=crop&w=1350&q=80" class="w-full h-full object-cover">
-                    <div class="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex items-center px-8">
-                        <div class="text-white max-w-lg">
-                            <span class="bg-pink-500 text-xs font-bold px-2 py-1 rounded mb-2 inline-block">MATERNITY</span>
-                            <h2 class="text-3xl md:text-5xl font-bold mb-2">Glowing & Stylish</h2>
-                            <p class="mb-4 text-gray-200 text-sm md:text-base">Comfort for every step of your journey.</p>
-                            <button onclick="filterCategory('Maternity')" class="bg-white text-black px-4 py-2 rounded-full font-bold text-sm hover:bg-pink-500 hover:text-white transition">Shop Maternity</button>
-                        </div>
-                    </div>
-                </div>
+        <div id="products-grid" class="flex-grow grid grid-cols-2 lg:grid-cols-4 gap-4">
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div class="bg-blue-50 rounded-md p-6 flex justify-between items-center relative overflow-hidden group cursor-pointer" onclick="filterCategory('Baby & Kids')">
-                    <div class="relative z-10">
-                        <span class="text-jumia-orange text-xs font-bold uppercase tracking-wider">New Arrivals</span>
-                        <h3 class="text-xl font-bold text-gray-800 mt-1">Baby Collections</h3>
-                        <button class="mt-3 text-sm font-bold underline hover:text-jumia-orange">Shop Now</button>
-                    </div>
-                    <img src="https://cdn-icons-png.flaticon.com/512/3082/3082060.png" class="w-24 h-24 object-contain group-hover:scale-110 transition duration-300">
-                </div>
-                <div class="bg-green-50 rounded-md p-6 flex justify-between items-center relative overflow-hidden group cursor-pointer" onclick="filterCategory('Thrift Wears')">
-                    <div class="relative z-10">
-                        <span class="text-green-600 text-xs font-bold uppercase tracking-wider">Flash Sale</span>
-                        <h3 class="text-xl font-bold text-gray-800 mt-1">Thrift Wears</h3>
-                        <button class="mt-3 text-sm font-bold underline hover:text-green-600">View Deals</button>
-                    </div>
-                    <img src="https://cdn-icons-png.flaticon.com/512/2331/2331716.png" class="w-24 h-24 object-contain group-hover:scale-110 transition duration-300">
-                </div>
-            </div>
-
-            <div class="bg-white p-3 rounded-t-md border-b flex justify-between items-center sticky top-16 md:top-0 z-40 shadow-sm md:shadow-none">
-                <h2 class="font-bold text-lg" id="section-title">Top Picks</h2>
-                
-                <div class="flex items-center gap-2">
-                    <button onclick="openModal('filterModal')" class="md:hidden flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50">
-                        <i class="fas fa-filter text-jumia-orange"></i> Filter
-                    </button>
-
-                    <select id="sort" onchange="sortProducts()" class="text-sm border border-gray-300 rounded px-2 py-1.5 outline-none bg-white">
-                        <option value="newest">Newest</option>
-                        <option value="price-low">Price: Low to High</option>
-                        <option value="price-high">Price: High to Low</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="products-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 bg-white p-2 rounded-b-md shadow-sm">
-                </div>
-        </section>
     </main>
 
-    <section class="container mx-auto px-4 py-8 mt-8">
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                <i class="fas fa-shield-alt text-3xl text-green-500 mb-2"></i>
-                <h4 class="font-bold text-sm">Secure Payment</h4>
-                <p class="text-xs text-gray-500">100% Safe Transfer</p>
+    <div id="cartSidebar" class="fixed inset-0 bg-black/50 z-50 hidden justify-end">
+        <div class="bg-white w-full max-w-md h-full flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center">
+                <h3 class="font-bold">Your Cart</h3>
+                <button onclick="toggleCart()" class="text-2xl">&times;</button>
             </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                <i class="fas fa-truck text-3xl text-jumia-orange mb-2"></i>
-                <h4 class="font-bold text-sm">Fast Delivery</h4>
-                <p class="text-xs text-gray-500">Nationwide Shipping</p>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                <i class="fas fa-check-circle text-3xl text-blue-500 mb-2"></i>
-                <h4 class="font-bold text-sm">Quality Verified</h4>
-                <p class="text-xs text-gray-500">Premium & Thrift</p>
-            </div>
-            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                <i class="fas fa-headset text-3xl text-purple-500 mb-2"></i>
-                <h4 class="font-bold text-sm">24/7 Support</h4>
-                <p class="text-xs text-gray-500">Via WhatsApp</p>
-            </div>
-        </div>
-    </section>
-
-    <section class="bg-white py-12 mt-4">
-        <div class="container mx-auto px-4">
-            <h2 class="text-2xl font-bold text-center mb-8 text-gray-800">Happy Mums & Dads <span class="text-jumia-orange">♥</span></h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-gray-50 p-6 rounded-lg border border-gray-100">
-                    <div class="flex text-yellow-400 mb-3"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p class="text-gray-600 text-sm italic mb-4">"I was skeptical about buying thrift online, but the quality from Kemmex is amazing. Looks brand new!"</p>
-                    <div class="font-bold text-sm">- Chioma A. <span class="text-xs font-normal text-gray-400 ml-1">Lagos</span></div>
-                </div>
-                <div class="bg-gray-50 p-6 rounded-lg border border-gray-100">
-                    <div class="flex text-yellow-400 mb-3"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p class="text-gray-600 text-sm italic mb-4">"Fast delivery to Abeokuta. The maternity gown fits perfectly. Will order again."</p>
-                    <div class="font-bold text-sm">- Mrs. Adebayo <span class="text-xs font-normal text-gray-400 ml-1">Ogun</span></div>
-                </div>
-                <div class="bg-gray-50 p-6 rounded-lg border border-gray-100">
-                    <div class="flex text-yellow-400 mb-3"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
-                    <p class="text-gray-600 text-sm italic mb-4">"Affordable prices for baby wears. I filled my baby's wardrobe without breaking the bank."</p>
-                    <div class="font-bold text-sm">- Samuel O. <span class="text-xs font-normal text-gray-400 ml-1">Ibadan</span></div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <footer class="bg-gray-900 text-gray-300 py-12 mt-10">
-        <div class="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-                <h3 class="text-2xl font-bold text-white mb-4">KEMMEX STORE</h3>
-                <p class="text-sm mb-4">Your number one source for quality Baby & Kids wear, Maternity essentials, and premium Thrift Wears.</p>
-                <div class="flex gap-4">
-                    <a href="#" class="hover:text-blue-500"><i class="fab fa-facebook fa-lg"></i></a>
-                    <a href="#" class="hover:text-blue-500"><i class="fab fa-instagram fa-lg"></i></a>
-                    <a href="https://www.tiktok.com/@kemzolin?_r=1&_t=ZS-92xOiW9fuzd" class="hover:text-blue-500"><i class="fab fa-tiktok fa-lg"></i></a>
-                </div>
-            </div>
-            <div>
-                <h4 class="text-white font-bold uppercase mb-4">Quick Links</h4>
-                <ul class="space-y-2 text-sm">
-                    <li><a href="about.html" class="hover:text-blue-500 hover:underline">About Us</a></li>
-                    <li><a href="terms.html" class="hover:text-blue-500 hover:underline">Terms & Conditions</a></li>
-                    <li><a href="#" onclick="toggleCart(); return false;" class="hover:text-blue-500 hover:underline">View Cart</a></li>
-                    <li><a href="admin.html" class="hover:text-blue-500 hover:underline">Admin Login</a></li>
-                </ul>
-            </div>
-            <div>
-                <h4 class="text-white font-bold uppercase mb-4">Contact Us</h4>
-                <ul class="space-y-2 text-sm">
-                    <li><i class="fas fa-phone mr-2 text-blue-500"></i> +234 803 946 8706</li>
-                    <li><i class="fas fa-envelope mr-2 text-blue-500"></i> kemzolin99@gmail.com</li>
-                    <li><i class="fas fa-map-marker-alt mr-2 text-blue-500"></i> Ogun State, Nigeria</li>
-                </ul>
-            </div>
-        </div>
-        <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-            <p>&copy; 2025 Kemmex Store. Built for greatness.</p>
-        </div>
-    </footer>
-    
-    <div id="cartSidebar" class="fixed inset-0 bg-black/50 z-50 hidden justify-end transition-opacity">
-        <div class="bg-white w-full max-w-md h-full flex flex-col shadow-2xl animate-slideInRight">
-            <div class="p-4 border-b flex justify-between items-center bg-gray-50">
-                <h3 class="font-bold text-lg">Shopping Cart (<span id="cart-qty-header">0</span>)</h3>
-                <button onclick="toggleCart()" class="text-gray-500 hover:text-red-500 text-xl">&times;</button>
-            </div>
-            <div id="cart-items" class="flex-grow overflow-y-auto p-4 space-y-4">
-                <div class="text-center text-gray-500 mt-10">Your cart is empty</div>
-            </div>
+            <div id="cart-items" class="flex-grow p-4 overflow-y-auto space-y-4"></div>
             <div class="p-4 border-t bg-gray-50">
-                <div class="flex justify-between mb-4 text-lg font-bold">
-                    <span>Subtotal</span>
-                    <span class="text-jumia-orange">₦<span id="cart-total">0</span></span>
+                <div class="flex justify-between mb-4 font-bold text-lg">
+                    <span>Subtotal:</span>
+                    <span id="cart-total">₦0</span>
                 </div>
-                <button onclick="checkout()" class="w-full bg-jumia-orange hover:bg-jumia-hover text-white font-bold py-3 rounded shadow-md uppercase">Checkout Now</button>
+                <button onclick="openCheckout()" class="w-full bg-jumia-orange text-white py-3 rounded font-bold">PROCEED TO CHECKOUT</button>
             </div>
         </div>
     </div>
 
-    <div id="filterModal" class="fixed inset-0 bg-black/60 z-50 hidden justify-end">
-        <div class="bg-white w-full max-w-xs h-full p-6 flex flex-col shadow-2xl animate-slideInRight">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold text-jumia-orange">Filter Products</h2>
-                <button onclick="closeModal('filterModal')" class="text-gray-500 hover:text-black text-2xl">&times;</button>
-            </div>
-            
-            <div class="space-y-3">
-                <button onclick="filterCategory('all'); closeModal('filterModal')" class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-blue-50 rounded font-medium border border-gray-100 flex items-center gap-3">
-                    <i class="fas fa-th-large text-gray-400"></i> All Categories
-                </button>
-                <button onclick="filterCategory('Baby & Kids'); closeModal('filterModal')" class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-blue-50 rounded font-medium border border-gray-100 flex items-center gap-3">
-                    <i class="fas fa-baby text-orange-500"></i> Baby & Kids
-                </button>
-                <button onclick="filterCategory('Maternity'); closeModal('filterModal')" class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-blue-50 rounded font-medium border border-gray-100 flex items-center gap-3">
-                    <i class="fas fa-person-pregnant text-pink-500"></i> Maternity
-                </button>
-                <button onclick="filterCategory('Adult Wears'); closeModal('filterModal')" class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-blue-50 rounded font-medium border border-gray-100 flex items-center gap-3">
-                    <i class="fas fa-tshirt text-blue-500"></i> Adult Wears
-                </button>
-                <button onclick="filterCategory('Thrift Wears'); closeModal('filterModal')" class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-blue-50 rounded font-medium border border-gray-100 flex items-center gap-3">
-                    <i class="fas fa-recycle text-green-500"></i> Thrift Wears
-                </button>
-                <button onclick="filterCategory('Toys'); closeModal('filterModal')" class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-blue-50 rounded font-medium border border-gray-100 flex items-center gap-3">
-                    <i class="fas fa-gamepad text-yellow-500"></i> Toys
-                </button>
-                <button onclick="filterCategory('Accessories'); closeModal('filterModal')" class="w-full text-left px-4 py-3 bg-gray-50 hover:bg-blue-50 rounded font-medium border border-gray-100 flex items-center gap-3">
-                    <i class="fas fa-hat-cowboy text-purple-500"></i> Accessories
-                </button>
-            </div>
-        </div>
-    </div>
+    <div id="checkoutModal" class="fixed inset-0 bg-black/60 z-[60] hidden justify-center items-center p-4">
+        <div class="bg-white rounded-lg w-full max-w-lg p-6 relative">
+            <button onclick="closeModal()" class="absolute top-3 right-3 text-2xl">&times;</button>
+            <h2 class="text-xl font-bold mb-4">Delivery & Payment</h2>
+            <form onsubmit="handleOrderSubmission(event)" class="space-y-4">
+                <input id="custName" type="text" placeholder="Full Name" required class="w-full border p-2 rounded">
+                <input id="custPhone" type="tel" placeholder="WhatsApp Number" required class="w-full border p-2 rounded">
+                <textarea id="custAddress" placeholder="Full Delivery Address" required class="w-full border p-2 rounded"></textarea>
+                
+                <select id="deliveryLoc" onchange="calculateFinalTotal()" class="w-full border p-2 rounded">
+                    <option value="0">Store Pickup (Abeokuta) - Free</option>
+                    <option value="1000">Within Ogun State - ₦1,000</option>
+                    <option value="3000">Outside Ogun State - ₦3,000</option>
+                </select>
 
-    <div id="loginModal" class="modal fixed inset-0 bg-black/60 z-[60] hidden justify-center items-center backdrop-blur-sm">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm p-6 relative">
-            <button onclick="closeModal('loginModal')" class="absolute top-3 right-3 text-gray-400 hover:text-black">&times;</button>
-            <div class="text-center mb-6">
-                <h2 class="text-2xl font-bold text-jumia-orange">Welcome Back!</h2>
-                <p class="text-gray-500 text-sm">Login to continue</p>
-            </div>
-            <form onsubmit="handleLogin(event)" class="space-y-4">
-                <input id="loginEmail" type="email" required placeholder="Email Address" class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
-                <input id="loginPassword" type="password" required placeholder="Password" class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
-                <button type="submit" class="w-full bg-jumia-orange hover:bg-jumia-hover text-white font-bold py-2.5 rounded shadow-lg">Login</button>
+                <div class="bg-blue-50 p-4 rounded border text-sm">
+                    <p class="mb-1">Pay to: <strong>Opay | 8039468706 | Sokunbi Oluwakemi</strong></p>
+                    <div class="flex justify-between font-bold text-lg mt-2">
+                        <span>Total:</span>
+                        <span id="final-total">₦0</span>
+                    </div>
+                </div>
+                <button type="submit" id="submitBtn" class="w-full bg-green-600 text-white py-3 rounded font-bold uppercase">Confirm & Send Order</button>
             </form>
-            <p class="text-center text-sm mt-4">New here? <button onclick="openModal('signupModal')" class="text-jumia-orange font-bold">Create Account</button></p>
         </div>
     </div>
 
-    <div id="signupModal" class="modal fixed inset-0 bg-black/60 z-[60] hidden justify-center items-center">
-      <div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6 relative">
-        <button onclick="closeModal('signupModal')" class="absolute top-3 right-3 text-gray-400">&times;</button>
-        <h2 class="text-xl font-bold mb-4 text-center text-jumia-orange">Create Account</h2>
-        <form onsubmit="handleSignup(event)" class="space-y-3">
-          <input id="signupEmail" type="email" required placeholder="Email" class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
-          <input id="signupPassword" type="password" required placeholder="Password" class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
-          <button class="w-full bg-jumia-orange hover:bg-jumia-hover text-white py-2 font-bold rounded">Sign Up</button>
-        </form>
-      </div>
-    </div>
-
-    <div id="checkoutModal" class="modal fixed inset-0 z-[60] hidden justify-center items-center bg-black/60 backdrop-blur-sm p-4">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg relative flex flex-col max-h-[85vh]">
-            <button onclick="closeModal('checkoutModal')" class="absolute top-3 right-3 text-gray-400 hover:text-black text-xl z-10">&times;</button>
-            
-            <div class="p-6 pb-0">
-                <h2 class="text-xl font-bold border-b pb-3 text-jumia-orange">Finalize Order</h2>
-            </div>
-
-            <div class="overflow-y-auto p-6 pt-4 modal-content">
-                <form onsubmit="handlePayment(event)" class="space-y-4 pb-32"> <div class="grid grid-cols-2 gap-4">
-                        <div><label class="block text-xs font-bold text-gray-600">First Name</label><input id="firstName" type="text" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
-                        <div><label class="block text-xs font-bold text-gray-600">Last Name</label><input id="lastName" type="text" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
-                    </div>
-                    <div><label class="block text-xs font-bold text-gray-600">Delivery Address</label><textarea id="address" required rows="2" class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></textarea></div>
-                    
-                    <div><label class="block text-xs font-bold text-gray-600">Phone Number</label><input id="phone" type="tel" required class="w-full border p-2 rounded focus:border-jumia-orange outline-none"></div>
-
-                    <div class="mt-4 mb-2">
-                        <label class="block text-xs font-bold text-gray-600 mb-1">Delivery Location</label>
-                        <select id="delivery-location" onchange="updateTotalWithShipping()" class="w-full border p-2 rounded focus:border-jumia-orange outline-none">
-                            <option value="0">Select Location...</option>
-                            <option value="1000">Abeokuta (Within Ogun) - ₦1,000</option>
-                            <option value="3000">Outside Ogun State - ₦3,000</option>
-                            <option value="0">Store Pickup (Abeokuta) - Free</option>
-                        </select>
-                    </div>
-
-                    <div class="mt-4 mb-2">
-                        <label class="block text-xs font-bold text-gray-600 mb-2 uppercase">Payment Method</label>
-                        <div class="border-2 border-jumia-orange rounded-md p-4 bg-gray-50 relative">
-                            <div class="flex items-center gap-2 mb-3">
-                                <input type="radio" checked name="payment" class="accent-jumia-orange w-4 h-4">
-                                <span class="font-bold text-sm text-gray-800">Bank Transfer</span>
-                            </div>
-                            <div class="ml-6 space-y-2">
-                                <p class="text-sm text-gray-700">Transfer <strong class="text-black text-lg">₦<span id="transfer-amount">0</span></strong> to:</p>
-                                <div class="bg-white p-3 rounded border border-gray-200 shadow-sm">
-                                    <div class="flex justify-between mb-1"><span class="text-gray-500 text-xs">Bank:</span><span class="font-bold text-jumia-dark">Opay</span></div>
-                                    <div class="flex justify-between mb-1"><span class="text-gray-500 text-xs">Name:</span><span class="font-bold text-jumia-dark">Sokunbi Oluwakemi</span></div>
-                                    <div class="flex justify-between pt-2 border-t border-dashed"><span class="text-gray-500 text-xs">Acct No:</span><span class="font-bold text-xl text-jumia-orange tracking-widest">8039468706</span></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mb-6 flex items-start gap-3 p-3 bg-gray-50 rounded border">
-                        <input type="checkbox" id="confirmPaid" required class="mt-1 w-5 h-5 accent-jumia-orange cursor-pointer">
-                        <label for="confirmPaid" class="text-sm text-gray-700 cursor-pointer">I have sent the money to the account above.</label>
-                    </div>
-
-                    <div class="bg-blue-50 p-3 rounded border border-blue-100 mb-4">
-                        <div class="flex justify-between font-bold text-lg">
-                            <span>Total to Pay</span>
-                            <span class="text-jumia-orange">₦<span id="checkout-total">0</span></span>
-                        </div>
-                        <p id="shipping-display" class="text-right text-xs text-gray-500 mt-1 italic">Shipping fee not included yet.</p>
-                    </div>
-
-                    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 rounded shadow-lg text-lg uppercase tracking-wide">Complete Order</button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <div id="successModal" class="modal fixed inset-0 bg-black/60 z-[70] hidden justify-center items-center">
-        <div class="bg-white rounded-lg p-8 text-center max-w-sm m-4">
-            <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl"><i class="fas fa-check"></i></div>
-            <h2 class="text-2xl font-bold mb-2">Order Placed!</h2>
-            <p class="text-gray-500 mb-6">We will confirm your payment shortly.</p>
-            <button onclick="closeModal('successModal'); window.location.reload();" class="bg-jumia-orange text-white px-6 py-2 rounded font-bold">Continue Shopping</button>
-        </div>
-    </div>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
     <script>
-        let products = [];
+        const firebaseConfig = {
+            apiKey: "AIzaSyBizDI5d10EjKw3TREi84gvmsC5uGcRxh8",
+            authDomain: "kemmex-store-9ffa3.firebaseapp.com",
+            projectId: "kemmex-store-9ffa3",
+            storageBucket: "kemmex-store-9ffa3.appspot.com",
+            appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         let cart = JSON.parse(localStorage.getItem('kemmex_cart')) || [];
-        let isLoggedIn = false;
-        let currentFilter = 'all';
+        let currentCategory = 'all';
 
         function loadProducts() {
-            const grid = document.getElementById('products-grid');
-            grid.innerHTML = Array(8).fill(0).map(() => `
-                <div class="bg-white p-2 rounded-md shadow-sm h-64 flex flex-col gap-2">
-                    <div class="skeleton h-40 w-full rounded-md"></div>
-                    <div class="skeleton h-4 w-3/4 rounded"></div>
-                    <div class="skeleton h-4 w-1/2 rounded"></div>
-                </div>
-             `).join('');
+            let query = db.collection("products").where("active", "==", true);
+            if(currentCategory !== 'all') query = query.where("category", "==", currentCategory);
 
-          db.collection("products")
-            .where("active", "==", true)
-            .get()
-            .then(snapshot => {
-              products = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-              }));
-              renderProducts(products);
-            })
-            .catch(err => {
-              console.error("Error loading products", err);
-              grid.innerHTML = `<p class="col-span-full text-center text-red-500">Failed to load products. Check console.</p>`;
+            query.onSnapshot(snapshot => {
+                const grid = document.getElementById('products-grid');
+                grid.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const p = doc.data();
+                    grid.innerHTML += `
+                        <div class="bg-white p-3 rounded shadow-sm border group">
+                            <div class="relative overflow-hidden">
+                                <img src="${p.img}" class="w-full h-44 object-cover rounded mb-2 group-hover:scale-105 transition">
+                            </div>
+                            <h3 class="text-xs font-medium truncate">${p.name}</h3>
+                            <p class="text-jumia-orange font-bold">₦${p.price.toLocaleString()}</p>
+                            <div class="flex gap-2 mt-2">
+                                <button onclick="addToCart('${doc.id}', '${p.name}', ${p.price}, '${p.img}')" class="flex-grow bg-jumia-orange text-white text-[10px] py-2 rounded font-bold">ADD TO CART</button>
+                                <button onclick="enquire('${p.name}', ${p.price})" class="bg-green-500 text-white px-3 py-2 rounded">
+                                    <i class="fab fa-whatsapp"></i>
+                                </button>
+                            </div>
+                        </div>`;
+                });
             });
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            loadProducts();
-            updateCartUI();
-        });
-
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                isLoggedIn = true;
-                document.getElementById('userDisplayName').innerText = user.email ? user.email.split('@')[0] : "User";
-                document.getElementById('loginBtn').classList.add('hidden');
-                document.getElementById('logoutBtn').classList.remove('hidden');
-                localStorage.setItem('kemmex_user', user.uid);
-            } else {
-                isLoggedIn = false;
-                document.getElementById('userDisplayName').innerText = "Account";
-                document.getElementById('loginBtn').classList.remove('hidden');
-                document.getElementById('logoutBtn').classList.add('hidden');
-                localStorage.removeItem('kemmex_user');
-            }
-        });
-
-        function toggleUserMenu() {
-            const menu = document.getElementById('userMenu');
-            menu.classList.toggle('hidden');
-        }
-        window.addEventListener('click', function(e) {
-            const section = document.getElementById('authSection');
-            const menu = document.getElementById('userMenu');
-            if (!section.contains(e.target)) menu.classList.add('hidden');
-        });
-
-      function renderProducts(items) {
-            const grid = document.getElementById('products-grid');
-            if(items.length === 0) {
-                grid.innerHTML = '<p class="col-span-full text-center text-gray-500">No products found.</p>';
-                return;
-            }
-            grid.innerHTML = items.map(p => `
-                <div class="group bg-white border border-transparent hover:border-gray-200 hover:shadow-lg rounded-md transition duration-200 relative p-2 flex flex-col">
-                    <button onclick="toggleSave('${p.id}', this)" class="absolute top-3 right-3 z-10 bg-white/80 rounded-full p-2 hover:bg-white transition heart-btn ${isSaved(p.id) ? 'saved' : ''}">
-                        <i class="fas fa-heart text-gray-300 hover:text-red-500 text-lg"></i>
-                    </button>
-                    
-                    <a href="product.html?id=${p.id}" class="block relative overflow-hidden mb-2 cursor-pointer">
-                        <img src="${p.img}" alt="${p.name}" class="w-full h-40 object-cover rounded-md group-hover:scale-105 transition duration-300">
-                        ${p.oldPrice ? `<span class="absolute top-0 right-0 bg-orange-100 text-jumia-orange text-xs font-bold px-2 py-1 rounded-bl-md">-${Math.round(((p.oldPrice - p.price)/p.oldPrice)*100)}%</span>` : ''}
-                    </a>
-                    
-                    <div class="flex-grow">
-                        <a href="product.html?id=${p.id}" class="block">
-                            <h3 class="text-sm text-gray-700 line-clamp-2 mb-1 group-hover:text-jumia-orange transition">${p.name}</h3>
-                        </a>
-                        
-                        <div class="mb-1">
-                            <span class="text-lg font-bold text-gray-900">₦ ${p.price.toLocaleString()}</span>
-                            ${p.oldPrice ? `<span class="text-xs text-gray-400 line-through ml-2">₦ ${p.oldPrice.toLocaleString()}</span>` : ''}
-                        </div>
-                        <div class="text-xs text-yellow-400 mb-3">
-                            ${getStars(p.rating || 5)} <span class="text-gray-300">(${Math.floor(Math.random()*50 + 10)})</span>
-                        </div>
-                        <div class="text-xs text-gray-500 mb-2">Stock: ${p.stock}</div>
-                    </div>
-                    <button onclick="addToCart('${p.id}')" class="w-full bg-jumia-orange text-white py-2 rounded text-sm font-bold uppercase hover:bg-jumia-hover transition shadow-sm opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 duration-300 md:opacity-100 md:translate-y-0">
-                        Add To Cart
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        // 🟢 SAVED ITEMS LOGIC
-        function toggleSave(id, btn) {
-            let savedIds = JSON.parse(localStorage.getItem('kemmex_saved')) || [];
-            if (savedIds.includes(id)) {
-                savedIds = savedIds.filter(item => item !== id);
-                btn.classList.remove('saved');
-            } else {
-                savedIds.push(id);
-                btn.classList.add('saved');
-            }
-            localStorage.setItem('kemmex_saved', JSON.stringify(savedIds));
-        }
-
-        function isSaved(id) {
-            const savedIds = JSON.parse(localStorage.getItem('kemmex_saved')) || [];
-            return savedIds.includes(id);
-        }
-
-        function getStars(rating) {
-            let stars = '';
-            for(let i=1; i<=5; i++) {
-                if(i <= rating) stars += '<i class="fas fa-star"></i>';
-                else if(i === Math.ceil(rating) && !Number.isInteger(rating)) stars += '<i class="fas fa-star-half-alt"></i>';
-                else stars += '<i class="far fa-star"></i>';
-            }
-            return stars;
-        }
-
-        function addToCart(id) {
-            const product = products.find(p => p.id === id);
-            if (!product) return;
-
-            if (product.stock <= 0) {
-                alert("Out of stock");
-                return;
-            }
-
-            const existing = cart.find(item => item.id === id);
-            if (existing && existing.qty >= product.stock) {
-                alert("Max stock reached");
-                return;
-            }
-
-            if(existing) {
-                existing.qty++;
-            } else {
-                cart.push({ ...product, qty: 1 });
-            }
-            
-            saveCart();
-            updateCartUI();
-            
-            const btn = event.target;
-            const originalText = btn.innerText;
-            btn.innerText = "Added!";
-            btn.classList.add('bg-green-600');
-            setTimeout(() => { btn.innerText = originalText; btn.classList.remove('bg-green-600'); }, 1000);
-        }
-
-        function updateCartUI() {
-            const container = document.getElementById('cart-items');
-            const countEl = document.getElementById('cartCount');
-            const headerQty = document.getElementById('cart-qty-header');
-            const totalEl = document.getElementById('cart-total');
-            const checkoutTotal = document.getElementById('checkout-total');
-            const transferAmount = document.getElementById('transfer-amount');
-
-            localStorage.setItem('kemmex_cart', JSON.stringify(cart));
-
-            const totalQty = cart.reduce((acc, item) => acc + item.qty, 0);
-            const totalPrice = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
-
-            countEl.innerText = totalQty;
-            headerQty.innerText = totalQty;
-            totalEl.innerText = totalPrice.toLocaleString();
-            
-            if(checkoutTotal) checkoutTotal.innerText = totalPrice.toLocaleString();
-            if(transferAmount) transferAmount.innerText = totalPrice.toLocaleString();
-
-            if(cart.length === 0) {
-                container.innerHTML = '<div class="text-center mt-10"><i class="fas fa-shopping-cart text-4xl text-gray-200 mb-2"></i><p class="text-gray-500">Your cart is empty</p></div>';
-                return;
-            }
-
-            container.innerHTML = cart.map(item => `
-                <div class="flex gap-3 border-b pb-3">
-                    <img src="${item.img}" class="w-16 h-16 object-cover rounded">
-                    <div class="flex-grow">
-                        <h4 class="text-sm font-medium line-clamp-1">${item.name}</h4>
-                        <div class="text-jumia-orange font-bold text-sm">₦ ${item.price.toLocaleString()}</div>
-                        <div class="flex items-center justify-between mt-2">
-                            <div class="flex items-center border rounded">
-                                <button onclick="changeQty('${item.id}', -1)" class="px-2 py-0.5 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold">-</button>
-                                <span class="px-2 text-sm">${item.qty}</span>
-                                <button onclick="changeQty('${item.id}', 1)" class="px-2 py-0.5 bg-jumia-orange text-white hover:bg-jumia-hover font-bold">+</button>
-                            </div>
-                            <button onclick="removeFromCart('${item.id}')" class="text-xs text-gray-400 hover:text-red-500 underline"><i class="fas fa-trash"></i> Remove</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function changeQty(id, change) {
-            const item = cart.find(i => i.id === id);
-            const product = products.find(p => p.id === id);
-            
-            if(item) {
-                if (change > 0 && product && item.qty >= product.stock) {
-                    alert("Max stock reached");
-                    return;
-                }
-                
-                item.qty += change;
-                if(item.qty <= 0) removeFromCart(id);
-                else {
-                    saveCart();
-                    updateCartUI();
-                }
-            }
-        }
-
-        function removeFromCart(id) {
-            cart = cart.filter(i => i.id !== id);
-            saveCart();
-            updateCartUI();
-        }
-
-        function saveCart() { localStorage.setItem('kemmex_cart', JSON.stringify(cart)); }
-        function toggleCart() { const s = document.getElementById('cartSidebar'); s.classList.toggle('hidden'); s.classList.toggle('flex'); }
-
-        function filterCategory(cat) {
-            currentFilter = cat;
-            document.getElementById('section-title').innerText = cat === 'all' ? "All Products" : cat;
-            const filtered = cat === 'all' ? products : products.filter(p => p.category === cat);
-            renderProducts(filtered);
-            window.scrollTo({top: document.getElementById('products-grid').offsetTop - 100, behavior: 'smooth'});
-        }
-
-        function filterProducts(source) {
-            const inputId = source === 'mobile' ? 'mobileSearchInput' : 'searchInput';
-            const query = document.getElementById(inputId).value.toLowerCase();
-            const filtered = products.filter(p => p.name.toLowerCase().includes(query) || p.category.toLowerCase().includes(query));
-            document.getElementById('section-title').innerText = `Search results for "${query}"`;
-            renderProducts(filtered);
-        }
-
-        function sortProducts() {
-            const sortVal = document.getElementById('sort').value;
-            let sortedProducts = [...products];
-            if(currentFilter !== 'all') sortedProducts = sortedProducts.filter(p => p.category === currentFilter);
-            if(sortVal === 'price-low') sortedProducts.sort((a,b) => a.price - b.price);
-            if(sortVal === 'price-high') sortedProducts.sort((a,b) => b.price - a.price);
-            renderProducts(sortedProducts);
-        }
-
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
-        function closeModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
-
-        function handleLogin(e) {
+        function handleOrderSubmission(e) {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value, password = document.getElementById('loginPassword').value, btn = e.target.querySelector('button'), txt = btn.innerText;
-            btn.innerText = "Signing in..."; btn.disabled = true;
-            auth.signInWithEmailAndPassword(email, password)
-                .then(() => { closeModal('loginModal'); if (cart.length > 0) checkout(); })
-                .catch(err => alert(err.message))
-                .finally(() => { btn.innerText = txt; btn.disabled = false; });
-        }
-
-        function handleSignup(e) {
-            e.preventDefault();
-            const email = document.getElementById('signupEmail').value, password = document.getElementById('signupPassword').value, btn = e.target.querySelector('button'), txt = btn.innerText;
-            btn.innerText = "Creating Account..."; btn.disabled = true;
-            auth.createUserWithEmailAndPassword(email, password)
-                .then(() => { alert("Success! Please log in."); closeModal('signupModal'); openModal('loginModal'); })
-                .catch(err => alert(err.message))
-                .finally(() => { btn.innerText = txt; btn.disabled = false; });
-        }
-
-        function logout() { auth.signOut(); }
-        
-        function checkout() { 
-            toggleCart(); 
-            if(!isLoggedIn) openModal('loginModal'); 
-            else { 
-                if(cart.length === 0) return alert("Cart is empty"); 
-                
-                const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-                document.getElementById('delivery-location').value = "0"; 
-                document.getElementById('checkout-total').innerText = subtotal.toLocaleString();
-                document.getElementById('checkout-total').dataset.subtotal = subtotal; 
-                document.getElementById('transfer-amount').innerText = subtotal.toLocaleString();
-                document.getElementById('shipping-display').innerText = "Select delivery location to see final total.";
-                
-                openModal('checkoutModal'); 
-            } 
-        }
-
-        function updateTotalWithShipping() {
-            const shippingFee = Number(document.getElementById('delivery-location').value);
-            const subtotal = Number(document.getElementById('checkout-total').dataset.subtotal || 0);
-            const finalTotal = subtotal + shippingFee;
-            
-            document.getElementById('checkout-total').innerText = finalTotal.toLocaleString();
-            document.getElementById('transfer-amount').innerText = finalTotal.toLocaleString();
-            
-            if(shippingFee > 0) {
-                document.getElementById('shipping-display').innerText = `(Includes ₦${shippingFee.toLocaleString()} Delivery Fee)`;
-            } else {
-                const sel = document.getElementById('delivery-location');
-                const text = sel.options[sel.selectedIndex].text;
-                if(text.includes("Pickup")) document.getElementById('shipping-display').innerText = "Store Pickup (Free)";
-                else document.getElementById('shipping-display').innerText = "Shipping fee pending...";
-            }
-        }
-
-        function handlePayment(e) {
-            e.preventDefault();
-            if (!auth.currentUser) return alert("Please log in");
-            if (cart.length === 0) return alert("Cart is empty");
-
-            const deliverySelect = document.getElementById('delivery-location');
-            if (deliverySelect.value === "0" && deliverySelect.options[deliverySelect.selectedIndex].text.includes("Select")) {
-                 alert("Please select a delivery location.");
-                 return;
-            }
-
-            if (!document.getElementById('confirmPaid').checked) return alert("Please confirm payment");
-
-            const btn = e.target.querySelector('button[type="submit"]');
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            const btn = document.getElementById('submitBtn');
             btn.disabled = true;
+            btn.innerText = "Processing...";
 
-            const shippingFee = Number(deliverySelect.value);
-            const subtotal = Number(document.getElementById('checkout-total').dataset.subtotal);
-            const total = subtotal + shippingFee;
+            const name = document.getElementById('custName').value;
+            const phone = document.getElementById('custPhone').value;
+            const address = document.getElementById('custAddress').value;
+            const shipping = Number(document.getElementById('deliveryLoc').value);
+            let subtotal = cart.reduce((s, i) => s + (i.price * i.qty), 0);
 
             const orderData = {
-                userId: auth.currentUser.uid,
-                email: auth.currentUser.email,
-                items: cart.map(i => ({ id: i.id, name: i.name, price: i.price, qty: i.qty })),
-                subtotal: subtotal,
-                shipping: shippingFee,
-                totalAmount: total, 
-                customer: {
-                    firstName: document.getElementById('firstName').value,
-                    lastName: document.getElementById('lastName').value,
-                    phone: document.getElementById('phone').value,
-                    address: document.getElementById('address').value,
-                    state: deliverySelect.options[deliverySelect.selectedIndex].text
-                },
-                paymentMethod: "bank_transfer",
-                status: "pending", 
+                customer: { name, phone, address, state: document.getElementById('deliveryLoc').options[document.getElementById('deliveryLoc').selectedIndex].text },
+                items: cart,
+                totalAmount: subtotal + shipping,
+                shipping: shipping,
+                status: "Pending",
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            db.collection("orders").add(orderData)
-                .then(() => {
-                    cart.forEach(item => {
-                        db.collection("products").doc(item.id).update({
-                            stock: firebase.firestore.FieldValue.increment(-item.qty)
-                        });
-                    });
+            // 1. Save to Firestore for your Admin Panel
+            db.collection("orders").add(orderData).then(() => {
+                // 2. Format for WhatsApp
+                let itemText = "";
+                cart.forEach((item, i) => {
+                    itemText += `${i+1}. *${item.name}* (x${item.qty}) - ₦${(item.price * item.qty).toLocaleString()}%0A`;
+                });
 
-                    closeModal('checkoutModal');
-                    cart = [];
-                    saveCart();
-                    updateCartUI();
-                    openModal('successModal');
-                })
-                .catch(error => alert("Error: " + error.message))
-                .finally(() => { btn.innerHTML = originalHTML; btn.disabled = false; });
+                const msg = `*NEW ORDER - KEMMEX STORE*%0A---------------------------%0A*Name:* ${name}%0A*Address:* ${address}%0A---------------------------%0A*Items:*%0A${itemText}%0A*Shipping:* ₦${shipping.toLocaleString()}%0A*TOTAL:* ₦${(subtotal + shipping).toLocaleString()}%0A---------------------------%0A_Payment confirmation follows._`;
+                
+                window.open(`https://wa.me/2348039468706?text=${msg}`, '_blank');
+                
+                // Clear Cart
+                cart = [];
+                localStorage.removeItem('kemmex_cart');
+                location.reload();
+            });
         }
 
-        // Automatic Slider
-        let currentSlide = 0;
-        setTimeout(() => {
-            const slides = document.querySelectorAll('.slide-item');
-            if(slides.length > 0) {
-                function nextSlide() {
-                    slides[currentSlide].classList.remove('opacity-100');
-                    slides[currentSlide].classList.add('opacity-0');
-                    currentSlide = (currentSlide + 1) % slides.length;
-                    slides[currentSlide].classList.remove('opacity-0');
-                    slides[currentSlide].classList.add('opacity-100');
-                }
-                setInterval(nextSlide, 5000);
-            }
-        }, 1000);
-        
+        function addToCart(id, name, price, img) {
+            const idx = cart.findIndex(i => i.id === id);
+            if(idx > -1) cart[idx].qty++;
+            else cart.push({id, name, price, img, qty: 1});
+            saveCart();
+            alert("Added to cart!");
+        }
+
+        function saveCart() {
+            localStorage.setItem('kemmex_cart', JSON.stringify(cart));
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const list = document.getElementById('cart-items');
+            const totalEl = document.getElementById('cart-total');
+            document.getElementById('cartCount').innerText = cart.reduce((s, i) => s + i.qty, 0);
+            
+            let total = 0;
+            list.innerHTML = cart.map(item => {
+                total += (item.price * item.qty);
+                return `<div class="flex items-center gap-3 border-b pb-2">
+                    <img src="${item.img}" class="w-12 h-12 object-cover rounded">
+                    <div class="flex-grow">
+                        <p class="text-xs font-bold">${item.name}</p>
+                        <p class="text-xs text-gray-500">${item.qty} x ₦${item.price.toLocaleString()}</p>
+                    </div>
+                </div>`;
+            }).join('');
+            totalEl.innerText = `₦${total.toLocaleString()}`;
+        }
+
+        function calculateFinalTotal() {
+            let subtotal = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+            let shipping = Number(document.getElementById('deliveryLoc').value);
+            document.getElementById('final-total').innerText = `₦${(subtotal + shipping).toLocaleString()}`;
+        }
+
+        function filterCategory(cat) { currentCategory = cat; loadProducts(); }
+        function enquire(name, price) { window.open(`https://wa.me/2348039468706?text=Hi,%20is%20${name}%20(₦${price})%20available?`, '_blank'); }
+        function toggleCart() { document.getElementById('cartSidebar').classList.toggle('hidden'); document.getElementById('cartSidebar').classList.toggle('flex'); }
+        function openCheckout() { if(cart.length === 0) return; toggleCart(); document.getElementById('checkoutModal').classList.remove('hidden'); document.getElementById('checkoutModal').classList.add('flex'); calculateFinalTotal(); }
+        function closeModal() { document.getElementById('checkoutModal').classList.add('hidden'); }
+
+        window.onload = () => { loadProducts(); updateCartUI(); };
     </script>
 </body>
 </html>
