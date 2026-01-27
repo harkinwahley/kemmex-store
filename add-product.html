@@ -3,45 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Product | Kemmex Store</title>
+    <title>Add Product | Kemmex Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-</head>
-<body class="bg-gray-100 min-h-screen">
 
-    <div class="container mx-auto px-4 py-8 max-w-2xl">
-        <div class="bg-white p-8 rounded-lg shadow-lg">
-            
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold">Add New Product</h1>
-                <a href="admin.html" class="text-blue-600 hover:underline">Back to Dashboard</a>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        kemmex: { blue: '#1e40af', orange: '#ea580c', dark: '#111827' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+
+    <div class="container mx-auto px-4 py-10 max-w-3xl">
+        <nav class="flex mb-5 text-sm" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li><a href="admin.html" class="text-gray-500 hover:text-kemmex-blue">Dashboard</a></li>
+                <li><span class="mx-2 text-gray-400">/</span></li>
+                <li class="text-kemmex-blue font-bold">Add Product</li>
+            </ol>
+        </nav>
+
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-kemmex-dark p-6 text-white flex justify-between items-center">
+                <div>
+                    <h1 class="text-xl font-bold">Create New Listing</h1>
+                    <p class="text-gray-400 text-xs mt-1">Fill in the details to add a product to the store</p>
+                </div>
+                <i class="fas fa-plus-circle text-3xl text-kemmex-orange"></i>
             </div>
 
-            <form id="addProductForm" onsubmit="saveProduct(event)" class="space-y-4">
+            <form id="addProductForm" onsubmit="saveProduct(event)" class="p-8 space-y-6">
                 
-                <div>
-                    <label class="block text-sm font-bold mb-1">Product Name</label>
-                    <input type="text" id="pName" required class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="block text-xs font-black uppercase tracking-wider text-gray-500 mb-2">Product Name</label>
+                        <input type="text" id="pName" required placeholder="e.g. Vintage Floral Baby Dress" 
+                            class="w-full border-gray-200 border-2 p-3 rounded-lg focus:border-kemmex-blue outline-none transition">
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-bold mb-1">Price (₦)</label>
-                        <input type="number" id="pPrice" required class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+                        <label class="block text-xs font-black uppercase tracking-wider text-gray-500 mb-2">Price (₦)</label>
+                        <input type="number" id="pPrice" required placeholder="0.00" 
+                            class="w-full border-gray-200 border-2 p-3 rounded-lg focus:border-kemmex-blue outline-none transition font-bold text-kemmex-orange">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold mb-1">Stock Quantity</label>
-                        <input type="number" id="pStock" required class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+                        <label class="block text-xs font-black uppercase tracking-wider text-gray-500 mb-2">Stock Qty</label>
+                        <input type="number" id="pStock" required placeholder="1" 
+                            class="w-full border-gray-200 border-2 p-3 rounded-lg focus:border-kemmex-blue outline-none transition">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold mb-1">Category</label>
-                    <select id="pCategory" class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+                    <label class="block text-xs font-black uppercase tracking-wider text-gray-500 mb-2">Category</label>
+                    <select id="pCategory" class="w-full border-gray-200 border-2 p-3 rounded-lg focus:border-kemmex-blue outline-none transition bg-white">
                         <option value="Baby & Kids">Baby & Kids</option>
                         <option value="Maternity">Maternity</option>
                         <option value="Adult Wears">Adult Wears</option>
@@ -53,29 +80,45 @@
 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-sm font-bold mb-1">Sizes (Optional)</label>
-                        <input type="text" id="pSize" placeholder="e.g. S, M, L, XL" class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+                        <label class="block text-xs font-black uppercase tracking-wider text-gray-500 mb-2">Sizes</label>
+                        <input type="text" id="pSize" placeholder="S, M, L" class="w-full border-gray-200 border-2 p-3 rounded-lg outline-none">
                     </div>
                     <div>
-                        <label class="block text-sm font-bold mb-1">Colors (Optional)</label>
-                        <input type="text" id="pColor" placeholder="e.g. Red, Blue, Black" class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+                        <label class="block text-xs font-black uppercase tracking-wider text-gray-500 mb-2">Colors</label>
+                        <input type="text" id="pColor" placeholder="Pink, Blue" class="w-full border-gray-200 border-2 p-3 rounded-lg outline-none">
                     </div>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold mb-1">Description</label>
-                    <textarea id="pDesc" rows="3" placeholder="Describe the material, fit, or condition..." class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none"></textarea>
+                    <label class="block text-xs font-black uppercase tracking-wider text-gray-500 mb-2">Description</label>
+                    <textarea id="pDesc" rows="3" placeholder="Tell customers more about this item..." 
+                        class="w-full border-gray-200 border-2 p-3 rounded-lg focus:border-kemmex-blue outline-none transition"></textarea>
                 </div>
 
-                <div>
-                    <label class="block text-sm font-bold mb-1">Image URL</label>
-                    <input type="text" id="pImg" required placeholder="Paste link from ImgBB here..." class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
-                    <p class="text-xs text-gray-500 mt-1">Tip: Use the <strong>Direct Link</strong> from ImgBB (ends in .jpg or .png).</p>
+                <div class="border-t pt-6">
+                    <label class="block text-xs font-black uppercase tracking-wider text-gray-500 mb-2">Image URL (Direct Link)</label>
+                    <div class="flex flex-col md:flex-row gap-4">
+                        <div class="flex-1">
+                            <input type="text" id="pImg" required oninput="previewImage(this.value)"
+                                placeholder="https://i.ibb.co/..." 
+                                class="w-full border-gray-200 border-2 p-3 rounded-lg focus:border-kemmex-blue outline-none transition text-sm">
+                            <p class="text-[10px] text-gray-400 mt-2 italic">Copy the "Direct Link" from ImgBB so it ends in .jpg or .png</p>
+                        </div>
+                        <div id="image-preview-container" class="w-32 h-32 border-2 border-dashed border-gray-200 rounded-lg flex items-center justify-center bg-gray-50 overflow-hidden">
+                            <img id="imgPreview" src="" class="hidden w-full h-full object-cover">
+                            <i id="imgPlaceholder" class="fas fa-image text-gray-300 text-2xl"></i>
+                        </div>
+                    </div>
                 </div>
 
-                <button type="submit" id="saveBtn" class="w-full bg-green-600 text-white font-bold py-3 rounded hover:bg-green-700 transition mt-4">
-                    Upload Product
-                </button>
+                <div class="pt-4 flex gap-3">
+                    <button type="button" onclick="window.location.href='admin.html'" class="flex-1 bg-gray-100 text-gray-600 font-bold py-4 rounded-xl hover:bg-gray-200 transition">
+                        Cancel
+                    </button>
+                    <button type="submit" id="saveBtn" class="flex-[2] bg-kemmex-blue text-white font-bold py-4 rounded-xl hover:bg-kemmex-dark shadow-lg shadow-blue-200 transition">
+                        Upload to Store
+                    </button>
+                </div>
             </form>
         </div>
     </div>
@@ -88,7 +131,6 @@
             authDomain: "kemmex-store-9ffa3.firebaseapp.com",
             projectId: "kemmex-store-9ffa3",
             storageBucket: "kemmex-store-9ffa3.appspot.com",
-            messagingSenderId: "500875032118",
             appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
         };
         firebase.initializeApp(firebaseConfig);
@@ -97,38 +139,41 @@
 
         auth.onAuthStateChanged(user => {
             if (!user || !ADMIN_EMAILS.includes(user.email)) {
-                alert("Unauthorized Access");
                 window.location.href = "index.html";
             }
         });
 
-        function saveProduct(e) {
+        function previewImage(url) {
+            const preview = document.getElementById('imgPreview');
+            const placeholder = document.getElementById('imgPlaceholder');
+            if (url.startsWith('http')) {
+                preview.src = url;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            } else {
+                preview.classList.add('hidden');
+                placeholder.classList.remove('hidden');
+            }
+        }
+
+        async function saveProduct(e) {
             e.preventDefault();
             
             let imgUrl = document.getElementById('pImg').value.trim();
 
-            // 🪄 AUTO-CLEAN: Extracts URL if they paste the BBCode block [img]...[/img]
+            // Auto-clean BBCode if pasted
             if (imgUrl.includes('[img]')) {
                 const match = imgUrl.match(/\[img\](.*?)\[\/img\]/);
-                if (match && match[1]) {
-                    imgUrl = match[1];
-                }
+                imgUrl = (match && match[1]) ? match[1] : imgUrl;
             }
 
-            // 🛑 VALIDATION: Block blob links
             if (imgUrl.startsWith('blob:')) {
-                alert("⚠️ Error: You pasted a temporary preview link.\nPlease upload the image to ImgBB and copy the 'DIRECT LINK'.");
-                return;
-            }
-
-            // 🛑 VALIDATION: Ensure it's a real link
-            if (!imgUrl.startsWith('http')) {
-                alert("⚠️ Error: Please provide a valid web link starting with https://");
+                alert("⚠️ Error: You pasted a temporary preview link. Use the 'Direct Link' from ImgBB.");
                 return;
             }
 
             const btn = document.getElementById('saveBtn');
-            btn.innerText = "Saving...";
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Processing...`;
             btn.disabled = true;
 
             const product = {
@@ -136,27 +181,26 @@
                 price: Number(document.getElementById('pPrice').value),
                 stock: Number(document.getElementById('pStock').value),
                 category: document.getElementById('pCategory').value,
-                img: imgUrl, // This is now the cleaned, working URL
+                img: imgUrl,
                 size: document.getElementById('pSize').value || "Free Size",
                 color: document.getElementById('pColor').value || "As seen",
-                description: document.getElementById('pDesc').value || "No description provided.",
+                description: document.getElementById('pDesc').value || "No description.",
                 active: true,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            db.collection("products").add(product)
-            .then(() => {
-                alert("Product Added Successfully! ✅");
+            try {
+                await db.collection("products").add(product);
+                alert("Product Published Successfully! 🚀");
                 document.getElementById('addProductForm').reset();
-            })
-            .catch(error => {
-                console.error("Firebase Error:", error);
+                document.getElementById('imgPreview').classList.add('hidden');
+                document.getElementById('imgPlaceholder').classList.remove('hidden');
+            } catch (error) {
                 alert("Error: " + error.message);
-            })
-            .finally(() => {
-                btn.innerText = "Upload Product";
+            } finally {
+                btn.innerText = "Upload to Store";
                 btn.disabled = false;
-            });
+            }
         }
     </script>
 </body>
