@@ -3,82 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Product | Kemmex Store</title>
+    <title>Add Product | Kemmex Store Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/shop-local.png">
     
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-</head>
-<body class="bg-gray-100 min-h-screen">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-    <div class="container mx-auto px-4 py-8 max-w-2xl">
-        <div class="bg-white p-8 rounded-lg shadow-lg">
+    <style>
+        .kemmex-orange { color: #f68b1e; }
+        .bg-kemmex-orange { background-color: #f68b1e; }
+        .bg-kemmex-orange:hover { background-color: #e07e1b; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen font-sans">
+
+    <header class="bg-white shadow-sm py-4 mb-8">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <h1 class="text-xl font-black tracking-tighter uppercase italic">KEMMEX Admin<span class="kemmex-orange">★</span></h1>
+            <div class="flex gap-4 items-center">
+                <a href="admin.html" class="text-sm font-bold text-gray-500 hover:text-black">Dashboard</a>
+                <a href="index.html" class="text-sm font-bold text-kemmex-orange">View Store</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 pb-20 max-w-5xl">
+        <div class="grid lg:grid-cols-3 gap-8">
             
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="text-2xl font-bold">Add New Product</h1>
-                <a href="admin.html" class="text-blue-600 hover:underline">Back to Dashboard</a>
+            <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-2xl font-black mb-6 text-gray-800">New Product Entry</h2>
+                
+                <form id="addProductForm" onsubmit="saveProduct(event)" class="space-y-5">
+                    
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-1 tracking-widest">Product Name</label>
+                        <input type="text" id="pName" required class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl focus:ring-2 focus:ring-orange-200 outline-none" placeholder="e.g. Floral Maternity Maxi Gown">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-1 tracking-widest">Price (₦)</label>
+                            <input type="number" id="pPrice" required class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none" placeholder="0.00">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-1 tracking-widest">Stock Quantity</label>
+                            <input type="number" id="pStock" required class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none" placeholder="1">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-1 tracking-widest">Category</label>
+                        <select id="pCategory" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none appearance-none">
+                            <option value="Baby & Kids">Baby & Kids</option>
+                            <option value="Maternity">Maternity</option>
+                            <option value="Thrift Wears">Thrift Wears (Okrika)</option>
+                            <option value="Adult Wears">Adult Wears</option>
+                            <option value="Accessories">Accessories</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-1 tracking-widest">Sizes</label>
+                            <input type="text" id="pSize" placeholder="S, M, L, XL" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black uppercase text-gray-400 mb-1 tracking-widest">Colors</label>
+                            <input type="text" id="pColor" placeholder="As seen / Blue" class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-1 tracking-widest">Description</label>
+                        <textarea id="pDesc" rows="3" placeholder="Fabric details, fit, etc..." class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none"></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-1 tracking-widest">Image URL (Direct Link)</label>
+                        <input type="text" id="pImg" required placeholder="https://i.ibb.co/..." class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none mb-1">
+                        <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i> Use <strong>Direct Link</strong> from ImgBB ending in .jpg or .png</p>
+                    </div>
+
+                    <button type="submit" id="saveBtn" class="w-full bg-kemmex-orange text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest transition transform active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload Product
+                    </button>
+                </form>
             </div>
 
-            <form id="addProductForm" onsubmit="saveProduct(event)" class="space-y-4">
-                
-                <div>
-                    <label class="block text-sm font-bold mb-1">Product Name</label>
-                    <input type="text" id="pName" required class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold mb-1">Price (₦)</label>
-                        <input type="number" id="pPrice" required class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+            <div class="lg:block sticky top-24">
+                <h3 class="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Live Image Preview</h3>
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+                    <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
+                        <img id="imgPreview" src="https://via.placeholder.com/400?text=No+Image+Provided" class="w-full h-full object-cover">
                     </div>
-                    <div>
-                        <label class="block text-sm font-bold mb-1">Stock Quantity</label>
-                        <input type="number" id="pStock" required class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
+                    <div class="p-6">
+                        <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest" id="previewCat">Category</span>
+                        <h4 class="font-black text-gray-900 text-lg line-clamp-1" id="previewName">Product Name</h4>
+                        <p class="text-xl font-black kemmex-orange mt-2">₦<span id="previewPrice">0</span></p>
                     </div>
                 </div>
+            </div>
 
-                <div>
-                    <label class="block text-sm font-bold mb-1">Category</label>
-                    <select id="pCategory" class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
-                        <option value="Baby & Kids">Baby & Kids</option>
-                        <option value="Maternity">Maternity</option>
-                        <option value="Adult Wears">Adult Wears</option>
-                        <option value="Thrift Wears">Thrift Wears</option>
-                        <option value="Toys">Toys</option>
-                        <option value="Accessories">Accessories</option>
-                    </select>
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-bold mb-1">Sizes (Optional)</label>
-                        <input type="text" id="pSize" placeholder="e.g. S, M, L, XL" class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-bold mb-1">Colors (Optional)</label>
-                        <input type="text" id="pColor" placeholder="e.g. Red, Blue, Black" class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold mb-1">Description</label>
-                    <textarea id="pDesc" rows="3" placeholder="Describe the material, fit, or condition..." class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold mb-1">Image URL</label>
-                    <input type="text" id="pImg" required placeholder="Paste link from ImgBB here..." class="w-full border p-2 rounded focus:ring-2 focus:ring-orange-500 outline-none">
-                    <p class="text-xs text-gray-500 mt-1">Tip: Use the <strong>Direct Link</strong> from ImgBB (ends in .jpg or .png).</p>
-                </div>
-
-                <button type="submit" id="saveBtn" class="w-full bg-green-600 text-white font-bold py-3 rounded hover:bg-green-700 transition mt-4">
-                    Upload Product
-                </button>
-            </form>
         </div>
-    </div>
+    </main>
 
     <script>
         const ADMIN_EMAILS = ["aakinwale16@gmail.com", "kemzolin99@gmail.com"];
@@ -91,10 +121,12 @@
             messagingSenderId: "500875032118",
             appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
         };
-        firebase.initializeApp(firebaseConfig);
+        
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const auth = firebase.auth();
 
+        // Security Check
         auth.onAuthStateChanged(user => {
             if (!user || !ADMIN_EMAILS.includes(user.email)) {
                 alert("Unauthorized Access");
@@ -102,44 +134,49 @@
             }
         });
 
+        // Live Preview Logic
+        const pImgInput = document.getElementById('pImg');
+        const pNameInput = document.getElementById('pName');
+        const pPriceInput = document.getElementById('pPrice');
+        const pCatInput = document.getElementById('pCategory');
+
+        const updatePreview = () => {
+            document.getElementById('imgPreview').src = pImgInput.value || "https://via.placeholder.com/400?text=No+Image+Provided";
+            document.getElementById('previewName').innerText = pNameInput.value || "Product Name";
+            document.getElementById('previewPrice').innerText = Number(pPriceInput.value).toLocaleString();
+            document.getElementById('previewCat').innerText = pCatInput.value;
+        };
+
+        [pImgInput, pNameInput, pPriceInput, pCatInput].forEach(el => el.addEventListener('input', updatePreview));
+
         function saveProduct(e) {
             e.preventDefault();
-            
-            let imgUrl = document.getElementById('pImg').value.trim();
+            let imgUrl = pImgInput.value.trim();
 
-            // 🪄 AUTO-CLEAN: Extracts URL if they paste the BBCode block [img]...[/img]
+            // BBCode Cleaning
             if (imgUrl.includes('[img]')) {
                 const match = imgUrl.match(/\[img\](.*?)\[\/img\]/);
-                if (match && match[1]) {
-                    imgUrl = match[1];
-                }
+                if (match && match[1]) imgUrl = match[1];
             }
 
-            // 🛑 VALIDATION: Block blob links
             if (imgUrl.startsWith('blob:')) {
-                alert("⚠️ Error: You pasted a temporary preview link.\nPlease upload the image to ImgBB and copy the 'DIRECT LINK'.");
-                return;
-            }
-
-            // 🛑 VALIDATION: Ensure it's a real link
-            if (!imgUrl.startsWith('http')) {
-                alert("⚠️ Error: Please provide a valid web link starting with https://");
+                alert("Error: You pasted a temporary preview link. Use the Direct Link from ImgBB.");
                 return;
             }
 
             const btn = document.getElementById('saveBtn');
-            btn.innerText = "Saving...";
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`;
             btn.disabled = true;
 
             const product = {
-                name: document.getElementById('pName').value,
-                price: Number(document.getElementById('pPrice').value),
+                name: pNameInput.value,
+                price: Number(pPriceInput.value),
                 stock: Number(document.getElementById('pStock').value),
-                category: document.getElementById('pCategory').value,
-                img: imgUrl, // This is now the cleaned, working URL
+                category: pCatInput.value,
+                img: imgUrl,
                 size: document.getElementById('pSize').value || "Free Size",
                 color: document.getElementById('pColor').value || "As seen",
-                description: document.getElementById('pDesc').value || "No description provided.",
+                description: document.getElementById('pDesc').value || "Premium quality item curated by Kemmex Store.",
                 active: true,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
@@ -148,13 +185,13 @@
             .then(() => {
                 alert("Product Added Successfully! ✅");
                 document.getElementById('addProductForm').reset();
+                updatePreview();
             })
             .catch(error => {
-                console.error("Firebase Error:", error);
                 alert("Error: " + error.message);
             })
             .finally(() => {
-                btn.innerText = "Upload Product";
+                btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Upload Product`;
                 btn.disabled = false;
             });
         }
