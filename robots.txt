@@ -1,17 +1,1 @@
-# Allow all search engines to crawl the site
-User-agent: *
 
-# Block sensitive Admin pages
-Disallow: /admin.html
-Disallow: /add-product.html
-Disallow: /edit-product.html
-
-# Block any future private or temporary folders
-Disallow: /tmp/
-Disallow: /private/
-
-# Help search engines find your content faster (Update with your actual domain)
-Sitemap: https://kemmex-store-9ffa3.web.app/sitemap.xml
-
-# Friendly crawl-delay for smaller servers (optional)
-Crawl-delay: 10
