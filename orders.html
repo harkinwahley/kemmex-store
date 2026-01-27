@@ -6,37 +6,26 @@
     <title>My Orders | Kemmex Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/shop-local.png">
+
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        jumia: { orange: '#1e40af', hover: '#1e3a8a', dark: '#282828', gray: '#f1f1f2' }
-                    }
-                }
-            }
-        }
-    </script>
 </head>
-<body class="bg-gray-100 font-sans min-h-screen">
+<body class="bg-gray-50 font-sans min-h-screen">
 
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-bold tracking-tighter text-jumia-dark">KEMMEX<span class="text-jumia-orange">★</span></a>
-            <a href="index.html" class="text-sm font-bold text-jumia-orange hover:underline"><i class="fas fa-arrow-left"></i> Back to Shop</a>
+            <a href="index.html" class="text-2xl font-bold tracking-tighter">KEMMEX<span class="text-blue-600">★</span></a>
+            <a href="index.html" class="text-sm font-bold text-blue-600 hover:underline"><i class="fas fa-arrow-left"></i> Back to Shop</a>
         </div>
     </header>
 
     <main class="container mx-auto px-4 py-8 max-w-3xl">
-        <h1 class="text-2xl font-bold mb-6 text-jumia-dark">My Order History</h1>
+        <h1 class="text-2xl font-bold mb-6">My Order History</h1>
         
         <div id="loading" class="text-center py-10">
-            <i class="fas fa-spinner fa-spin text-2xl text-jumia-orange"></i>
+            <i class="fas fa-spinner fa-spin text-2xl text-blue-600"></i>
         </div>
 
         <div id="orders-container" class="space-y-4">
@@ -49,6 +38,7 @@
             authDomain: "kemmex-store-9ffa3.firebaseapp.com",
             projectId: "kemmex-store-9ffa3",
             storageBucket: "kemmex-store-9ffa3.appspot.com",
+            messagingSenderId: "500875032118",
             appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
         };
         firebase.initializeApp(firebaseConfig);
@@ -59,17 +49,19 @@
             if (user) {
                 loadMyOrders(user.uid);
             } else {
-                document.getElementById('loading').classList.add('hidden');
-                document.getElementById('orders-container').innerHTML = `
-                    <div class="bg-white p-8 rounded-lg shadow-sm text-center">
-                        <i class="fas fa-user-circle text-5xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-500 mb-4 font-medium">Log in to track your current and past orders.</p>
-                        <button onclick="loginUser()" class="bg-jumia-orange text-white px-8 py-3 rounded font-bold uppercase text-sm">Sign In / Register</button>
-                    </div>`;
+                document.getElementById('loading').innerHTML = `
+                    <div class="text-center">
+                        <p class="text-gray-500 mb-4">Please log in to view your orders.</p>
+                        <a href="index.html" class="bg-blue-600 text-white px-6 py-2 rounded font-bold">Login Now</a>
+                    </div>
+                `;
             }
         });
 
         function loadMyOrders(uid) {
+            // "Debug Mode" - showing alerts for errors
+            console.log("Attempting to load orders for:", uid);
+
             db.collection("orders")
                 .where("userId", "==", uid)
                 .orderBy("createdAt", "desc") 
@@ -79,77 +71,66 @@
                     document.getElementById('loading').classList.add('hidden');
 
                     if (snapshot.empty) {
-                        container.innerHTML = `
-                            <div class='bg-white p-10 rounded-lg text-center border shadow-sm'>
-                                <p class='text-gray-500 font-medium'>You haven't placed any orders yet.</p>
-                                <a href="index.html" class="text-jumia-orange font-bold hover:underline block mt-2">Start Shopping</a>
-                            </div>`;
+                        container.innerHTML = "<div class='bg-white p-8 rounded text-center text-gray-500'>You haven't placed any NEW orders yet. (Old orders won't show).</div>";
                         return;
                     }
 
                     container.innerHTML = snapshot.docs.map(doc => {
                         const o = doc.data();
-                        const orderDate = o.createdAt ? new Date(o.createdAt.toDate()).toLocaleDateString('en-NG', {day: 'numeric', month: 'short', year: 'numeric'}) : 'Processing';
-                        const items = o.items || o.cart || [];
-                        const status = o.status || 'Pending';
+                        const date = o.createdAt ? new Date(o.createdAt.toDate()).toLocaleDateString() : 'Processing';
                         
-                        let statusColor = "bg-blue-100 text-blue-700";
-                        if(status === 'Delivered') statusColor = "bg-green-100 text-green-700";
-                        if(status === 'Cancelled') statusColor = "bg-red-100 text-red-700";
-
+                        // Handle both old 'cart' and new 'items' structure
+                        const items = o.items || o.cart || [];
+                        
                         const itemsHtml = items.map(i => `
-                            <div class="flex justify-between text-sm py-2 border-b border-gray-50 last:border-0">
+                            <div class="flex justify-between text-sm py-2 border-b border-gray-100 last:border-0">
                                 <span class="text-gray-600">${i.qty}x ${i.name}</span>
-                                <span class="font-bold">₦${(i.price * i.qty).toLocaleString()}</span>
+                                <span class="font-medium">₦${(i.price * i.qty).toLocaleString()}</span>
                             </div>
                         `).join('');
 
                         return `
-                            <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200">
-                                <div class="flex justify-between items-start mb-4">
+                            <div class="bg-white p-5 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition">
+                                <div class="flex justify-between items-center mb-3 pb-2 border-b">
                                     <div>
-                                        <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Order ID</span>
-                                        <h3 class="font-bold text-gray-800">#${doc.id.slice(0, 8).toUpperCase()}</h3>
-                                        <p class="text-xs text-gray-500">${orderDate}</p>
+                                        <span class="font-bold text-gray-800">Order #${doc.id.slice(0, 6).toUpperCase()}</span>
+                                        <div class="text-xs text-gray-500">${date}</div>
                                     </div>
-                                    <span class="${statusColor} text-[10px] px-3 py-1 rounded-full font-black uppercase">${status}</span>
+                                    <span class="bg-blue-100 text-blue-700 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider">${o.status || 'Pending'}</span>
                                 </div>
-                                <div class="bg-gray-50 p-3 rounded mb-4">
+                                <div class="mb-3">
                                     ${itemsHtml}
                                 </div>
-                                <div class="flex justify-between items-center">
+                                <div class="flex justify-between items-center pt-2 border-t border-dashed">
                                     <div>
-                                        <p class="text-[10px] text-gray-400 font-bold uppercase">Total Amount</p>
-                                        <p class="text-lg font-black text-jumia-orange">₦${(o.totalAmount || o.total || 0).toLocaleString()}</p>
+                                        <span class="text-xs text-gray-400 block">Shipping: ₦${(o.shipping || 0).toLocaleString()}</span>
+                                        <span class="text-xs text-gray-500">Total Paid</span>
                                     </div>
-                                    <button onclick="helpWithOrder('${doc.id.slice(0,8)}')" class="text-[10px] font-bold border border-gray-300 px-4 py-2 rounded hover:bg-gray-50 transition uppercase">
-                                        Need Help?
-                                    </button>
+                                    <span class="text-xl font-bold text-orange-600">₦${(o.totalAmount || o.total || 0).toLocaleString()}</span>
                                 </div>
                             </div>
                         `;
                     }).join('');
                 })
                 .catch(error => {
-                    document.getElementById('loading').classList.add('hidden');
+                    console.error("Full Error:", error);
+                    
+                    // 🚨 THIS IS THE IMPORTANT PART
                     if(error.message.includes("index")) {
+                        // Create a clickable link for you
                         const link = error.message.match(/https:\/\/[^ ]*/)[0];
                         document.getElementById('orders-container').innerHTML = `
-                            <div class="bg-orange-50 border-l-4 border-orange-500 p-4">
-                                <p class="text-sm text-orange-700 font-bold">⚠️ Database Index Required</p>
-                                <a href="${link}" target="_blank" class="text-xs underline text-orange-600">Click here to enable order history</a>
-                            </div>`;
+                            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                                <strong class="font-bold">⚠️ Database Index Missing!</strong>
+                                <p class="block sm:inline">You need to create an index for this query to work.</p>
+                                <a href="${link}" target="_blank" class="block mt-2 font-bold underline">CLICK HERE TO CREATE INDEX</a>
+                            </div>
+                        `;
+                    } else {
+                        alert("Error: " + error.message);
                     }
+                    document.getElementById('loading').classList.add('hidden');
                 });
-        }
-
-        function helpWithOrder(id) {
-            window.open(`https://wa.me/2348039468706?text=Hello, I need help with my Order: #${id.toUpperCase()}`, '_blank');
-        }
-
-        function loginUser() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider).catch(err => alert(err.message));
         }
     </script>
 </body>
