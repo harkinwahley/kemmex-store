@@ -6,29 +6,39 @@
     <title>Saved Items | Kemmex Store</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon" type="image/png" href="https://img.icons8.com/color/48/shop-local.png">
-
+    
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        jumia: { orange: '#1e40af', hover: '#1e3a8a', dark: '#282828', gray: '#f1f1f2' }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-gray-50 font-sans min-h-screen">
+<body class="bg-gray-100 font-sans min-h-screen">
 
     <header class="bg-white shadow-sm sticky top-0 z-50">
         <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <a href="index.html" class="text-2xl font-bold tracking-tighter">KEMMEX<span class="text-blue-600">★</span></a>
-            <a href="index.html" class="text-sm font-bold text-blue-600 hover:underline"><i class="fas fa-arrow-left"></i> Back to Shop</a>
+            <a href="index.html" class="text-2xl font-bold tracking-tighter text-jumia-dark">KEMMEX<span class="text-jumia-orange">★</span></a>
+            <a href="index.html" class="text-sm font-bold text-jumia-orange hover:underline"><i class="fas fa-arrow-left"></i> Back to Shop</a>
         </div>
     </header>
 
     <main class="container mx-auto px-4 py-8 max-w-4xl">
         <div class="flex justify-between items-end mb-6">
             <h1 class="text-2xl font-bold">Saved Items (<span id="saved-count">0</span>)</h1>
-            <button onclick="clearSaved()" class="text-xs text-red-500 hover:underline">Clear All</button>
+            <button onclick="clearSaved()" class="text-xs text-red-500 font-bold hover:underline">CLEAR ALL</button>
         </div>
         
         <div id="loading" class="text-center py-10">
-            <i class="fas fa-spinner fa-spin text-2xl text-blue-600"></i>
+            <i class="fas fa-spinner fa-spin text-2xl text-jumia-orange"></i>
         </div>
 
         <div id="saved-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -41,7 +51,6 @@
             authDomain: "kemmex-store-9ffa3.firebaseapp.com",
             projectId: "kemmex-store-9ffa3",
             storageBucket: "kemmex-store-9ffa3.appspot.com",
-            messagingSenderId: "500875032118",
             appId: "1:500875032118:web:f1d3b9b9d6351bc7130a97"
         };
         firebase.initializeApp(firebaseConfig);
@@ -56,20 +65,18 @@
             if (savedIds.length === 0) {
                 document.getElementById('loading').classList.add('hidden');
                 document.getElementById('saved-grid').innerHTML = `
-                    <div class="col-span-full text-center py-10">
+                    <div class="col-span-full text-center py-10 bg-white rounded-lg border shadow-sm">
                         <div class="text-gray-300 text-6xl mb-4"><i class="far fa-heart"></i></div>
-                        <p class="text-gray-500">You haven't saved any items yet.</p>
-                        <a href="index.html" class="inline-block mt-4 bg-blue-600 text-white px-6 py-2 rounded font-bold">Start Shopping</a>
+                        <p class="text-gray-500 font-medium">Your wishlist is empty.</p>
+                        <a href="index.html" class="inline-block mt-4 bg-jumia-orange text-white px-8 py-2 rounded font-bold uppercase text-sm">Shop Now</a>
                     </div>`;
                 return;
             }
 
-            // Load all products and filter (Simple method)
             db.collection("products").where("active", "==", true).get()
             .then(snapshot => {
                 const allProducts = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
                 const savedProducts = allProducts.filter(p => savedIds.includes(p.id));
-                
                 renderSaved(savedProducts);
             })
             .catch(err => console.error(err))
@@ -79,33 +86,38 @@
         function renderSaved(items) {
             const grid = document.getElementById('saved-grid');
             grid.innerHTML = items.map(p => `
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden relative group">
-                    <button onclick="removeSaved('${p.id}')" class="absolute top-2 right-2 bg-white rounded-full p-1.5 shadow text-red-500 hover:bg-red-50 z-10">
-                        <i class="fas fa-times"></i>
+                <div class="bg-white rounded shadow-sm border overflow-hidden relative group">
+                    <button onclick="removeSaved('${p.id}')" class="absolute top-2 right-2 bg-white/90 rounded-full w-8 h-8 shadow text-red-500 hover:bg-red-500 hover:text-white z-10 transition-colors">
+                        <i class="fas fa-trash-alt text-xs"></i>
                     </button>
-                    <a href="product.html?id=${p.id}">
-                        <img src="${p.img}" class="w-full h-40 object-cover">
-                        <div class="p-3">
-                            <h3 class="text-sm font-bold text-gray-800 line-clamp-1">${p.name}</h3>
-                            <p class="text-orange-600 font-bold mt-1">₦${p.price.toLocaleString()}</p>
-                        </div>
-                    </a>
-                    <button onclick="window.location.href='product.html?id=${p.id}'" class="w-full bg-gray-100 text-gray-700 py-2 text-xs font-bold uppercase hover:bg-blue-600 hover:text-white transition">
-                        View Item
-                    </button>
+                    <img src="${p.img}" class="w-full h-40 object-cover">
+                    <div class="p-3">
+                        <h3 class="text-xs font-bold text-gray-800 truncate">${p.name}</h3>
+                        <p class="text-jumia-orange font-black mt-1">₦${p.price.toLocaleString()}</p>
+                    </div>
+                    <div class="p-2 pt-0 space-y-1">
+                        <button onclick="enquire('${p.name}', ${p.price})" class="w-full bg-green-500 text-white py-2 rounded text-[10px] font-bold uppercase flex items-center justify-center gap-1">
+                            <i class="fab fa-whatsapp"></i> Buy via WhatsApp
+                        </button>
+                    </div>
                 </div>
             `).join('');
+        }
+
+        function enquire(name, price) {
+            const msg = `Hello Kemmex Store, I'm ready to buy this item from my Saved List:%0A*Product:* ${name}%0A*Price:* ₦${price.toLocaleString()}`;
+            window.open(`https://wa.me/2348039468706?text=${msg}`, '_blank');
         }
 
         function removeSaved(id) {
             let savedIds = JSON.parse(localStorage.getItem('kemmex_saved')) || [];
             savedIds = savedIds.filter(item => item !== id);
             localStorage.setItem('kemmex_saved', JSON.stringify(savedIds));
-            loadSavedItems(); // Reload
+            loadSavedItems();
         }
 
         function clearSaved() {
-            if(confirm("Clear all saved items?")) {
+            if(confirm("Empty your saved items list?")) {
                 localStorage.removeItem('kemmex_saved');
                 loadSavedItems();
             }
