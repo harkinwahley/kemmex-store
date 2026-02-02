@@ -189,19 +189,38 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         }
 
         // --- UPDATED WHATSAPP FUNCTION ---
-        function orderViaWhatsApp() {
+       function orderViaWhatsApp() {
             const phoneNumber = "2348039468706";
+            const cart = JSON.parse(localStorage.getItem('kemmex_cart')) || [];
             
-            if (!currentProduct) return;
+            let message = "";
 
-            // Get the current page URL to create the product link
-            const productLink = window.location.href;
+            if (cart.length > 0) {
+                // Scenario 1: Customer has items in the cart
+                message = "Hello Kemmex Store! I want to buy the items in my cart:\n\n";
+                
+                let total = 0;
+                cart.forEach((item, index) => {
+                    message += `*${index + 1}. ${item.name}*\n`;
+                    message += `Price: ₦${item.price.toLocaleString()}\n`;
+                    message += `Qty: ${item.qty}\n\n`;
+                    total += (item.price * item.qty);
+                });
 
-            // Format the message exactly as requested
-            let message = "Hello Kemmex Store! I want to buy this:\n\n";
-            message += `*Product:* ${currentProduct.name}\n`;
-            message += `*Price:* ₦${currentProduct.price.toLocaleString()}\n`;
-            message += `*Link:* ${productLink}`;
+                message += `*Total Amount:* ₦${total.toLocaleString()}\n`;
+                message += `--------------------------\n`;
+                message += "Please confirm availability.";
+            } else if (currentProduct) {
+                // Scenario 2: Cart is empty, just send the current product
+                const productLink = window.location.href;
+                message = "Hello Kemmex Store! I want to buy this:\n\n";
+                message += `*Product:* ${currentProduct.name}\n`;
+                message += `*Price:* ₦${currentProduct.price.toLocaleString()}\n`;
+                message += `*Link:* ${productLink}`;
+            } else {
+                alert("Your cart is empty and no product was found.");
+                return;
+            }
 
             const encodedMessage = encodeURIComponent(message);
             window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
