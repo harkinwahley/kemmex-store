@@ -16,6 +16,7 @@
         .kemmex-orange { color: #f68b1e; }
         .bg-kemmex-orange { background-color: #f68b1e; }
         .bg-kemmex-orange:hover { background-color: #e07e1b; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-gray-50 min-h-screen font-sans">
@@ -81,11 +82,14 @@
                         <textarea id="pDesc" rows="3" placeholder="Fabric details, fit, etc..." class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none"></textarea>
                     </div>
 
-                    <div>
-                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-1 tracking-widest">Image URL (Direct Link)</label>
-                        <input type="text" id="pImg" required placeholder="https://i.ibb.co/..." class="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none mb-1">
-                        <p class="text-[10px] text-gray-400"><i class="fas fa-info-circle mr-1"></i> Use <strong>Direct Link</strong> from ImgBB ending in .jpg or .png</p>
+                    <div id="imageInputsContainer">
+                        <label class="block text-[10px] font-black uppercase text-gray-400 mb-1 tracking-widest">Product Images (Direct Links)</label>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" name="pImage" required placeholder="https://i.ibb.co/..." class="p-image-input w-full bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none">
+                            <button type="button" onclick="addImageField()" class="bg-black text-white px-4 rounded-xl"><i class="fas fa-plus"></i></button>
+                        </div>
                     </div>
+                    <p class="text-[10px] text-gray-400 mb-4"><i class="fas fa-info-circle mr-1"></i> Use <strong>Direct Link</strong> from ImgBB ending in .jpg or .png</p>
 
                     <button type="submit" id="saveBtn" class="w-full bg-kemmex-orange text-white font-black py-4 rounded-xl shadow-lg uppercase tracking-widest transition transform active:scale-95 flex items-center justify-center gap-2">
                         <i class="fas fa-cloud-upload-alt"></i> Upload Product
@@ -96,8 +100,8 @@
             <div class="lg:block sticky top-24">
                 <h3 class="text-[10px] font-black uppercase text-gray-400 mb-4 tracking-widest">Live Image Preview</h3>
                 <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
-                    <div class="aspect-square bg-gray-100 flex items-center justify-center overflow-hidden">
-                        <img id="imgPreview" src="https://via.placeholder.com/400?text=No+Image+Provided" class="w-full h-full object-cover">
+                    <div id="previewCarousel" class="aspect-square bg-gray-100 flex overflow-x-auto snap-x snap-mandatory hide-scrollbar">
+                        <img src="https://via.placeholder.com/400?text=No+Image+Provided" class="w-full h-full object-cover flex-shrink-0 snap-center">
                     </div>
                     <div class="p-6">
                         <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest" id="previewCat">Category</span>
@@ -126,7 +130,6 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
-        // Security Check
         auth.onAuthStateChanged(user => {
             if (!user || !ADMIN_EMAILS.includes(user.email)) {
                 alert("Unauthorized Access");
@@ -134,46 +137,84 @@
             }
         });
 
-        // Live Preview Logic
-        const pImgInput = document.getElementById('pImg');
-        const pNameInput = document.getElementById('pName');
-        const pPriceInput = document.getElementById('pPrice');
-        const pCatInput = document.getElementById('pCategory');
+        // Add more image URL inputs
+        function addImageField() {
+            const container = document.getElementById('imageInputsContainer');
+            const div = document.createElement('div');
+            div.className = "flex gap-2 mt-2 items-center";
+            div.innerHTML = `
+                <input type="text" name="pImage" placeholder="Additional Image URL" class="p-image-input w-full bg-gray-50 border border-gray-200 p-3 rounded-xl outline-none">
+                <button type="button" onclick="this.parentElement.remove(); updatePreview();" class="bg-red-500 text-white px-4 py-3 rounded-xl"><i class="fas fa-trash"></i></button>
+            `;
+            container.appendChild(div);
+            
+            // Re-attach listeners to new inputs
+            div.querySelector('input').addEventListener('input', updatePreview);
+        }
 
         const updatePreview = () => {
-            document.getElementById('imgPreview').src = pImgInput.value || "https://via.placeholder.com/400?text=No+Image+Provided";
-            document.getElementById('previewName').innerText = pNameInput.value || "Product Name";
-            document.getElementById('previewPrice').innerText = Number(pPriceInput.value).toLocaleString();
-            document.getElementById('previewCat').innerText = pCatInput.value;
+            const name = document.getElementById('pName').value;
+            const price = document.getElementById('pPrice').value;
+            const cat = document.getElementById('pCategory').value;
+            const imageInputs = document.querySelectorAll('.p-image-input');
+            const carousel = document.getElementById('previewCarousel');
+
+            document.getElementById('previewName').innerText = name || "Product Name";
+            document.getElementById('previewPrice').innerText = Number(price).toLocaleString();
+            document.getElementById('previewCat').innerText = cat;
+
+            // Update Carousel
+            carousel.innerHTML = '';
+            let hasImages = false;
+            imageInputs.forEach(input => {
+                if (input.value.trim() !== "") {
+                    hasImages = true;
+                    const img = document.createElement('img');
+                    img.src = input.value;
+                    img.className = "w-full h-full object-cover flex-shrink-0 snap-center";
+                    carousel.appendChild(img);
+                }
+            });
+
+            if (!hasImages) {
+                carousel.innerHTML = `<img src="https://via.placeholder.com/400?text=No+Image+Provided" class="w-full h-full object-cover flex-shrink-0 snap-center">`;
+            }
         };
 
-        [pImgInput, pNameInput, pPriceInput, pCatInput].forEach(el => el.addEventListener('input', updatePreview));
+        // Attach listeners to initial static elements
+        document.getElementById('pName').addEventListener('input', updatePreview);
+        document.getElementById('pPrice').addEventListener('input', updatePreview);
+        document.getElementById('pCategory').addEventListener('input', updatePreview);
+        document.querySelector('.p-image-input').addEventListener('input', updatePreview);
 
         function saveProduct(e) {
             e.preventDefault();
-            let imgUrl = pImgInput.value.trim();
-
-            // BBCode Cleaning
-            if (imgUrl.includes('[img]')) {
-                const match = imgUrl.match(/\[img\](.*?)\[\/img\]/);
-                if (match && match[1]) imgUrl = match[1];
-            }
-
-            if (imgUrl.startsWith('blob:')) {
-                alert("Error: You pasted a temporary preview link. Use the Direct Link from ImgBB.");
-                return;
-            }
-
+            
             const btn = document.getElementById('saveBtn');
             btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Saving...`;
             btn.disabled = true;
 
+            // Collect all image URLs into an array
+            const imageUrls = [];
+            document.querySelectorAll('.p-image-input').forEach(input => {
+                let val = input.value.trim();
+                if (val) {
+                    // BBCode Cleaning
+                    if (val.includes('[img]')) {
+                        const match = val.match(/\[img\](.*?)\[\/img\]/);
+                        if (match && match[1]) val = match[1];
+                    }
+                    imageUrls.push(val);
+                }
+            });
+
             const product = {
-                name: pNameInput.value,
-                price: Number(pPriceInput.value),
+                name: document.getElementById('pName').value,
+                price: Number(document.getElementById('pPrice').value),
                 stock: Number(document.getElementById('pStock').value),
-                category: pCatInput.value,
-                img: imgUrl,
+                category: document.getElementById('pCategory').value,
+                images: imageUrls, // Now an array
+                img: imageUrls[0] || "", // Keep for backward compatibility
                 size: document.getElementById('pSize').value || "Free Size",
                 color: document.getElementById('pColor').value || "As seen",
                 description: document.getElementById('pDesc').value || "Premium quality item curated by Kemmex Store.",
@@ -184,13 +225,10 @@
             db.collection("products").add(product)
             .then(() => {
                 alert("Product Added Successfully! ✅");
-                document.getElementById('addProductForm').reset();
-                updatePreview();
+                location.reload(); // Simplest way to reset the dynamic fields
             })
             .catch(error => {
                 alert("Error: " + error.message);
-            })
-            .finally(() => {
                 btn.innerHTML = `<i class="fas fa-cloud-upload-alt"></i> Upload Product`;
                 btn.disabled = false;
             });
